@@ -1,0 +1,14 @@
+# CODEOWNERS file
+# This file defines code owners for the repository.
+# GitHub will automatically request reviews from code owners when a PR is opened.
+#
+# Pattern: file_pattern owner1 owner2 ...
+# Use * to match all files
+
+# Protect the CODEOWNERS file and .github folder - requires amanz55 approval
+/.github/ @amanz55
+/.github/CODEOWNERS @amanz55
+
+# All files in the repository require approval from amanz55
+* @amanz55
+
