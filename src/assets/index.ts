@@ -51,6 +51,8 @@ const icon = {
 	'icon/shopping-bag': () => import('@lucide/svelte/icons/shopping-bag'),
 	'icon/package': () => import('@lucide/svelte/icons/package'),
 	'icon/credit-card': () => import('@lucide/svelte/icons/credit-card'),
+	'icon/store': () => import('@lucide/svelte/icons/store'),
+	'icon/trending-up': () => import('@lucide/svelte/icons/trending-up'),
 	
 	// Media & Files
 	'icon/image': () => import('@lucide/svelte/icons/image'),
@@ -70,6 +72,8 @@ const icon = {
 	'icon/alert-circle': () => import('@lucide/svelte/icons/alert-circle'),
 	'icon/check-circle': () => import('@lucide/svelte/icons/check-circle'),
 	'icon/x-circle': () => import('@lucide/svelte/icons/x-circle'),
+	'icon/eye': () => import('@lucide/svelte/icons/eye'),
+	'icon/eye-off': () => import('@lucide/svelte/icons/eye-off'),
 	
 	// Custom SVG icons can be added here:
 	// 'icon/custom-name': () => import('./icon/custom-name.svg?component'),
