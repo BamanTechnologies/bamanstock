@@ -137,7 +137,6 @@
               class="min-w-full h-full flex flex-col justify-center snap-start"
             >
               <div class="space-y-12 max-w-md">
-                <!-- Logo and Brand -->
                 <div class="flex items-center gap-3">
                   <div
                     class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md"
@@ -153,7 +152,6 @@
                   >
                 </div>
 
-                <!-- Content -->
                 <div class="space-y-4">
                   <h1 class="text-[29px] font-bold leading-[38px]">
                     {slide.title}
@@ -167,7 +165,6 @@
           {/each}
         </div>
 
-        <!-- Navigation indicators -->
         <div class="flex items-center gap-2 pb-8">
           {#each slides as _, index}
             <button
@@ -196,7 +193,7 @@
           </p>
         </div>
 
-        <form class="space-y-6" onsubmit={(e) => { e.preventDefault(); goto("/"); }}>
+        <form class="space-y-6" onsubmit={(e) => { e.preventDefault(); goto("/investor/landing"); }}>
           <FormField
             id="phone"
             label="Phone Number"

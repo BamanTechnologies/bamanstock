@@ -202,7 +202,10 @@
 
         <form
           class="space-y-6"
-          onsubmit={(e) => { e.preventDefault(); goto("/onboarding/otp"); }}
+          onsubmit={(e) => {
+            e.preventDefault();
+            goto(`/onboarding/otp?role=${role}`);
+          }}
         >
           <FormField
             id="name"

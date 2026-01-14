@@ -3,7 +3,10 @@
   import { cn } from "$lib/utils.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
   import { onMount, onDestroy } from "svelte";
+
+  const role = $derived($page.url.searchParams.get("role") || "investor");
 
   let otpValues = $state(["", "", "", ""]);
   let otpInputs: (HTMLInputElement | null)[] = $state([]);
@@ -296,7 +299,13 @@
           <Button
             size="lg"
             class="w-full bg-info text-info-foreground rounded-full py-6 text-lg hover:cursor-pointer font-medium"
-            onclick={() => goto("/")}
+            onclick={() => {
+              if (role === "investor") {
+                goto("/investor/landing");
+              } else {
+                goto("/merchant");
+              }
+            }}
             disabled={!isComplete}
           >
             Verify
