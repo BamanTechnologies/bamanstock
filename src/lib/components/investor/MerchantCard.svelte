@@ -19,8 +19,7 @@
     onHire,
   }: MerchantCardProps = $props();
 
-  // Color constants from Figma
-  const PRIMARY_BLUE = "#4DA0E6";
+  const PRIMARY_BLUE = "var(--primary-blue)";
 
   const statusConfig = {
     active: {
@@ -36,7 +35,7 @@
     invited: {
       label: "Invited",
       bgColor: "rgba(77, 160, 230, 0.19)",
-      textColor: "#4DA0E6",
+      textColor: PRIMARY_BLUE,
     },
   } as const;
 </script>

@@ -6,6 +6,9 @@
   }
 
   let { onInvite }: InviteMerchantCardProps = $props();
+
+  // Color constants from Figma
+  const PRIMARY_BLUE = "var(--primary-blue)";
 </script>
 
 <div
@@ -24,7 +27,7 @@
         class="flex-none"
         style="position: absolute; width: 27px; height: 27px; left: 16.96px; top: 14.19px;"
       >
-        <Icon iconName="icon/user-plus" size={27} style="color: #4DA0E6;" />
+        <Icon iconName="icon/user-plus" size={27} style="color: {PRIMARY_BLUE};" />
       </div>
     </div>
 
@@ -51,12 +54,12 @@
   <button
     type="button"
     class="flex flex-row justify-center items-center flex-none"
-    style="box-sizing: border-box; position: absolute; padding: 8.58333px 14.7143px; gap: 9.81px; width: 287.52px; height: 40.17px; left: 12px; top: 162px; background: rgba(77, 160, 230, 0.2); border: 1.22619px solid #4DA0E6; border-radius: 6.13095px; flex-grow: 0;"
+    style="box-sizing: border-box; position: absolute; padding: 8.58333px 14.7143px; gap: 9.81px; width: 287.52px; height: 40.17px; left: 12px; top: 162px; background: rgba(77, 160, 230, 0.2); border: 1.22619px solid {PRIMARY_BLUE}; border-radius: 6.13095px; flex-grow: 0;"
     onclick={onInvite}
   >
     <span
       class="flex-none text-center"
-      style="width: 43px; height: 23px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: #4DA0E6; text-align: center; flex-grow: 0;"
+      style="width: 43px; height: 23px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: {PRIMARY_BLUE}; text-align: center; flex-grow: 0;"
     >
       Invite
     </span>

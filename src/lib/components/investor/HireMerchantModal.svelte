@@ -36,7 +36,7 @@
   }: HireMerchantModalProps = $props();
 
   // Color constants from Figma
-  const PRIMARY_BLUE = "#4DA0E6";
+  const PRIMARY_BLUE = "var(--primary-blue)";
 
   let selectedLocation = $state("");
   let categories = $state<string[]>([]);
