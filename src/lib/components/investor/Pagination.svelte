@@ -70,8 +70,11 @@
   }
 </script>
 
-<div class="flex items-center justify-between w-full mt-8 pt-6 border-t border-border">
-  <div class="flex items-center gap-2">
+<div
+  class="flex flex-row items-center justify-between flex-none"
+  style="padding: 15px 0px; gap: 4px; width: 100%; max-width: 1356px; height: 58px; border-radius: 0px 0px 5px 5px; flex-grow: 0;"
+>
+  <div class="flex items-center" style="gap: 4px;">
     <span class="text-sm text-muted-foreground">Row Per Page</span>
     <select
       bind:value={rowsPerPage}
@@ -85,7 +88,7 @@
     <span class="text-sm text-muted-foreground">Entries</span>
   </div>
 
-  <div class="flex items-center gap-2">
+  <div class="flex items-center" style="gap: 4px;">
     <button
       type="button"
       class="p-2 rounded-md border border-input hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

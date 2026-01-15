@@ -8,7 +8,7 @@
     Pagination,
     HireMerchantModal,
   } from "$lib/components/investor/index.js";
-  import { Button } from "$lib/components/ui/button/index.js";
+  import Icon from "$lib/components/ui/Icon/index.js";
 
   let searchQuery = $state("");
   let locationFilter = $state("");
@@ -28,8 +28,8 @@
   const statusOptions = [
     { value: "", label: "All Status" },
     { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "pending", label: "Pending" },
+    { value: "declined", label: "Declined" },
+    { value: "invited", label: "Invited" },
   ];
 
   // ── Mock Data (replace with real API later) 
@@ -44,7 +44,7 @@
     },
     {
       id: 2,
-      name: "Sarah Johnson",
+      name: "Jason Russel",
       avatar: "/landingprofile.png",
       status: "active" as const,
       productsSold: 180,
@@ -52,7 +52,7 @@
     },
     {
       id: 3,
-      name: "Michael Chen",
+      name: "Michael Ch",
       avatar: "/landingprofile.png",
       status: "active" as const,
       productsSold: 320,
@@ -62,13 +62,13 @@
       id: 4,
       name: "Emily Davis",
       avatar: "/landingprofile.png",
-      status: "pending" as const,
+      status: "invited" as const,
       productsSold: 95,
-      category: "Beauty & Personal Care",
+      category: "Home & Kitchen",
     },
     {
       id: 5,
-      name: "David Wilson",
+      name: "Jason Russeln",
       avatar: "/landingprofile.png",
       status: "active" as const,
       productsSold: 410,
@@ -76,7 +76,7 @@
     },
     {
       id: 6,
-      name: "Lisa Anderson",
+      name: "Jason Russel",
       avatar: "/landingprofile.png",
       status: "active" as const,
       productsSold: 275,
@@ -84,15 +84,15 @@
     },
     {
       id: 7,
-      name: "James Brown",
+      name: "James Jac",
       avatar: "/landingprofile.png",
-      status: "inactive" as const,
+      status: "active" as const,
       productsSold: 150,
       category: "Toys & Games",
     },
     {
       id: 8,
-      name: "Maria Garcia",
+      name: "Jason Russel",
       avatar: "/landingprofile.png",
       status: "active" as const,
       productsSold: 380,
@@ -108,7 +108,7 @@
     },
     {
       id: 10,
-      name: "Jennifer Martinez",
+      name: "Jason Russel",
       avatar: "/landingprofile.png",
       status: "active" as const,
       productsSold: 290,
@@ -178,35 +178,48 @@
   }
 </script>
 
-<div class="min-h-screen bg-background">
+<div class="min-h-screen background: #F8F8F8">
   <Header />
 
   <main class="container mx-auto px-5 sm:px-6 lg:px-8 py-8">
-    <!-- Title -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-foreground mb-2">
+      <h1
+        class="flex-none"
+        style="width: 507px; max-width: 100%; height: 38px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 29px; line-height: 38px; color: #212B36; flex: none; order: 0; flex-grow: 0;"
+      >
         Find & Work With Trusted Merchants
       </h1>
-      <p class="text-muted-foreground">
+      <p
+        class="flex-none mt-2"
+        style="width: 528px; max-width: 100%; height: 18px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; color: #7E7E7E; flex: none; order: 1; flex-grow: 0;"
+      >
         Browse registered merchants or invite new ones to manage stock and sales together.
       </p>
     </div>
 
     <div class="space-y-4 mb-10">
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <div class="w-full sm:flex-1 sm:max-w-xl">
+        <div class="w-full sm:flex-1" style="max-width: 484px;">
           <SearchBar
             bind:value={searchQuery}
             placeholder="Search merchants by name, location, or business type"
           />
         </div>
 
-        <Button
+        <button
+          type="button"
           onclick={handleInvite}
-          class="bg-info text-info-foreground hover:bg-info/90 h-9 px-6 whitespace-nowrap flex-shrink-0 sm:ml-auto"
+          class="flex flex-row justify-center items-center flex-none bg-info sm:ml-auto"
+          style="padding: 7px 20px; gap: 4px; width: 148px; height: 38px; border-radius: 5px; flex-grow: 0;"
         >
-          + Invite Merchant
-        </Button>
+          <Icon iconName="icon/plus" size={13} class="text-white flex-none" />
+          <span
+            class="flex-none text-center"
+            style="font-family: 'Nunito Sans', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF; width: 91px; height: 20px;"
+          >
+            Invite Merchant
+          </span>
+        </button>
       </div>
 
       <div class="flex flex-wrap gap-3">
@@ -224,7 +237,8 @@
     </div>
 
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-10"
+      style="row-gap: 41px; column-gap: 36.79px;"
     >
       {#each filteredMerchants as merchant}
         <MerchantCard

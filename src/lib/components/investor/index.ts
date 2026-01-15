@@ -1,4 +1,5 @@
 export { default as Header } from "./Header.svelte";
+export { default as Logo } from "./Logo.svelte";
 export { default as SearchBar } from "./SearchBar.svelte";
 export { default as FilterDropdown } from "./FilterDropdown.svelte";
 export { default as MerchantCard } from "./MerchantCard.svelte";

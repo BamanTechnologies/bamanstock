@@ -10,7 +10,7 @@
     id: number;
     name: string;
     avatar?: string;
-    status: "active" | "inactive" | "pending";
+    status: "active" | "declined" | "invited";
     productsSold: number;
     category: string;
   }
@@ -35,11 +35,16 @@
     onSendInvitation,
   }: HireMerchantModalProps = $props();
 
+  // Color constants from Figma
+  const PRIMARY_BLUE = "#4DA0E6";
+
   let selectedLocation = $state("");
   let categories = $state<string[]>([]);
   let products = $state<string[]>([]);
   let canCreateProduct = $state(false);
   let canAssignStock = $state(true);
+  let locationDropdownOpen = $state(false);
+  let locationDropdownRef: HTMLDivElement | undefined;
 
   const locationOptions = [
     { value: "", label: "Select Location" },
@@ -52,13 +57,13 @@
 
   const statusConfig = {
     active: { label: "Active", class: "bg-success text-success-foreground" },
-    inactive: {
-      label: "Inactive",
-      class: "bg-muted text-muted-foreground",
+    declined: {
+      label: "Declined",
+      class: "bg-destructive text-destructive-foreground",
     },
-    pending: {
-      label: "Pending",
-      class: "bg-warning text-warning-foreground",
+    invited: {
+      label: "Invited",
+      class: "bg-info text-info-foreground",
     },
   } as const;
 
@@ -99,6 +104,30 @@
       handleClose();
     }
   }
+
+  function toggleLocationDropdown() {
+    locationDropdownOpen = !locationDropdownOpen;
+  }
+
+  function selectLocation(locationValue: string) {
+    selectedLocation = locationValue;
+    locationDropdownOpen = false;
+  }
+
+  function handleLocationClickOutside(event: MouseEvent) {
+    if (locationDropdownRef && !locationDropdownRef.contains(event.target as Node)) {
+      locationDropdownOpen = false;
+    }
+  }
+
+  $effect(() => {
+    if (locationDropdownOpen) {
+      document.addEventListener("click", handleLocationClickOutside);
+      return () => {
+        document.removeEventListener("click", handleLocationClickOutside);
+      };
+    }
+  });
 
   onMount(() => {
     if (isOpen) {
@@ -176,22 +205,55 @@
                   {statusConfig[merchant.status].label}
                 </span>
               </div>
-              <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon iconName="icon/trending-up" size={16} />
+              <div class="flex items-center gap-2 text-sm" style="color: {PRIMARY_BLUE};">
+                <Icon iconName="icon/trending-up" size={16} style="color: {PRIMARY_BLUE};" />
                 <span>{merchant.productsSold}+ Product Sold</span>
               </div>
             </div>
           </div>
 
-          <div class="space-y-2">
+          <div class="space-y-2 w-full">
             <label class="text-sm font-medium text-foreground">
               Assign Location
             </label>
-            <FilterDropdown
-              label="Select Location"
-              options={locationOptions}
-              bind:value={selectedLocation}
-            />
+            <div bind:this={locationDropdownRef} class="relative" style="width: 624px;">
+              <button
+                type="button"
+                class="w-full flex items-center justify-between"
+                style="box-sizing: border-box; display: flex; flex-direction: row; align-items: center; padding: 14px 12px; isolation: isolate; width: 624px; height: 46px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 6px; flex: none; order: 1; align-self: stretch; flex-grow: 0;"
+                onclick={toggleLocationDropdown}
+              >
+                <span class="text-sm text-foreground truncate text-left">
+                  {selectedLocation
+                    ? locationOptions.find((opt) => opt.value === selectedLocation)?.label || "Select Location"
+                    : "Select Location"}
+                </span>
+                <Icon
+                  iconName="icon/chevron-down"
+                  size={16}
+                  class="text-muted-foreground transition-transform flex-shrink-0 {locationDropdownOpen ? 'rotate-180' : ''}"
+                />
+              </button>
+
+              {#if locationDropdownOpen}
+                <div
+                  class="absolute top-full left-0 mt-1 w-full bg-background border border-input rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
+                >
+                  {#each locationOptions as option}
+                    <button
+                      type="button"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors {selectedLocation ===
+                      option.value
+                        ? 'bg-muted font-medium'
+                        : ''}"
+                      onclick={() => selectLocation(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
           </div>
 
           <div class="space-y-2">
