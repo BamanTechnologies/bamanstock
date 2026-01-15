@@ -45,6 +45,8 @@
         behavior: "smooth",
       });
     }
+    // Reset auto-scroll timer when user manually navigates
+    startAutoScroll();
   }
 
   function handleScroll() {
@@ -94,6 +96,25 @@
     isDragging = false;
   }
 
+  let autoScrollInterval: ReturnType<typeof setInterval> | null = null;
+
+  function startAutoScroll() {
+    if (autoScrollInterval) clearInterval(autoScrollInterval);
+    autoScrollInterval = setInterval(() => {
+      if (!isDragging && carouselContainer) {
+        const nextSlide = (currentSlide + 1) % slides.length;
+        goToSlide(nextSlide);
+      }
+    }, 3000);
+  }
+
+  function stopAutoScroll() {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+  }
+
   onMount(() => {
     intervalId = setInterval(() => {
       if (resendTimer > 0) {
@@ -106,11 +127,21 @@
     setTimeout(() => otpInputs[0]?.focus(), 100);
     if (carouselContainer) {
       carouselContainer.addEventListener("scroll", handleScroll);
+      startAutoScroll();
     }
   });
 
   onDestroy(() => {
     if (intervalId) clearInterval(intervalId);
+    stopAutoScroll();
+  });
+
+  $effect(() => {
+    if (isDragging) {
+      stopAutoScroll();
+    } else {
+      startAutoScroll();
+    }
   });
 
   function formatTime(seconds: number): string {
@@ -164,7 +195,7 @@
 
 <div class="min-h-screen bg-white flex items-center justify-center p-4">
   <div
-    class="w-full max-w-6xl flex flex-col lg:flex-row shadow-2xl rounded-2xl overflow-hidden"
+    class="w-full max-w-6xl flex flex-col lg:flex-row rounded-2xl overflow-hidden"
   >
     <!-- Left side: Consistent across all onboarding pages -->
     <div
@@ -207,7 +238,7 @@
               <div class="space-y-12 max-w-md">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md"
+                    class="w-12 h-12 bg-white rounded-lg flex items-center justify-center"
                   >
                     <Icon
                       iconName="icon/trending-up"

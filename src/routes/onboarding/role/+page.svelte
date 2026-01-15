@@ -2,7 +2,7 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   type Role = "investor" | "merchant";
 
@@ -39,6 +39,8 @@
         behavior: "smooth",
       });
     }
+    // Reset auto-scroll timer when user manually navigates
+    startAutoScroll();
   }
 
   function handleScroll() {
@@ -96,16 +98,49 @@
     }
   }
 
+  let autoScrollInterval: ReturnType<typeof setInterval> | null = null;
+
+  function startAutoScroll() {
+    if (autoScrollInterval) clearInterval(autoScrollInterval);
+    autoScrollInterval = setInterval(() => {
+      if (!isDragging && carouselContainer) {
+        const nextSlide = (currentSlide + 1) % slides.length;
+        goToSlide(nextSlide);
+      }
+    }, 3000);
+  }
+
+  function stopAutoScroll() {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+  }
+
   onMount(() => {
     if (carouselContainer) {
       carouselContainer.addEventListener("scroll", handleScroll);
+      startAutoScroll();
+    }
+  });
+
+  onDestroy(() => {
+    stopAutoScroll();
+  });
+
+  // Pause auto-scroll when user interacts
+  $effect(() => {
+    if (isDragging) {
+      stopAutoScroll();
+    } else {
+      startAutoScroll();
     }
   });
 </script>
 
 <div class="min-h-screen bg-white flex items-center justify-center p-4">
   <div
-    class="w-full max-w-6xl flex flex-col lg:flex-row shadow-2xl rounded-2xl overflow-hidden"
+    class="w-full max-w-6xl flex flex-col lg:flex-row rounded-2xl overflow-hidden"
   >
     <div
       class="hidden lg:block lg:w-1/2 relative bg-cover bg-center overflow-hidden"
@@ -147,7 +182,7 @@
               <div class="space-y-12 max-w-md">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md"
+                    class="w-12 h-12 bg-white rounded-lg flex items-center justify-center"
                   >
                     <Icon
                       iconName="icon/trending-up"
@@ -194,8 +229,11 @@
     >
       <div class="w-full max-w-md space-y-8">
         <div class="space-y-2 text-center lg:text-left">
-          <h2 class="text-3xl font-bold text-foreground">Select your role</h2>
-          <p class="text-muted-foreground">
+          <h2 class="text-2xl font-bold text-foreground">Select your role</h2>
+          <p
+            class="text-[12px] leading-4 font-normal max-w-[364px] h-4 flex items-center"
+            style="font-family: 'Raleway', sans-serif; color: #7E7E7E;"
+          >
             Select your role below to tailor your experience on BamanStock.
           </p>
         </div>
@@ -262,10 +300,15 @@
 
         <Button
           size="lg"
-          class="w-full hover:cursor-pointer bg-info text-info-foreground rounded-full py-6 text-lg font-medium"
+          class="w-full hover:cursor-pointer bg-info rounded-full py-6 flex items-center justify-center"
           onclick={handleContinue}
         >
-          Continue as {selectedRole === "investor" ? "Investor" : "Merchant"}
+          <span
+            class="h-5 flex items-center justify-center text-center"
+            style="font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15px; line-height: 20px; color: #FFFFFF; max-width: 364px; flex-grow: 1;"
+          >
+            Continue as {selectedRole === "investor" ? "Investor" : "Merchant"}
+          </span>
         </Button>
 
         <div class="text-center text-sm text-muted-foreground">
