@@ -66,6 +66,9 @@ const icon = {
 	'icon/arrow-down': () => import('@lucide/svelte/icons/arrow-down'),
 	'icon/chevron-left': () => import('@lucide/svelte/icons/chevron-left'),
 	'icon/chevron-right': () => import('@lucide/svelte/icons/chevron-right'),
+	'icon/chevron-down': () => import('@lucide/svelte/icons/chevron-down'),
+	'icon/user-plus': () => import('@lucide/svelte/icons/user-plus'),
+	'icon/tag': () => import('@lucide/svelte/icons/tag'),
 	
 	// Status & Feedback
 	'icon/info': () => import('@lucide/svelte/icons/info'),
