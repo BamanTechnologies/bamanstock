@@ -332,7 +332,7 @@
             class="w-full bg-info text-info-foreground rounded-full py-6 text-lg hover:cursor-pointer font-medium"
             onclick={() => {
               if (role === "investor") {
-                goto("/investor/landing");
+                goto("/investor");
               } else {
                 goto("/merchant");
               }

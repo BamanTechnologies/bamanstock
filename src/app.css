@@ -141,5 +141,19 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Raleway", sans-serif;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Sora", sans-serif;
+  }
+  /* Subtitles - paragraphs with larger text sizes */
+  p.text-xl,
+  p.text-2xl {
+    font-family: "Sora", sans-serif;
   }
 }

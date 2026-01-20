@@ -87,7 +87,11 @@
           style="padding: 0px; gap: 4.9px; width: 144.62px; height: 20px; flex-grow: 0;"
         >
           <div class="flex-none" style="width: 14.71px; height: 14.71px;">
-            <Icon iconName="icon/trending-up" size={14.71} style="color: {PRIMARY_BLUE};" />
+            <Icon
+              iconName="icon/trending-up"
+              size={14.71}
+              style="color: {PRIMARY_BLUE};"
+            />
           </div>
           <div
             class="flex-none"
@@ -100,11 +104,15 @@
 
       <div
         class="flex flex-col justify-center items-center flex-none"
-        style="padding: 0px; margin: 0 auto; width: 67.44px; height: 20px; background: {statusConfig[status].bgColor}; border-radius: 104029px; flex-grow: 0;"
+        style="padding: 0px; margin: 0 auto; width: 67.44px; height: 20px; background: {statusConfig[
+          status
+        ].bgColor}; border-radius: 104029px; flex-grow: 0;"
       >
         <div
           class="flex-none"
-          style="width: 36px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; color: {statusConfig[status].textColor}; display: flex; align-items: center; flex-grow: 0;"
+          style="width: 36px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; color: {statusConfig[
+            status
+          ].textColor}; display: flex; align-items: center; flex-grow: 0;"
         >
           {statusConfig[status].label}
         </div>
@@ -125,8 +133,15 @@
       class="flex flex-row items-center flex-none"
       style="padding: 0px; gap: 4.9px; width: 144.62px; height: 20px; flex-grow: 0;"
     >
-      <div class="flex-none flex items-center justify-center" style="width: 14.71px; height: 20px;">
-        <Icon iconName="icon/shopping-bag" size={14.71} style="color: #1A1A1A;" />
+      <div
+        class="flex-none flex items-center justify-center"
+        style="width: 14.71px; height: 20px;"
+      >
+        <Icon
+          iconName="icon/shopping-bag"
+          size={14.71}
+          style="color: #1A1A1A;"
+        />
       </div>
       <div
         class="flex-none flex items-center"
