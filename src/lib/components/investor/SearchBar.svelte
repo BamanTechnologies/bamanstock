@@ -25,7 +25,10 @@
       class="flex flex-row justify-center items-center flex-none"
       style="padding: 0px 0px 0px 16px; width: 32px; height: 42px; border-radius: 12px 0px 0px 12px; flex: none; order: 0; align-self: stretch; flex-grow: 0;"
     >
-      <div class="flex-none flex items-center justify-center" style="width: 16px; height: 16px; flex: none; order: 0; flex-grow: 0;">
+      <div
+        class="flex-none flex items-center justify-center"
+        style="width: 16px; height: 16px; flex: none; order: 0; flex-grow: 0;"
+      >
         <Icon iconName="icon/search" size={16} style="color: #757575;" />
       </div>
     </div>

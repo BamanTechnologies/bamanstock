@@ -5,7 +5,11 @@
     onToggle?: (checked: boolean) => void;
   }
 
-  let { label, checked = $bindable(false), onToggle }: ToggleSwitchProps = $props();
+  let {
+    label,
+    checked = $bindable(false),
+    onToggle,
+  }: ToggleSwitchProps = $props();
 
   function handleToggle() {
     checked = !checked;

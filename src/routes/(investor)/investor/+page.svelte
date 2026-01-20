@@ -14,7 +14,9 @@
   let locationFilter = $state("");
   let statusFilter = $state("");
   let isModalOpen = $state(false);
-  let selectedMerchant = $state<typeof mockMerchants[0] | undefined>(undefined);
+  let selectedMerchant = $state<(typeof mockMerchants)[0] | undefined>(
+    undefined
+  );
 
   const locationOptions = [
     { value: "", label: "All Locations" },
@@ -32,7 +34,7 @@
     { value: "invited", label: "Invited" },
   ];
 
-  // ── Mock Data (replace with real API later) 
+  // ── Mock Data (replace with real API later)
   const mockMerchants = [
     {
       id: 1,
@@ -131,8 +133,7 @@
         merchant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         merchant.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesStatus =
-        !statusFilter || merchant.status === statusFilter;
+      const matchesStatus = !statusFilter || merchant.status === statusFilter;
 
       const matchesLocation = true;
 
@@ -193,12 +194,15 @@
         class="flex-none mt-2"
         style="width: 528px; max-width: 100%; height: 18px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; color: #7E7E7E; flex: none; order: 1; flex-grow: 0;"
       >
-        Browse registered merchants or invite new ones to manage stock and sales together.
+        Browse registered merchants or invite new ones to manage stock and sales
+        together.
       </p>
     </div>
 
     <div class="space-y-4 mb-10">
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+      <div
+        class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
+      >
         <div class="w-full sm:flex-1" style="max-width: 484px;">
           <SearchBar
             bind:value={searchQuery}

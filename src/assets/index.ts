@@ -34,10 +34,15 @@ const icon = {
 	'icon/users': () => import('@lucide/svelte/icons/users'),
 	'icon/bell': () => import('@lucide/svelte/icons/bell'),
 	'icon/mail': () => import('@lucide/svelte/icons/mail'),
+	'icon/phone': () => import('@lucide/svelte/icons/phone'),
+	'icon/message-circle': () => import('@lucide/svelte/icons/message-circle'),
+	'icon/smile': () => import('@lucide/svelte/icons/smile'),
+	'icon/file-text': () => import('@lucide/svelte/icons/file-text'),
 	
 	// Actions
 	'icon/plus': () => import('@lucide/svelte/icons/plus'),
 	'icon/minus': () => import('@lucide/svelte/icons/minus'),
+	// 'icon/minus': () => import('@lucide/svelte/icons/minus'),
 	'icon/x': () => import('@lucide/svelte/icons/x'),
 	'icon/check': () => import('@lucide/svelte/icons/check'),
 	'icon/edit': () => import('@lucide/svelte/icons/edit'),
@@ -53,6 +58,11 @@ const icon = {
 	'icon/credit-card': () => import('@lucide/svelte/icons/credit-card'),
 	'icon/store': () => import('@lucide/svelte/icons/store'),
 	'icon/trending-up': () => import('@lucide/svelte/icons/trending-up'),
+	'icon/building': () => import('@lucide/svelte/icons/building'),
+	'icon/bar-chart': () => import('@lucide/svelte/icons/bar-chart'),
+	'icon/user-circle': () => import('@lucide/svelte/icons/user-circle'),
+	'icon/star': () => import('@lucide/svelte/icons/star'),
+	'icon/quote': () => import('@lucide/svelte/icons/quote'),
 	
 	// Media & Files
 	'icon/image': () => import('@lucide/svelte/icons/image'),
@@ -66,9 +76,14 @@ const icon = {
 	'icon/arrow-down': () => import('@lucide/svelte/icons/arrow-down'),
 	'icon/chevron-left': () => import('@lucide/svelte/icons/chevron-left'),
 	'icon/chevron-right': () => import('@lucide/svelte/icons/chevron-right'),
+	'icon/chevron-up': () => import('@lucide/svelte/icons/chevron-up'),
 	'icon/chevron-down': () => import('@lucide/svelte/icons/chevron-down'),
 	'icon/user-plus': () => import('@lucide/svelte/icons/user-plus'),
 	'icon/tag': () => import('@lucide/svelte/icons/tag'),
+	'icon/layout-grid': () => import('@lucide/svelte/icons/layout-grid'),
+	'icon/map-pin': () => import('@lucide/svelte/icons/map-pin'),
+	'icon/box': () => import('@lucide/svelte/icons/box'),
+	'icon/log-out': () => import('@lucide/svelte/icons/log-out'),
 	
 	// Status & Feedback
 	'icon/info': () => import('@lucide/svelte/icons/info'),
@@ -87,8 +102,10 @@ const icon = {
 // Social media platform icons
 // ============================================================================
 const social = {
-	// Add social media icons here as needed
-	// Example: 'social/Facebook': () => import('./social/Facebook.svg?component'),
+	'social/youtube': () => import('@lucide/svelte/icons/youtube'),
+	'social/twitter': () => import('@lucide/svelte/icons/twitter'),
+	'social/instagram': () => import('@lucide/svelte/icons/instagram'),
+	'social/facebook': () => import('@lucide/svelte/icons/facebook'),
 } as const;
 
 // ============================================================================
