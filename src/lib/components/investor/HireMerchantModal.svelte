@@ -115,7 +115,10 @@
   }
 
   function handleLocationClickOutside(event: MouseEvent) {
-    if (locationDropdownRef && !locationDropdownRef.contains(event.target as Node)) {
+    if (
+      locationDropdownRef &&
+      !locationDropdownRef.contains(event.target as Node)
+    ) {
       locationDropdownOpen = false;
     }
   }
@@ -200,13 +203,22 @@
                   {merchant.name}
                 </h3>
                 <span
-                  class="px-2.5 py-1 rounded-full text-xs font-medium {statusConfig[merchant.status].class}"
+                  class="px-2.5 py-1 rounded-full text-xs font-medium {statusConfig[
+                    merchant.status
+                  ].class}"
                 >
                   {statusConfig[merchant.status].label}
                 </span>
               </div>
-              <div class="flex items-center gap-2 text-sm" style="color: {PRIMARY_BLUE};">
-                <Icon iconName="icon/trending-up" size={16} style="color: {PRIMARY_BLUE};" />
+              <div
+                class="flex items-center gap-2 text-sm"
+                style="color: {PRIMARY_BLUE};"
+              >
+                <Icon
+                  iconName="icon/trending-up"
+                  size={16}
+                  style="color: {PRIMARY_BLUE};"
+                />
                 <span>{merchant.productsSold}+ Product Sold</span>
               </div>
             </div>
@@ -216,7 +228,11 @@
             <label class="text-sm font-medium text-foreground">
               Assign Location
             </label>
-            <div bind:this={locationDropdownRef} class="relative" style="width: 624px;">
+            <div
+              bind:this={locationDropdownRef}
+              class="relative"
+              style="width: 624px;"
+            >
               <button
                 type="button"
                 class="w-full flex items-center justify-between"
@@ -225,13 +241,17 @@
               >
                 <span class="text-sm text-foreground truncate text-left">
                   {selectedLocation
-                    ? locationOptions.find((opt) => opt.value === selectedLocation)?.label || "Select Location"
+                    ? locationOptions.find(
+                        (opt) => opt.value === selectedLocation
+                      )?.label || "Select Location"
                     : "Select Location"}
                 </span>
                 <Icon
                   iconName="icon/chevron-down"
                   size={16}
-                  class="text-muted-foreground transition-transform flex-shrink-0 {locationDropdownOpen ? 'rotate-180' : ''}"
+                  class="text-muted-foreground transition-transform flex-shrink-0 {locationDropdownOpen
+                    ? 'rotate-180'
+                    : ''}"
                 />
               </button>
 
@@ -260,10 +280,7 @@
             <label class="text-sm font-medium text-foreground">
               Assign Stock Categories
             </label>
-            <TagInput
-              bind:tags={categories}
-              placeholder="Add Category"
-            />
+            <TagInput bind:tags={categories} placeholder="Add Category" />
           </div>
 
           <div class="space-y-2">
@@ -274,7 +291,8 @@
           </div>
 
           <div class="space-y-3">
-            <label class="text-sm font-medium text-foreground">Permission</label>
+            <label class="text-sm font-medium text-foreground">Permission</label
+            >
             <div class="space-y-2">
               <ToggleSwitch
                 label="Create Product"
@@ -289,8 +307,10 @@
         {/if}
       </div>
 
-      <div class="flex items-center justify-end gap-3 p-6 border-t border-border">
-        <Button variant="outline" onclick={handleClose}> Cancel </Button>
+      <div
+        class="flex items-center justify-end gap-3 p-6 border-t border-border"
+      >
+        <Button variant="outline" onclick={handleClose}>Cancel</Button>
         <Button
           variant="default"
           class="bg-info text-info-foreground hover:bg-info/90"
