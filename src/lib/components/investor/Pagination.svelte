@@ -22,6 +22,8 @@
 
   const rowsPerPageOptions = [12, 24, 36, 48];
 
+  const rowsPerPageString = $derived(String(rowsPerPage));
+
   function handlePageChange(page: number) {
     if (page >= 1 && page <= totalPages) {
       currentPage = page;
@@ -77,7 +79,6 @@
 >
   <div class="flex items-center" style="gap: 4px;">
     <span class="text-sm text-muted-foreground">Row Per Page</span>
-    {@const rowsPerPageString = String(rowsPerPage)}
     <Dropdown
       value={rowsPerPageString}
       options={rowsPerPageOptions.map((opt) => ({
