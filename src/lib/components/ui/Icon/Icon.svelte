@@ -22,11 +22,16 @@
   // Check if this is a flag icon (PNG image)
   const isFlagIcon = $derived(iconName.startsWith("flags/"));
 
-  // Get the lazy loader function for this icon
-  const iconLoader = $derived(IconMap[iconName]);
-
-  // Load the icon
-  const iconPromise = $derived(iconLoader());
+  // Get the lazy loader function for this icon and load it
+  const iconPromise = $derived.by(() => {
+    const iconLoader = IconMap[iconName];
+    if (!iconLoader || typeof iconLoader !== "function") {
+      return Promise.reject(
+        new Error(`Icon "${iconName}" not found in IconMap`)
+      );
+    }
+    return iconLoader();
+  });
 </script>
 
 {#await iconPromise then iconModule}

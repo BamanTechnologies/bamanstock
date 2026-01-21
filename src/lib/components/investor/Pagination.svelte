@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { Dropdown } from "$lib/components/ui/dropdown/index.js";
 
   interface PaginationProps {
     currentPage?: number;
@@ -31,7 +32,7 @@
   function handleRowsPerPageChange(rows: number) {
     rowsPerPage = rows;
     onRowsPerPageChange?.(rows);
-    currentPage = 1; 
+    currentPage = 1;
   }
 
   function getVisiblePages() {
@@ -76,15 +77,16 @@
 >
   <div class="flex items-center" style="gap: 4px;">
     <span class="text-sm text-muted-foreground">Row Per Page</span>
-    <select
-      bind:value={rowsPerPage}
-      onchange={(e) => handleRowsPerPageChange(Number(e.currentTarget.value))}
-      class="px-3 py-1.5 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info/50"
-    >
-      {#each rowsPerPageOptions as option}
-        <option value={option}>{option}</option>
-      {/each}
-    </select>
+    {@const rowsPerPageString = String(rowsPerPage)}
+    <Dropdown
+      value={rowsPerPageString}
+      options={rowsPerPageOptions.map((opt) => ({
+        value: String(opt),
+        label: String(opt),
+      }))}
+      onchange={(value) => handleRowsPerPageChange(Number(value))}
+      class="min-w-[80px]"
+    />
     <span class="text-sm text-muted-foreground">Entries</span>
   </div>
 

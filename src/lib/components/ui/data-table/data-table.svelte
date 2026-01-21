@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Input } from "$lib/components/ui/input/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { Dropdown } from "$lib/components/ui/dropdown/index.js";
 
   interface Column<T> {
     key: keyof T | string;
@@ -83,16 +84,12 @@
         </div>
       {/if}
       {#each filters as filter}
-        <select
-          class="px-4 py-2 border border-border rounded-md bg-background text-foreground"
+        <Dropdown
+          options={filter.options}
           value={filterValues[filter.key] || ""}
-          onchange={(e) =>
-            handleFilterChange(filter.key, e.currentTarget.value)}
-        >
-          {#each filter.options as option}
-            <option value={option.value}>{option.label}</option>
-          {/each}
-        </select>
+          onchange={(value) => handleFilterChange(filter.key, value)}
+          class="min-w-[140px]"
+        />
       {/each}
     </div>
   {/if}
@@ -186,17 +183,17 @@
     <div class="p-4 border-t border-border flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="text-sm text-muted-foreground">Row Per Page</span>
-        <select
-          class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
-          value={pagination.rowsPerPage}
-          onchange={(e) =>
-            pagination.onRowsPerPageChange(Number(e.currentTarget.value))}
-        >
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
+        <Dropdown
+          options={[
+            { value: "10", label: "10" },
+            { value: "20", label: "20" },
+            { value: "50", label: "50" },
+            { value: "100", label: "100" },
+          ]}
+          value={String(pagination.rowsPerPage)}
+          onchange={(value) => pagination.onRowsPerPageChange(Number(value))}
+          class="min-w-[80px]"
+        />
         <span class="text-sm text-muted-foreground">Entries</span>
       </div>
       <div class="flex items-center gap-2">

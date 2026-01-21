@@ -1,12 +1,16 @@
 <script lang="ts">
+  import { cn } from "$lib/utils.js";
+
   interface LogoProps {
     src?: string;
     alt?: string;
+    class?: string;
   }
 
   let {
-    src = "/bamanstock logo 1.png",
+    src = "/bamanstock-logo.png",
     alt = "BAMANSTOCK",
+    class: className = "",
   }: LogoProps = $props();
 </script>
 
@@ -17,7 +21,7 @@
   <img
     {src}
     {alt}
-    class="object-contain flex-none"
-    style="width: 188px; height: 98px; flex: none; order: 0; flex-grow: 0;"
+    class={cn("object-contain flex-none", className)}
+    style="width: 223px; height: 66.17px; flex: none; order: 0; flex-grow: 0;"
   />
 </div>
