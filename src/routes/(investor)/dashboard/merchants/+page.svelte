@@ -3,6 +3,8 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { goto } from "$app/navigation";
+  import InviteMerchantModal from "$lib/components/investor/InviteMerchantModal.svelte";
+  import DeleteMerchantModal from "$lib/components/investor/DeleteMerchantModal.svelte";
 
   // Mock data - replace with real data later
   const summaryCards = [
@@ -26,7 +28,7 @@
     },
   ];
 
-  const merchants = [
+  let merchants = $state([
     {
       name: "Richard Wilson",
       revenue: "$156,900",
@@ -55,7 +57,7 @@
       location: "Branch #2",
       status: "Active",
     }),
-  ];
+  ]);
 
   function getStatusClass(status: string) {
     switch (status) {
@@ -145,6 +147,9 @@
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
   const totalPages = $derived(Math.ceil(merchants.length / rowsPerPage));
+  let isInviteModalOpen = $state(false);
+  let isDeleteModalOpen = $state(false);
+  let merchantToDelete = $state<(typeof merchants)[0] | null>(null);
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -162,8 +167,21 @@
   }
 
   function handleDelete(merchant: (typeof merchants)[0]) {
-    console.log("Delete merchant:", merchant);
-    // Show confirmation and delete
+    merchantToDelete = merchant;
+    isDeleteModalOpen = true;
+  }
+
+  function handleConfirmDelete() {
+    if (merchantToDelete) {
+      console.log("Deleting merchant:", merchantToDelete);
+      // TODO: Implement API call to delete merchant
+      // Remove from local state after successful deletion
+      const index = merchants.findIndex((m) => m === merchantToDelete);
+      if (index > -1) {
+        merchants.splice(index, 1);
+      }
+      merchantToDelete = null;
+    }
   }
 </script>
 
@@ -175,7 +193,10 @@
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-info text-info-foreground hover:bg-info/90">
+    <Button
+      class="bg-info text-info-foreground hover:bg-info/90"
+      onclick={() => (isInviteModalOpen = true)}
+    >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       Invite Merchant
     </Button>
@@ -231,5 +252,21 @@
       onPageChange: handlePageChange,
       onRowsPerPageChange: handleRowsPerPageChange,
     }}
+  />
+
+  <!-- Invite Merchant Modal -->
+  <InviteMerchantModal
+    bind:isOpen={isInviteModalOpen}
+    onSendInvitation={(data) => {
+      console.log("Sending invitation:", data);
+      // TODO: Implement API call to send invitation
+    }}
+  />
+
+  <!-- Delete Merchant Modal -->
+  <DeleteMerchantModal
+    bind:isOpen={isDeleteModalOpen}
+    merchantName={merchantToDelete?.name || ""}
+    onConfirm={handleConfirmDelete}
   />
 </div>

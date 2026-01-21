@@ -11,18 +11,14 @@
       <!-- Logo/Brand -->
       <a
         href="/"
-        class="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        class="flex items-center hover:opacity-80 transition-opacity -ml-1.5"
       >
-        <div
-          class="w-10 h-10 rounded-xl bg-info flex items-center justify-center"
-        >
-          <Icon
-            iconName="icon/trending-up"
-            size={20}
-            class="text-info-foreground"
-          />
-        </div>
-        <span class="text-xl font-bold text-info">BAMANSTOCK</span>
+        <img
+          src="/bamanstock-logo.png"
+          alt="BAMANSTOCK"
+          style="width: 160px; height: 66.17px;"
+          class="object-contain"
+        />
       </a>
 
       <!-- Navigation Links -->

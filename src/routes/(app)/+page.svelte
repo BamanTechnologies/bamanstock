@@ -717,10 +717,13 @@
             <!-- Left Side: Brand and Contact Info -->
             <div class="space-y-4">
               <!-- Logo/Brand -->
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-bold text-info">BAMANST</span>
-                <Icon iconName="icon/bar-chart" size={24} class="text-info" />
-                <span class="text-2xl font-bold text-info">CK</span>
+              <div class="flex items-center -ml-1.5">
+                <img
+                  src="/bamanstock-logo.png"
+                  alt="BAMANSTOCK"
+                  style="width: 160px; height: 66.17px;"
+                  class="object-contain"
+                />
               </div>
 
               <!-- Address -->
