@@ -32,7 +32,7 @@
 {#await iconPromise then iconModule}
   {#if isFlagIcon}
     <!-- Flag icons are rendered as img tags -->
-    {@const iconSrc = iconModule.default as string}
+    {@const iconSrc = iconModule.default as unknown as string}
     <img
       src={iconSrc}
       alt={iconName}

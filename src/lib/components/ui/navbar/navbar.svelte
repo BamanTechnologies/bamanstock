@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button/index.js";
-  import Icon from "$lib/components/ui/Icon/index.js";
+  import { Button } from "$lib/components/ui/button/index.js"; 
 </script>
 
 <nav
@@ -13,16 +12,7 @@
         href="/"
         class="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        <div
-          class="w-10 h-10 rounded-xl bg-info flex items-center justify-center"
-        >
-          <Icon
-            iconName="icon/trending-up"
-            size={20}
-            class="text-info-foreground"
-          />
-        </div>
-        <span class="text-xl font-bold text-info">BAMANSTOCK</span>
+        <img src="/bamanstocknewLogo.png" alt="Bamanstock" class="h-20 w-auto" />
       </a>
 
       <!-- Navigation Links -->

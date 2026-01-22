@@ -9,6 +9,8 @@
   function toggleFaq(index: number) {
     faqOpen[index] = !faqOpen[index];
   }
+
+  let faq: boolean[] = [false, false, false, false, false];
 </script>
 
 <div class="min-h-screen bg-background">
@@ -21,13 +23,15 @@
       <div class="max-w-4xl mx-auto text-center space-y-8">
         <!-- Main Headline -->
         <h1
-          class="text-5xl lg:text-6xl font-bold text-foreground leading-tight"
+          class="text-center font-extrabold text-[40px] leading-[48px] md:text-[56px] md:leading-[64px] lg:text-[72px] lg:leading-[85px] max-w-[1042px] mx-auto bg-gradient-to-r from-[#2258A6] to-[#021B45] bg-clip-text text-transparent"
         >
           Manage Your Stock. Know Your Business.
         </h1>
 
         <!-- Sub-headline -->
-        <p class="text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
+        <p
+          class="font-light text-[16px] leading-[28px] sm:text-[18px] sm:leading-[30px] lg:text-[20px] lg:leading-[33px] text-center text-black max-w-[971px] mx-auto"
+        >
           A privacy-first stock management platform for investors and merchants
           control branches, track inventory, and view performance in one unified
           dashboard.
@@ -40,18 +44,65 @@
           <Button
             href="/onboarding/role"
             size="lg"
-            class="bg-info text-info-foreground hover:bg-info/90 min-w-[200px]"
+            class="bg-info text-info-foreground hover:bg-info/90
+         min-w-[201px] h-[56px]
+         px-[12px] py-[8px]
+         flex items-center gap-[14px]
+         rounded-[12px]"
           >
-            Get Started Now
-            <Icon iconName="icon/arrow-right" size={20} />
+            <!-- Text: Frame 13 -->
+            <span
+              class="flex items-center justify-center
+           px-[7px]
+           w-[133px] h-[20px]
+           flex-none"
+            >
+              Get Started Now
+            </span>
+
+            <!-- Icon: Frame 12 -->
+            <span
+              class="w-[37px] h-[40px]
+           bg-white
+           rounded-[12px]
+           flex items-center justify-center
+           flex-none"
+            >
+              <Icon
+                iconName="icon/arrow-up-right"
+                size={20}
+                class="text-info"
+              />
+            </span>
           </Button>
+
           <Button
+            href="#features"
             variant="outline"
             size="lg"
-            href="#features"
-            class="min-w-[200px]"
+            class="
+    w-[134px] h-[56px]
+    px-[19px] py-[16px]
+    flex items-center gap-[14px]
+    border border-info
+    rounded-[12px]
+    bg-transparent
+  "
           >
-            Learn More
+            <span
+              class="
+      w-[82px] h-[20px]
+      flex items-center justify-center
+      font-raleway
+      font-bold
+      text-[15px]
+      leading-[20px]
+      text-info
+      flex-none
+    "
+            >
+              Learn More
+            </span>
           </Button>
         </div>
       </div>
@@ -77,37 +128,83 @@
   </section>
 
   <!-- Trusted by Leading Businesses Section -->
-  <!-- <section class="py-16 lg:py-24 bg-background">
-    <div class="container mx-auto px-6">
-      <div class="max-w-6xl mx-auto">
-        <h2
-          class="text-3xl lg:text-4xl font-bold text-foreground text-center mb-12"
+  <section
+    class="flex flex-col justify-center items-center py-16 lg:py-24 bg-background gap-8"
+  >
+    <h2
+      class="text-center font-sora font-bold text-[#1F1F1F] text-3xl leading-tight md:text-[56px] md:leading-[65px]"
+    >
+      Trusted by Leading Businesses
+    </h2>
+
+    <div class="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
+      <!-- Ephemeral -->
+      <div class="flex items-start gap-2.5 w-45 h-12">
+        <img
+          src="/campanyLogos/ephermal.svg"
+          alt="Ephemeral logo"
+          class="w-12 h-12 object-contain flex-none"
+        />
+        <span
+          class="font-sora text-[24px] font-bold leading-none text-[rgba(10,21,25,0.8)] flex items-center h-12 flex-none"
         >
-          Trusted by Leading Businesses
-        </h2>
-        <div
-          class="flex flex-wrap justify-center items-center gap-8 lg:gap-12 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+          Ephemeral
+        </span>
+      </div>
+
+      <div class="flex items-start gap-2.5 w-49.25 h-12">
+        <img
+          src="/campanyLogos/wildcraft.svg"
+          alt="Wildcrafted logo"
+          class="w-12 h-12 object-contain flex-none"
+        />
+        <span
+          class="font-sora text-[24px] font-bold leading-none text-[rgba(10,21,25,0.8)] flex items-center h-12 flex-none"
         >
-          Company Logos
-          <div class="flex items-center justify-center h-12">
-            <span class="text-2xl font-bold text-foreground">Ephemeral</span>
-          </div>
-          <div class="flex items-center justify-center h-12">
-            <span class="text-2xl font-bold text-foreground">Wildcrafted</span>
-          </div>
-          <div class="flex items-center justify-center h-12">
-            <span class="text-2xl font-bold text-foreground">Codecraft_</span>
-          </div>
-          <div class="flex items-center justify-center h-12">
-            <span class="text-2xl font-bold text-foreground">Convergence</span>
-          </div>
-          <div class="flex items-center justify-center h-12">
-            <span class="text-2xl font-bold text-foreground">ImgCompress</span>
-          </div>
-        </div>
+          Wildcrafted
+        </span>
+      </div>
+
+      <div class="flex items-start gap-2.5 w-50.5 h-12">
+        <img
+          src="/campanyLogos/codecraft.svg"
+          alt="Codecraft logo"
+          class="w-10 h-12 object-contain flex-none"
+        />
+        <span
+          class="font-sora text-[24px] font-bold leading-none text-[rgba(10,21,25,0.8)] flex items-center h-12 flex-none"
+        >
+          Codecraft_
+        </span>
+      </div>
+
+      <div class="flex items-start gap-2.5 w-50 h-12">
+        <img
+          src="/campanyLogos/convergence.svg"
+          alt="Convergence logo"
+          class="w-12 h-12 object-contain flex-none"
+        />
+        <span
+          class="font-sora text-[24px] font-bold leading-none text-[rgba(10,21,25,0.8)] flex items-center h-12 flex-none"
+        >
+          Convergence
+        </span>
+      </div>
+
+      <div class="flex items-start gap-2.5 w-45 h-12">
+        <img
+          src="/campanyLogos/imagecompress.svg"
+          alt="ImgCompress logo"
+          class="w-12 h-12 object-contain flex-none"
+        />
+        <span
+          class="font-sora text-[24px] font-bold leading-none text-[rgba(10,21,25,0.8)] flex items-center h-12 flex-none"
+        >
+          ImgCompress
+        </span>
       </div>
     </div>
-  </section> -->
+  </section>
 
   <!-- Features Section -->
   <section id="features" class="py-16 lg:py-24 bg-white">
@@ -115,14 +212,20 @@
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
           <span
-            class="inline-block px-4 py-1.5 rounded-full bg-muted text-muted-foreground text-sm font-medium mb-4"
+            class="inline-flex justify-center items-center px-7 py-2.5 rounded-full bg-[#FAFAFA] border border-[#E6E6E6] text-[#7E7E7E] text-[17px] font-normal leading-6.5 tracking-[-0.5px] font-sora mb-4"
           >
             Features
           </span>
-          <h2 class="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+
+          <h2
+            class="font-sora font-bold text-[45px] leading-16.25 text-center text-[#1F1F1F] max-w-170.5 mx-auto"
+          >
             The Clear Way to Manage Your Stock.
           </h2>
-          <p class="text-xl text-muted-foreground max-w-3xl mx-auto">
+
+          <p
+            class="font-sora font-normal text-[17px] leading-6.5 text-center text-[#7E7E7E] max-w-196.5 mx-auto"
+          >
             Simplify operations and gain total visibility with features designed
             to give investors confidence and merchants efficiency.
           </p>
@@ -291,49 +394,73 @@
     <div class="container mx-auto px-6">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
-          <h2 class="font-bold text-foreground mb-4" style="font-size: 45px;">
+          <h2
+            class="font-sora font-bold text-[45px] leading-16.25 text-center text-[#1F1F1F] max-w-178 mx-auto mb-4"
+          >
             What our customers have to say about our product.
           </h2>
-          <p class="text-xl text-muted-foreground">
-            Proven. Reliable. Loved by Users. ❤️
+
+          <p
+            class="font-sora font-normal text-[24px] leading-9.5 text-center text-[#000000] max-w-178 mx-auto"
+            style="letter-spacing: -0.04em;"
+          >
+            Proven. Reliable. Loved by Users. <span class="text-red-500"
+              >❤️</span
+            >
           </p>
         </div>
 
         <!-- Testimonials Grid -->
-        <div class="grid md:grid-cols-2 gap-8">
-          <!-- Testimonial 1 -->
-          <div class="relative p-8 bg-card border border-border rounded-lg">
-            <Icon iconName="icon/quote" size={48} class="text-muted/30 mb-4" />
-            <p class="text-foreground mb-6 text-lg">
-              Before switching, we were juggling spreadsheets, WhatsApp chats,
-              and scattered files. Now everything locations, merchants, and deal
-              statuses is in one place.
-            </p>
-            <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-full bg-info flex items-center justify-center text-info-foreground font-semibold"
-              >
-                SM
-              </div>
-              <span class="text-foreground font-medium">Sophia M.</span>
-            </div>
-          </div>
+        <div class="flex justify-center w-full">
+          <div
+            class="flex flex-row items-center gap-[54px] w-full max-w-[1266px]"
+          >
+            <div class="flex flex-col items-center gap-[35px] w-[606px]">
+              <Icon
+                iconName="icon/quote"
+                class="w-[53px] h-[77px] text-black opacity-20"
+              />
 
-          <!-- Testimonial 2 -->
-          <div class="relative p-8 bg-card border border-border rounded-lg">
-            <Icon iconName="icon/quote" size={48} class="text-muted/30 mb-4" />
-            <p class="text-foreground mb-6 text-lg">
-              As an investor managing multiple locations, keeping track of
-              merchants and stock movements was always chaotic. This dashboard
-              gives me real-time insights on everything.
-            </p>
-            <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-full bg-info flex items-center justify-center text-info-foreground font-semibold"
+              <p
+                class="font-raleway text-[24px] leading-[1.71] text-center max-w-[558px] text-foreground"
               >
-                NA
+                Before switching, we were juggling spreadsheets, WhatsApp chats,
+                and scattered files. Now everything locations, merchants, and
+                deal statuses is in one place.
+              </p>
+
+              <div class="flex items-center gap-[15px]">
+                <img
+                  src="/sophia.png"
+                  alt="Sophia M."
+                  class="w-[42px] h-[42px] rounded-full object-cover"
+                />
+                <span class="font-medium text-foreground">Sophia M.</span>
               </div>
-              <span class="text-foreground font-medium">Nathan A.</span>
+            </div>
+
+            <div class="flex flex-col items-center gap-[35px] w-[606px]">
+              <Icon
+                iconName="icon/quote"
+                class="w-[53px] h-[77px] text-gray-500 opacity-20"
+              />
+
+              <p
+                class="font-raleway text-[24px] leading-[1.71] text-center max-w-[558px] text-foreground"
+              >
+                As an investor managing multiple locations, keeping track of
+                merchants and stock movements was always chaotic. This dashboard
+                gives me real-time insights on everything.
+              </p>
+
+              <div class="flex items-center gap-3.75">
+                <img
+                  src="/natan.png"
+                  alt="Nathan A."
+                  class="w-10.5 h-10.5 rounded-full object-cover"
+                />
+                <span class="font-medium text-foreground">Nathan A.</span>
+              </div>
             </div>
           </div>
         </div>
@@ -403,144 +530,92 @@
     <div class="container mx-auto px-6">
       <div class="max-w-4xl mx-auto">
         <div class="text-center mb-12">
-          <h2 class="font-bold text-foreground mb-4" style="font-size: 45px;">
+          <h2
+            class="font-sora font-bold text-[45px] leading-[65px] text-[#1F1F1F] mb-4"
+            style="width: 657px; height: 65px; margin: 0 auto;"
+          >
             Frequently Asked Questions
           </h2>
-          <p class="text-xl text-muted-foreground">
+
+          <p
+            class="font-sora font-normal text-[19px] leading-[30px] text-[#7E7E7E]"
+            style="width: 494px; height: 30px; margin: 0 auto;"
+          >
             Everything you need to know about Baman Stock
           </p>
         </div>
 
         <!-- FAQ Items -->
-        <div class="space-y-4">
-          <!-- FAQ Item 1 -->
-          <div class="border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between p-6 text-left hover:bg-muted/50 transition-colors"
-              onclick={() => toggleFaq(0)}
+        <div class="space-y-4 flex flex-col items-center">
+          {#each faq as _, i}
+            <div
+              class="flex flex-col items-start bg-white border-b border-[#E0E0E0] rounded-lg overflow-hidden w-full max-w-[1254px] p-7 gap-3"
+              style="height: auto;"
             >
-              <h3 class="text-lg font-semibold text-foreground">
-                How does BamanStock work?
-              </h3>
-              <Icon
-                iconName={faqOpen[0] ? "icon/minus" : "icon/plus"}
-                size={20}
-                class="text-info transition-transform"
-              />
-            </button>
-            {#if faqOpen[0]}
-              <div class="px-6 pb-6 text-muted-foreground">
-                BamanStock is designed to help investors manage multiple
-                merchants and locations from one centralized dashboard.
-                Investors create locations (branches), assign merchants to those
-                locations, and link specific stock items to each location.
-              </div>
-            {/if}
-          </div>
+              <button
+                type="button"
+                class="w-full flex items-center justify-between text-left"
+                on:click={() => toggleFaq(i)}
+              >
+                <h3
+                  class="font-raleway font-semibold text-[26px] leading-[24px] text-black flex-1"
+                  style="min-width: 0;"
+                >
+                  {#if i === 0}How does BamanStock work?{/if}
+                  {#if i === 1}Can merchants manage stock on their own?{/if}
+                  {#if i === 2}What is the purpose of locations in the system?{/if}
+                  {#if i === 3}How secure is my data on BamanStock?{/if}
+                  {#if i === 4}Can I make changes later to different locations?{/if}
+                </h3>
 
-          <!-- FAQ Item 2 -->
-          <div class="border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between p-6 text-left hover:bg-muted/50 transition-colors"
-              onclick={() => toggleFaq(1)}
-            >
-              <h3 class="text-lg font-semibold text-foreground">
-                Can merchants manage stock on their own?
-              </h3>
-              <Icon
-                iconName={faqOpen[1] ? "icon/minus" : "icon/plus"}
-                size={20}
-                class="text-info transition-transform"
-              />
-            </button>
-            {#if faqOpen[1]}
-              <div class="px-6 pb-6 text-muted-foreground">
-                Yes, merchants can manage their own stock within the locations
-                assigned to them. They have access to update inventory levels,
-                track stock movements, and view reports for their specific
-                locations.
-              </div>
-            {/if}
-          </div>
+                <Icon
+                  iconName={faqOpen[i] ? "icon/minus" : "icon/plus"}
+                  size={20}
+                  class={faqOpen[i]
+                    ? "bg-[#4DA0E6] text-white rounded-full flex items-center justify-center transition-transform"
+                    : "text-black flex items-center justify-center transition-transform"}
+                  style="width: 23.04px; height: 24px;"
+                />
+              </button>
 
-          <!-- FAQ Item 3 -->
-          <div class="border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between p-6 text-left hover:bg-muted/50 transition-colors"
-              onclick={() => toggleFaq(2)}
-            >
-              <h3 class="text-lg font-semibold text-foreground">
-                What is the purpose of locations in the system?
-              </h3>
-              <Icon
-                iconName={faqOpen[2] ? "icon/minus" : "icon/plus"}
-                size={20}
-                class="text-info transition-transform"
-              />
-            </button>
-            {#if faqOpen[2]}
-              <div class="px-6 pb-6 text-muted-foreground">
-                Locations represent physical branches or stores where stock is
-                managed. They allow investors to organize their business across
-                multiple sites, assign different merchants to each location, and
-                track inventory separately for each branch.
-              </div>
-            {/if}
-          </div>
-
-          <!-- FAQ Item 4 -->
-          <div class="border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between p-6 text-left hover:bg-muted/50 transition-colors"
-              onclick={() => toggleFaq(3)}
-            >
-              <h3 class="text-lg font-semibold text-foreground">
-                How secure is my data on BamanStock?
-              </h3>
-              <Icon
-                iconName={faqOpen[3] ? "icon/minus" : "icon/plus"}
-                size={20}
-                class="text-info transition-transform"
-              />
-            </button>
-            {#if faqOpen[3]}
-              <div class="px-6 pb-6 text-muted-foreground">
-                We take data security seriously. All data is encrypted in
-                transit and at rest, and we follow industry best practices for
-                privacy and security. Your information is never shared with
-                third parties without your explicit consent.
-              </div>
-            {/if}
-          </div>
-
-          <!-- FAQ Item 5 -->
-          <div class="border border-border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between p-6 text-left hover:bg-muted/50 transition-colors"
-              onclick={() => toggleFaq(4)}
-            >
-              <h3 class="text-lg font-semibold text-foreground">
-                Can I make changes later to different locations?
-              </h3>
-              <Icon
-                iconName={faqOpen[4] ? "icon/minus" : "icon/plus"}
-                size={20}
-                class="text-info transition-transform"
-              />
-            </button>
-            {#if faqOpen[4]}
-              <div class="px-6 pb-6 text-muted-foreground">
-                Absolutely! You can add, edit, or remove locations at any time.
-                You can also reassign merchants, update stock items, and modify
-                location settings as your business needs evolve.
-              </div>
-            {/if}
-          </div>
+              {#if faqOpen[i]}
+                <div
+                  class="font-raleway font-normal text-[17px] leading-[28px] text-[#4A4A4A] w-full max-w-[1198px]"
+                >
+                  {#if i === 0}
+                    BamanStock is designed to help investors manage multiple
+                    merchants and locations from one centralized dashboard.
+                    Investors create locations (branches), assign merchants to
+                    those locations, and link specific stock items to each
+                    location.
+                  {/if}
+                  {#if i === 1}
+                    Yes, merchants can manage their own stock within the
+                    locations assigned to them. They have access to update
+                    inventory levels, track stock movements, and view reports
+                    for their specific locations.
+                  {/if}
+                  {#if i === 2}
+                    Locations represent physical branches or stores where stock
+                    is managed. They allow investors to organize their business
+                    across multiple sites, assign different merchants to each
+                    location, and track inventory separately for each branch.
+                  {/if}
+                  {#if i === 3}
+                    We take data security seriously. All data is encrypted in
+                    transit and at rest, and we follow industry best practices
+                    for privacy and security. Your information is never shared
+                    with third parties without your explicit consent.
+                  {/if}
+                  {#if i === 4}
+                    Absolutely! You can add, edit, or remove locations at any
+                    time. You can also reassign merchants, update stock items,
+                    and modify location settings as your business needs evolve.
+                  {/if}
+                </div>
+              {/if}
+            </div>
+          {/each}
         </div>
       </div>
     </div>

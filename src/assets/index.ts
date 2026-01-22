@@ -72,6 +72,7 @@ const icon = {
 	// Arrows & Navigation
 	'icon/arrow-left': () => import('@lucide/svelte/icons/arrow-left'),
 	'icon/arrow-right': () => import('@lucide/svelte/icons/arrow-right'),
+	'icon/arrow-up-right': () => import('@lucide/svelte/icons/arrow-up-right'),
 	'icon/arrow-up': () => import('@lucide/svelte/icons/arrow-up'),
 	'icon/arrow-down': () => import('@lucide/svelte/icons/arrow-down'),
 	'icon/chevron-left': () => import('@lucide/svelte/icons/chevron-left'),
