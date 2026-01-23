@@ -555,10 +555,10 @@
               <button
                 type="button"
                 class="w-full flex items-center justify-between text-left"
-                on:click={() => toggleFaq(i)}
+                onclick={() => toggleFaq(i)}
               >
                 <h3
-                  class="font-raleway font-semibold text-[26px] leading-[24px] text-black flex-1"
+                  class="font-raleway font-semibold text-[26px] leading-[24px] text-[#000000] flex-1"
                   style="min-width: 0;"
                 >
                   {#if i === 0}How does BamanStock work?{/if}
@@ -627,35 +627,49 @@
       <div class="max-w-6xl mx-auto">
         <!-- Section Header -->
         <div class="text-center mb-12">
-          <h2 class="font-bold text-foreground mb-4" style="font-size: 45px;">
+          <h2
+            class="font-bold text-center mb-4"
+            style="
+    font-family: 'Sora', sans-serif;
+    font-size: 45px;
+    line-height: 65px;
+    color: #1F1F1F;
+  "
+          >
             How we can help you?
           </h2>
         </div>
 
         <!-- Contact Form -->
-        <form class="space-y-6">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            <!-- Left Column -->
-            <div class="space-y-6 flex flex-col">
+        <form class="space-y-10">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+            <div class="space-y-8">
               <!-- Full Name -->
               <div>
                 <label
                   for="fullName"
-                  class="block text-sm font-medium text-foreground mb-2"
+                  class="block mb-2 text-[17px] font-bold leading-5.5 text-[#1F1F1F]"
+                  style="font-family: 'Raleway', sans-serif;"
                 >
                   Your full name*
                 </label>
+
                 <div class="relative">
                   <input
                     type="text"
                     id="fullName"
                     placeholder="What's your name?"
-                    class="w-full px-4 py-3 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent bg-white"
+                    class="w-full border-0 border-b border-[#E6E6E6]
+                   bg-transparent px-0 py-2 pr-8
+                   text-[13px] leading-4.5
+                   placeholder:text-[#7E7E7E]
+                   focus:outline-none focus:border-[#1F1F1F]"
+                    style="font-family: 'Raleway', sans-serif;"
                   />
                   <Icon
                     iconName="icon/smile"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                    size={18}
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-[#9A9A9A]"
                   />
                 </div>
               </div>
@@ -664,47 +678,60 @@
               <div>
                 <label
                   for="phone"
-                  class="block text-sm font-medium text-foreground mb-2"
+                  class="block mb-2 text-[17px] font-bold leading-5.5 text-[#1F1F1F]"
+                  style="font-family: 'Raleway', sans-serif;"
                 >
                   Your phone number
                 </label>
+
                 <div class="relative">
                   <input
                     type="tel"
                     id="phone"
                     placeholder="Enter your phone number"
-                    class="w-full px-4 py-3 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent bg-white"
+                    class="w-full border-0 border-b border-[#E6E6E6]
+                   bg-transparent px-0 py-2 pr-8
+                   text-[13px] leading-4.5
+                   placeholder:text-[#7E7E7E]
+                   focus:outline-none focus:border-[#1F1F1F]"
+                    style="font-family: 'Raleway', sans-serif;"
                   />
                   <Icon
                     iconName="icon/phone"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                    size={18}
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-[#9A9A9A]"
                   />
                 </div>
               </div>
             </div>
 
-            <!-- Right Column -->
-            <div class="space-y-6 flex flex-col">
+            <div class="space-y-8">
               <!-- Email -->
               <div>
                 <label
                   for="email"
-                  class="block text-sm font-medium text-foreground mb-2"
+                  class="block mb-2 text-[17px] font-bold leading-5.5 text-[#1F1F1F]"
+                  style="font-family: 'Raleway', sans-serif;"
                 >
                   Your email address*
                 </label>
+
                 <div class="relative">
                   <input
                     type="email"
                     id="email"
                     placeholder="Enter your email address"
-                    class="w-full px-4 py-3 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent bg-white"
+                    class="w-full border-0 border-b border-[#E6E6E6]
+                   bg-transparent px-0 py-2 pr-8
+                   text-[13px] leading-4.5
+                   placeholder:text-[#7E7E7E]
+                   focus:outline-none focus:border-[#1F1F1F]"
+                    style="font-family: 'Raleway', sans-serif;"
                   />
                   <Icon
                     iconName="icon/mail"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                    size={18}
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-[#9A9A9A]"
                   />
                 </div>
               </div>
@@ -713,67 +740,90 @@
               <div>
                 <label
                   for="subject"
-                  class="block text-sm font-medium text-foreground mb-2"
+                  class="block mb-2 text-[17px] font-bold leading-5.5 text-[#1F1F1F]"
+                  style="font-family: 'Raleway', sans-serif;"
                 >
                   Your subject
                 </label>
+
                 <div class="relative">
                   <input
                     type="text"
                     id="subject"
                     placeholder="How can we help you?"
-                    class="w-full px-4 py-3 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent bg-white"
+                    class="w-full border-0 border-b border-[#E6E6E6]
+                   bg-transparent px-0 py-2 pr-8
+                   text-[13px] leading-4.5
+                   placeholder:text-[#7E7E7E]
+                   focus:outline-none focus:border-[#1F1F1F]"
+                    style="font-family: 'Raleway', sans-serif;"
                   />
                   <Icon
                     iconName="icon/file-text"
-                    size={20}
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                    size={18}
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-[#9A9A9A]"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Message - Full Width -->
-          <div>
+          <div class="relative pt-2 pb-16">
             <label
               for="message"
-              class="block text-sm font-medium text-foreground mb-2"
+              class="block mb-3 text-[17px] font-bold leading-5.5 text-[#1F1F1F]"
+              style="font-family: 'Raleway', sans-serif;"
             >
               Your message
             </label>
-            <div class="relative">
-              <textarea
-                id="message"
-                rows={6}
-                placeholder="Describe about your project"
-                class="w-full min-h-[150px] px-4 py-3 pr-12 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info focus:border-transparent resize-none bg-white"
-              ></textarea>
-              <Icon
-                iconName="icon/message-circle"
-                size={20}
-                class="absolute right-4 top-4 text-muted-foreground pointer-events-none"
-              />
-            </div>
+
+            <textarea
+              id="message"
+              placeholder="Describe about your project"
+              class="w-full bg-transparent border-0 resize-none
+           px-0 py-2 pr-8
+           text-[13px] leading-4.5
+           placeholder:text-[#7E7E7E]
+           focus:outline-none"
+              rows="4"
+              style="font-family: 'Raleway', sans-serif;"
+            ></textarea>
+
+            <div
+              class="absolute left-0 right-0 bottom-0 h-px bg-[#E6E6E6]"
+            ></div>
+
+            <Icon
+              iconName="icon/message-circle"
+              size={18}
+              class="absolute right-0 top-[52px] text-[#9A9A9A]"
+            />
           </div>
 
-          <!-- Privacy Statement and Send Button -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-            <!-- Privacy Statement -->
-            <p class="text-sm text-muted-foreground">
+          <div
+            class="flex flex-col lg:flex-row items-start lg:items-center justify-between
+         px-[15px] pt-10 max-w-[915px] mx-auto gap-6"
+          >
+            <p
+              class="text-[15px] leading-[27px] text-[#7E7E7E] max-w-[408px]"
+              style="font-family: 'Raleway', sans-serif;"
+            >
               We are committed to protecting your privacy. We will never collect
               information about you without your explicit consent.
             </p>
 
-            <!-- Send Button -->
-            <div class="flex justify-end">
-              <Button
-                type="submit"
-                class="bg-info text-info-foreground hover:bg-info/90 px-8 py-3"
-              >
-                Send Message
-              </Button>
-            </div>
+            <button
+              type="submit"
+              class="flex items-center justify-center
+           px-[71px] py-[12px]
+           bg-[#4DA0E6] hover:bg-[#3C8FDB]
+           rounded-[12px]
+           text-[17px] font-bold
+           text-[#FAFAFA]"
+              style="font-family: 'Raleway', sans-serif;"
+            >
+              Send Message
+            </button>
           </div>
         </form>
       </div>
@@ -781,121 +831,120 @@
   </section>
 
   <!-- Footer Section -->
-  <footer class="bg-[#F8F8F8]">
-    <div style="background: #F0F7FC; position: relative;">
-      <div
-        style="background: linear-gradient(to bottom, rgba(77, 160, 230, 0.1) 0%, rgba(77, 160, 230, 0.1) 38%, rgba(255, 255, 255, 0.1) 100%); position: absolute; inset: 0; pointer-events: none;"
-      ></div>
-      <div style="position: relative; z-index: 1;">
-        <div class="container mx-auto px-6 py-12">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Left Side: Brand and Contact Info -->
-            <div class="space-y-4">
-              <!-- Logo/Brand -->
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-bold text-info">BAMANST</span>
-                <Icon iconName="icon/bar-chart" size={24} class="text-info" />
-                <span class="text-2xl font-bold text-info">CK</span>
-              </div>
-
-              <!-- Address -->
-              <p class="text-foreground text-sm">
-                123 Research Blvd street, Austin, TX 78759
-              </p>
-
-              <!-- Phone Number -->
-              <p class="text-foreground text-sm">+1 234 567 890</p>
-            </div>
-
-            <!-- Right Side: Legal Links and Social Media -->
-            <div class="flex flex-col items-start lg:items-end space-y-6">
-              <!-- Legal Links -->
-              <div class="flex flex-wrap gap-6 lg:gap-8">
-                <a
-                  href="/terms"
-                  class="text-foreground text-sm hover:text-info transition-colors"
-                >
-                  Terms of Use
-                </a>
-                <a
-                  href="/privacy"
-                  class="text-foreground text-sm hover:text-info transition-colors"
-                >
-                  Privacy Policy
-                </a>
-                <a
-                  href="/disclaimer"
-                  class="text-foreground text-sm hover:text-info transition-colors"
-                >
-                  Disclaimer
-                </a>
-              </div>
-
-              <!-- Social Media Icons -->
-              <div class="flex gap-4">
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity"
-                  aria-label="YouTube"
-                >
-                  <Icon
-                    iconName="social/youtube"
-                    size={20}
-                    class="text-white"
-                  />
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity"
-                  aria-label="Twitter"
-                >
-                  <Icon
-                    iconName="social/twitter"
-                    size={20}
-                    class="text-white"
-                  />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity"
-                  aria-label="Instagram"
-                >
-                  <Icon
-                    iconName="social/instagram"
-                    size={20}
-                    class="text-white"
-                  />
-                </a>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity"
-                  aria-label="Facebook"
-                >
-                  <Icon
-                    iconName="social/facebook"
-                    size={20}
-                    class="text-white"
-                  />
-                </a>
-              </div>
-            </div>
+  <footer class="w-full flex justify-center bg-[#F0F7FC] relative">
+    <!-- Footer container (Frame 2121457532) -->
+    <div
+      class="relative flex flex-col items-center
+           w-[1440px] h-[452px]
+           pt-[58px] px-[93px] pb-[30px]
+           gap-[61px]"
+      style="background: linear-gradient(
+      180deg,
+      rgba(77, 160, 230, 0.1) 37.79%,
+      rgba(255, 255, 255, 0.1) 100%
+    );"
+    >
+      <!-- Top section -->
+      <div class="w-full flex justify-between items-start">
+        <!-- Left: Logo + address -->
+        <div>
+          <!-- Logo -->
+          <div
+            class="flex items-center gap-[17.95px]
+                 w-[333.54px] h-[98.97px]"
+          >
+            <img
+              src="/bamanstocknewLogo.png"
+              alt="Bamanstock"
+              class="w-[281.19px] h-[146.58px] object-contain"
+            />
           </div>
 
-          <!-- Copyright Section -->
-          <div class="border-t border-border pt-6">
-            <p class="text-foreground text-sm text-center">
-              Copyright © 2025. Bamanstock All rights reserved
-            </p>
+          <!-- Address & phone -->
+          <div class="mt-6 space-y-3 text-sm text-[#000000]">
+            <p>123 Research Blvd street, Austin, TX 78759</p>
+            <p>+1 234 567 890</p>
           </div>
         </div>
+
+        <div class="flex flex-col pt-28 gap-6">
+          <div class="flex gap-4">
+            <a
+              href="/terms"
+              class="w-[98px] h-[31px] font-sora font-normal text-[15px] leading-[31px] text-center text-black hover:text-info transition-colors"
+            >
+              Terms of Use
+            </a>
+            <a
+              href="/privacy"
+              class="w-[135px] h-[31px] font-sora font-normal text-[15px] leading-[31px] text-center text-black hover:text-info transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="/disclaimer"
+              class="w-[120px] h-[31px] font-sora font-normal text-[15px] leading-[31px] text-center text-black hover:text-info transition-colors"
+            >
+              Disclaimer
+            </a>
+          </div>
+
+          <div class="flex items-start justify-start gap-4">
+            <a
+              href="https://youtube.com"
+              aria-label="YouTube"
+              class="w-[35.63px] h-[35.63px]
+           rounded-full bg-black
+           flex items-center justify-center"
+            >
+              <Icon iconName="social/youtube" size={18} class="text-white" />
+            </a>
+
+            <a
+              href="https://twitter.com"
+              aria-label="Twitter"
+              class="w-[35.63px] h-[35.63px]
+           rounded-full bg-black
+           flex items-center justify-center"
+            >
+              <Icon iconName="social/twitter" size={18} class="text-white" />
+            </a>
+
+            <a
+              href="https://instagram.com"
+              aria-label="Instagram"
+              class="w-[35.63px] h-[35.63px]
+           rounded-full bg-black
+           flex items-center justify-center"
+            >
+              <Icon iconName="social/instagram" size={18} class="text-white" />
+            </a>
+
+            <a
+              href="https://facebook.com"
+              aria-label="Facebook"
+              class="w-[35.63px] h-[35.63px]
+           rounded-full bg-black
+           flex items-center justify-center"
+            >
+              <Icon iconName="social/facebook" size={18} class="text-white" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full h-px bg-[#C2C2C2]"></div>
+      <div class="w-full flex justify-end">
+        <p
+          class="w-[377px] h-[31px]
+           text-right
+           text-[15px] leading-[31px]
+           font-medium
+           text-[#000000]"
+          style="font-family: 'Montserrat', sans-serif;"
+        >
+          Copyright © 2025. Bamanstock All rights reserved
+        </p>
       </div>
     </div>
   </footer>
