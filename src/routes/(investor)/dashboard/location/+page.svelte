@@ -35,25 +35,27 @@
     status: boolean;
   } | null>(null);
 
-  function getStatusClass(status: string) {
+function getStatusClass(status: string) {
     switch (status) {
       case "Active":
-        return "text-green-600";
+        // This will apply the green background and white text
+        return "bg-success/70 text-success-foreground px-3 py-1 rounded-md font-medium";
       case "Inactive":
-        return "text-gray-600";
+        return "bg-muted text-muted-foreground px-3 py-1 rounded-md font-medium";
       default:
-        return "text-gray-600";
+        return "bg-muted text-muted-foreground px-3 py-1 rounded-md font-medium";
     }
   }
 
-  function getStatusDot(status: string) {
+function getStatusDot(status: string) {
     switch (status) {
       case "Active":
-        return "bg-green-500";
+      
+        return "bg-current"; 
       case "Inactive":
-        return "bg-gray-500";
+        return "bg-current";
       default:
-        return "bg-gray-500";
+        return "bg-current";
     }
   }
 
@@ -104,7 +106,7 @@
       key: "location",
       label: "Location",
       options: [
-        { value: "", label: "All Locations" },
+        { value: "", label: "Locations" },
         { value: "santa-clara", label: "Santa Clara Area #1" },
         { value: "other", label: "Other" },
       ],
@@ -113,7 +115,7 @@
       key: "status",
       label: "Status",
       options: [
-        { value: "", label: "All Status" },
+        { value: "", label: "Status" },
         { value: "active", label: "Active" },
         { value: "inactive", label: "Inactive" },
       ],
@@ -209,16 +211,15 @@
 
 <div class="flex-1 p-6 space-y-6">
   <!-- Header with Add Location Button -->
-  <div class="flex items-center justify-end">
-    <Button
-      class="bg-info text-info-foreground hover:bg-info/90"
-      onclick={handleAddLocation}
-    >
-      <Icon iconName="icon/plus" size={16} class="mr-2" />
-      Add Location
-    </Button>
-  </div>
-
+<div class="flex items-center justify-end">
+  <Button
+    class="bg-primary-blue text-info-foreground hover:opacity-90"
+    onclick={handleAddLocation}
+  >
+    <Icon iconName="icon/plus" size={16} class="mr-2" />
+    Add Location
+  </Button>
+</div>
   <!-- Empty State or Table Section -->
   {#if locations.length === 0}
     <EmptyState

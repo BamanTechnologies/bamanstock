@@ -138,7 +138,7 @@
                       <SidebarMenuButton
                         isActive={$page.url.pathname === item.href ||
                           ($page.url.pathname.startsWith(
-                            "/dashboard/merchants"
+                            "/dashboard/merchants",
                           ) &&
                             item.href === "/dashboard/merchants")}
                       >
@@ -263,9 +263,9 @@
                     <Icon
                       iconName="icon/log-out"
                       size={18}
-                      class="text-red-600"
+                      class="text-destructive"
                     />
-                    <span class="text-sm text-red-600">Log out</span>
+                    <span class="text-sm text-destructive">Log out</span>
                   </button>
                 </div>
               {/if}

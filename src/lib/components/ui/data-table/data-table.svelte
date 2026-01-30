@@ -157,16 +157,16 @@
                 {/if}
               </td>
             {/each}
-            {#if actions.length > 0}
+            <!-- {#if actions.length > 0}
               <th
                 class="px-4 py-3 text-right text-sm font-medium text-foreground"
               >
                 Actions
               </th>
-            {/if}
+            {/if} -->
 
             {#if actions.length > 0}
-              <td class="px-4 py-3">
+              <td class="px-8 py-3">
                 <div class="flex items-center justify-end gap-[8px]">
                   {#each actions as action}
                     <button
