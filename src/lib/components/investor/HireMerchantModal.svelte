@@ -56,7 +56,7 @@
   ];
 
   const statusConfig = {
-    active: { label: "Active", class: "bg-success text-success-foreground" },
+    active: { label: "Active", class: "bg-[#3EB780]/20 text-[#3EB780]" },
     declined: {
       label: "Declined",
       class: "bg-destructive text-destructive-foreground",
@@ -174,7 +174,7 @@
           onclick={handleClose}
           aria-label="Close modal"
         >
-          <Icon iconName="icon/x" size={20} class="text-foreground" />
+          <Icon iconName="icon/x" size={24} class="text-muted-foreground" />
         </button>
       </div>
 
@@ -203,9 +203,16 @@
                   {merchant.name}
                 </h3>
                 <span
-                  class="px-2.5 py-1 rounded-full text-xs font-medium {statusConfig[
+                  class="inline-flex items-center justify-center text-[11px] font-medium {statusConfig[
                     merchant.status
                   ].class}"
+                  style="
+        width: 67.44px; 
+        height: 20px; 
+        padding: 0px; 
+        border-radius: 100px; 
+        margin-top: -4px;
+      "
                 >
                   {statusConfig[merchant.status].label}
                 </span>
@@ -242,7 +249,7 @@
                 <span class="text-sm text-foreground truncate text-left">
                   {selectedLocation
                     ? locationOptions.find(
-                        (opt) => opt.value === selectedLocation
+                        (opt) => opt.value === selectedLocation,
                       )?.label || "Select Location"
                     : "Select Location"}
                 </span>

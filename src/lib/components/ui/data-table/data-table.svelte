@@ -66,9 +66,11 @@
 <div class="bg-card border border-border rounded-lg">
   <!-- Search and Filters -->
   {#if searchable || filters.length > 0}
-    <div class="p-4 border-b border-border flex items-center gap-4">
+    <div
+      class="p-4 border-b border-border flex items-center justify-between gap-4"
+    >
       {#if searchable}
-        <div class="flex-1 relative">
+        <div class="relative w-full max-w-xs">
           <Icon
             iconName="icon/search"
             size={18}
@@ -83,14 +85,17 @@
           />
         </div>
       {/if}
-      {#each filters as filter}
-        <Dropdown
-          options={filter.options}
-          value={filterValues[filter.key] || ""}
-          onchange={(value) => handleFilterChange(filter.key, value)}
-          class="min-w-[140px]"
-        />
-      {/each}
+
+      <div class="flex items-center gap-4">
+        {#each filters as filter}
+          <Dropdown
+            options={filter.options}
+            value={filterValues[filter.key] || ""}
+            onchange={(value) => handleFilterChange(filter.key, value)}
+            class="min-w-[140px]"
+          />
+        {/each}
+      </div>
     </div>
   {/if}
 
@@ -153,24 +158,34 @@
               </td>
             {/each}
             {#if actions.length > 0}
-              {#each actions as action}
-                <td class="px-4 py-3">
-                  <button
-                    onclick={() => action.onClick(row)}
-                    class="inline-flex items-center"
-                    aria-label={action.label}
-                  >
-                    <Icon
-                      iconName={action.icon}
-                      size={18}
-                      class="text-muted-foreground cursor-pointer {action.variant ===
-                      'destructive'
-                        ? 'hover:text-destructive'
-                        : 'hover:text-foreground'}"
-                    />
-                  </button>
-                </td>
-              {/each}
+              <th
+                class="px-4 py-3 text-right text-sm font-medium text-foreground"
+              >
+                Actions
+              </th>
+            {/if}
+
+            {#if actions.length > 0}
+              <td class="px-4 py-3">
+                <div class="flex items-center justify-end gap-[8px]">
+                  {#each actions as action}
+                    <button
+                      onclick={() => action.onClick(row)}
+                      class="inline-flex items-center"
+                      aria-label={action.label}
+                    >
+                      <Icon
+                        iconName={action.icon}
+                        size={18}
+                        class="text-muted-foreground cursor-pointer {action.variant ===
+                        'destructive'
+                          ? 'hover:text-destructive'
+                          : 'hover:text-foreground'}"
+                      />
+                    </button>
+                  {/each}
+                </div>
+              </td>
             {/if}
           </tr>
         {/each}
