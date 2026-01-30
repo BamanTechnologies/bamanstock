@@ -113,7 +113,7 @@
       sortable: true,
       render: (row: (typeof merchants)[0]) => {
         return `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(row.status)}">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] text-xs font-medium border ${getStatusClass(row.status)}">
             <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
             ${row.status}
           </span>

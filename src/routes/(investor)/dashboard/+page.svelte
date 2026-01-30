@@ -1,7 +1,16 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
 
-  const kpiCards = [
+  type IconName = "icon/bar-chart" | "icon/trending-up" | "icon/users";
+
+  const kpiCards: {
+    label: string;
+    value: string;
+    change: string;
+    changeType: "positive" | "negative";
+    icon: IconName;
+    iconColor: string;
+  }[] = [
     {
       label: "Total Revenue",
       value: "$48,988.78",
@@ -136,6 +145,8 @@
                 </div>
               </div>
               <p class="text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
+              <p class="text-xs text-muted-foreground mb-3">{kpi.label}</p>
+              <div class="border-t border-border my-3"></div>
               <p
                 class="text-xs {kpi.changeType === 'positive'
                   ? 'text-green-600'
@@ -157,7 +168,9 @@
               <div>
                 <p class="text-sm text-muted-foreground">Revenue Over Time</p>
                 <p class="text-2xl font-bold text-foreground">$1.25M</p>
-                <p class="text-sm text-green-600">Last 12 Months +15.2%</p>
+                <p class="text-sm text-muted-foreground">
+                  Last 12 Months <span class="text-green-600">+15.2%</span>
+                </p>
               </div>
               <div class="flex gap-2">
                 {#each ["1D", "1W", "1M", "3M", "6M", "1Y"] as period}
@@ -287,9 +300,9 @@
                     >
                     <td class="px-4 py-2">
                       <span
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border bg-green-100 text-green-800 border-green-200"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] text-[11px] font-medium border bg-[#3EB780] text-[#FFFFFF] border-green-200"
                       >
-                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#FFFFFF]"
                         ></span>
                         {row.status}
                       </span>
