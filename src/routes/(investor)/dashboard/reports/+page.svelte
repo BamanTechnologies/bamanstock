@@ -218,7 +218,7 @@
   let paymentsPage = $state(1);
   let paymentsRowsPerPage = $state(10);
   const paymentsTotalPages = $derived(
-    Math.ceil(paymentsReportData.length / paymentsRowsPerPage)
+    Math.ceil(paymentsReportData.length / paymentsRowsPerPage),
   );
 
   // Payments table columns
@@ -470,7 +470,7 @@
   let stockMovementPage = $state(1);
   let stockMovementRowsPerPage = $state(10);
   const stockMovementTotalPages = $derived(
-    Math.ceil(stockMovementData.length / stockMovementRowsPerPage)
+    Math.ceil(stockMovementData.length / stockMovementRowsPerPage),
   );
 
   // Stock Movement table columns
@@ -714,7 +714,7 @@
   let lowStockPage = $state(1);
   let lowStockRowsPerPage = $state(10);
   const lowStockTotalPages = $derived(
-    Math.ceil(lowStockData.length / lowStockRowsPerPage)
+    Math.ceil(lowStockData.length / lowStockRowsPerPage),
   );
 
   // Low Stock table columns
@@ -866,7 +866,7 @@
   let revenueBreakdownPage = $state(1);
   let revenueBreakdownRowsPerPage = $state(10);
   const revenueBreakdownTotalPages = $derived(
-    Math.ceil(revenueBreakdownData.length / revenueBreakdownRowsPerPage)
+    Math.ceil(revenueBreakdownData.length / revenueBreakdownRowsPerPage),
   );
 
   // Revenue Breakdown table columns
@@ -1233,20 +1233,24 @@
                 aria-label="More options"
               >
                 <Icon
-                  iconName="icon/settings"
+                  iconName="icon/more-vertical"
                   size={20}
                   class="text-muted-foreground"
                 />
               </button>
             </div>
             <p class="text-2xl font-bold text-foreground mb-2">{kpi.value}</p>
-            <div
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-            >
-              <Icon iconName="icon/arrow-up" size={12} />
-              <span>{kpi.change}%</span>
+            <div class="flex flex-row gap-4">
+              <div
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+              >
+                <Icon iconName="icon/arrow-up" size={12} />
+                <span>{kpi.change}%</span>
+              </div>
+              <p class="text-xs text-muted-foreground mt-1">
+                {kpi.changeLabel}
+              </p>
             </div>
-            <p class="text-xs text-muted-foreground mt-1">{kpi.changeLabel}</p>
           </div>
         {/each}
       </div>
@@ -1367,7 +1371,7 @@
         {#if true}
           {@const paginatedData = salesReportData.slice(
             (currentPage - 1) * rowsPerPage,
-            currentPage * rowsPerPage
+            currentPage * rowsPerPage,
           )}
           <DataTable
             columns={salesColumns}
@@ -1399,20 +1403,24 @@
                 aria-label="More options"
               >
                 <Icon
-                  iconName="icon/settings"
+                  iconName="icon/more-vertical"
                   size={20}
                   class="text-muted-foreground"
                 />
               </button>
             </div>
             <p class="text-2xl font-bold text-foreground mb-2">{kpi.value}</p>
-            <div
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-            >
-              <Icon iconName="icon/arrow-up" size={12} />
-              <span>{kpi.change}%</span>
+            <div class="flex flex-row gap-4">
+              <div
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+              >
+                <Icon iconName="icon/arrow-up" size={12} />
+                <span>{kpi.change}%</span>
+              </div>
+              <p class="text-xs text-muted-foreground mt-1">
+                {kpi.changeLabel}
+              </p>
             </div>
-            <p class="text-xs text-muted-foreground mt-1">{kpi.changeLabel}</p>
           </div>
         {/each}
       </div>
@@ -1609,7 +1617,7 @@
         {#if true}
           {@const paginatedRevenueData = revenueBreakdownData.slice(
             (revenueBreakdownPage - 1) * revenueBreakdownRowsPerPage,
-            revenueBreakdownPage * revenueBreakdownRowsPerPage
+            revenueBreakdownPage * revenueBreakdownRowsPerPage,
           )}
           <DataTable
             columns={revenueBreakdownColumns}
@@ -1632,30 +1640,22 @@
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {#each paymentsKpiCards as kpi}
-          <div class="bg-card border border-border rounded-lg p-6">
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-sm text-muted-foreground">{kpi.label}</span>
-              <button
-                type="button"
-                class="p-1 hover:bg-muted rounded transition-colors"
-                aria-label="More options"
-              >
-                <Icon
-                  iconName="icon/settings"
-                  size={20}
-                  class="text-muted-foreground"
-                />
-              </button>
-            </div>
-            <p class="text-3xl font-bold text-foreground mb-4">{kpi.value}</p>
+          <div
+            class="bg-card border border-border rounded-lg p-6 flex items-center gap-4"
+          >
             <div
-              class="{kpi.iconColor} w-12 h-12 rounded-lg flex items-center justify-center"
+              class="{kpi.iconColor} w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
             >
               <Icon
                 iconName={kpi.icon as any}
-                size={24}
+                size={32}
                 class={kpi.textColor}
               />
+            </div>
+
+            <div class="flex flex-col">
+              <span class="text-muted-foreground font-medium">{kpi.label}</span>
+              <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
             </div>
           </div>
         {/each}
@@ -1757,7 +1757,7 @@
         {#if true}
           {@const paginatedPaymentsData = paymentsReportData.slice(
             (paymentsPage - 1) * paymentsRowsPerPage,
-            paymentsPage * paymentsRowsPerPage
+            paymentsPage * paymentsRowsPerPage,
           )}
           <DataTable
             columns={paymentsColumns}
@@ -1781,10 +1781,9 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#each stockMovementKpiCards as kpi}
           <div class="bg-card border border-border rounded-lg p-6">
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-sm text-muted-foreground">{kpi.label}</span>
+            <div class="flex flex-row gap-2 mb-4">
               <div
-                class="{kpi.iconColor} w-12 h-12 rounded-lg flex items-center justify-center"
+                class="{kpi.iconColor} w-8 h-8 rounded-lg flex items-center justify-center"
               >
                 <Icon
                   iconName={kpi.icon as any}
@@ -1792,15 +1791,23 @@
                   class={kpi.textColor}
                 />
               </div>
+              <span
+                class="flex items-center justify-center text-sm text-muted-foreground"
+                >{kpi.label}</span
+              >
             </div>
             <p class="text-3xl font-bold text-foreground mb-2">{kpi.value}</p>
-            <div
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-            >
-              <Icon iconName="icon/arrow-up" size={12} />
-              <span>{kpi.change}%</span>
+            <div class="flex flex-row gap-4">
+              <div
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+              >
+                <Icon iconName="icon/arrow-up" size={12} />
+                <span>{kpi.change}%</span>
+              </div>
+              <p class="text-xs text-muted-foreground mt-1">
+                {kpi.changeLabel}
+              </p>
             </div>
-            <p class="text-xs text-muted-foreground mt-1">{kpi.changeLabel}</p>
           </div>
         {/each}
       </div>
@@ -1880,7 +1887,7 @@
         {#if true}
           {@const paginatedStockMovementData = stockMovementData.slice(
             (stockMovementPage - 1) * stockMovementRowsPerPage,
-            stockMovementPage * stockMovementRowsPerPage
+            stockMovementPage * stockMovementRowsPerPage,
           )}
           <DataTable
             columns={stockMovementColumns}
@@ -1917,39 +1924,43 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#each lowStockKpiCards as kpi}
           <div class="bg-card border border-border rounded-lg p-6">
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-sm text-muted-foreground">{kpi.label}</span>
-              <button
-                type="button"
-                class="p-1 hover:bg-muted rounded transition-colors"
-                aria-label="More options"
-              >
-                <Icon
-                  iconName="icon/settings"
-                  size={20}
-                  class="text-muted-foreground"
-                />
-              </button>
-            </div>
+           <div class="flex items-center justify-between mb-4">
+  <div class="flex items-center gap-3">
+    <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center">
+      <Icon
+        iconName={kpi.icon as any}
+        size={20}
+        class={kpi.textColor}
+      />
+    </div>
+    <span class="text-sm font-medium text-muted-foreground">{kpi.label}</span>
+  </div>
+
+  <button
+    type="button"
+    class="p-1 hover:bg-muted rounded transition-colors"
+    aria-label="More options"
+  >
+    <Icon
+      iconName="icon/more-vertical"
+      size={20}
+      class="text-muted-foreground"
+    />
+  </button>
+</div>
             <div class="flex items-center justify-between mb-2">
               <p class="text-3xl font-bold text-foreground">{kpi.value}</p>
-              <div
-                class="{kpi.iconColor} w-12 h-12 rounded-lg flex items-center justify-center"
-              >
-                <Icon
-                  iconName={kpi.icon as any}
-                  size={24}
-                  class={kpi.textColor}
-                />
-              </div>
             </div>
-            <div
+           <div class="flex flex-row gap-4">
+
+             <div
               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
             >
               <Icon iconName="icon/arrow-up" size={12} />
               <span>{kpi.change}%</span>
             </div>
             <p class="text-xs text-muted-foreground mt-1">{kpi.changeLabel}</p>
+           </div>
           </div>
         {/each}
       </div>
@@ -2029,7 +2040,7 @@
         {#if true}
           {@const paginatedLowStockData = lowStockData.slice(
             (lowStockPage - 1) * lowStockRowsPerPage,
-            lowStockPage * lowStockRowsPerPage
+            lowStockPage * lowStockRowsPerPage,
           )}
           <DataTable
             columns={lowStockColumns}

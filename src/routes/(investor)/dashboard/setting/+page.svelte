@@ -35,7 +35,7 @@
   }
 </script>
 
-<div class="flex-1 px-6 py-6 space-y-8">
+<div class="flex-1 px-12 py-15 space-y-8">
   <!-- Application Preferences Section -->
   <div class="space-y-6">
     <div>
@@ -50,14 +50,14 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
-            <Icon iconName="icon/sun" size={20} class="text-muted-foreground" />
+            <Icon iconName="icon/sun" size={20} class="text-[#4DA0E6]" />
           </div>
           <span class="text-sm font-medium text-foreground">Theme</span>
         </div>
         <div
-          class="flex items-center gap-1 border border-border rounded-lg p-1"
+          class="flex items-center gap-1 border border-border rounded-lg p-1 bg-[#4DA0E6]/10"
         >
           <button
             type="button"
@@ -96,12 +96,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/languages"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground">Language</span>
@@ -122,12 +122,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/bell"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground">Notifications</span>
@@ -149,12 +149,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/lock"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground">Password</span>
@@ -171,12 +171,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/shield-check"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <div>
@@ -205,19 +205,19 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/download"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground">Export Data</span>
         </div>
         <Button
           variant="outline"
-          class="border-info text-info hover:bg-info/10"
+          class="bg-info/20 text-info hover:bg-info/30"
           onclick={handleExportData}
         >
           Download My Data
@@ -228,12 +228,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/trash"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground"
@@ -241,7 +241,7 @@
           >
         </div>
         <Button
-          class="bg-red-600 text-white hover:bg-red-700"
+          class="bg-red-600/10 text-red-600 hover:bg-red-700"
           onclick={handleDeleteAccount}
         >
           Delete Account
@@ -262,12 +262,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/help-circle"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground">Help & Support</span
@@ -275,7 +275,7 @@
         </div>
         <Button
           variant="outline"
-          class="border-info text-info hover:bg-info/10"
+          class="bg-info/20 text-info hover:bg-info/30"
           onclick={handleOpenHelpCenter}
         >
           Open help center
@@ -286,12 +286,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
+            class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center"
           >
             <Icon
               iconName="icon/send"
               size={20}
-              class="text-muted-foreground"
+              class="text-[#4DA0E6]"
             />
           </div>
           <span class="text-sm font-medium text-foreground"
@@ -300,7 +300,7 @@
         </div>
         <Button
           variant="outline"
-          class="border-info text-info hover:bg-info/10"
+          class="bg-info/20 text-info hover:bg-info/30"
           onclick={handleContactSupport}
         >
           Send message

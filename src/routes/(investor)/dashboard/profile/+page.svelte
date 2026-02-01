@@ -51,7 +51,7 @@
       </div>
       <Button
         variant="outline"
-        class="border-info text-info hover:bg-info/10"
+        class="border-info bg-[#4DA0E6] text-white hover:bg-info/10"
         onclick={handleChangePhoto}
       >
         Change Photo
@@ -152,7 +152,7 @@
     <!-- Save Change Button -->
     <div class="flex justify-end mt-6">
       <Button
-        class="bg-info text-info-foreground hover:bg-info/90"
+        class="bg-[#4DA0E6] text-white hover:bg-info/90"
         onclick={handleSaveChange}
       >
         Save Change
