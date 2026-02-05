@@ -1,5 +1,7 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import CreateOrderModal from "../../../../../lib/components/merchant/CreateOrderModal.svelte";
+  import OrderDetailsModal from "../../../../../lib/components/merchant/OrderDetailsModal.svelte";
 
   const orders = [
     { id: "PT001", customer: "Stan Gaunter", items: 4, amount: "$3000", paymentStatus: "Paid", date: "24 Dec 2024", orderStatus: "Completed" },
@@ -12,8 +14,27 @@
     { id: "PT008", customer: "Stan Gaunter", items: 5, amount: "$6480", paymentStatus: "Partially Paid", date: "03 Oct 2024", orderStatus: "In Progress" },
     { id: "PT009", customer: "Stan Gaunter", items: 7, amount: "$2000", paymentStatus: "Not Paid", date: "14 Oct 2024", orderStatus: "Completed" },
     { id: "PT010", customer: "Stan Gaunter", items: 1, amount: "$900", paymentStatus: "Partially Paid", date: "03 Oct 2024", orderStatus: "In Progress" },
-  ];
+  ]; 
 
+
+  let showCreateModal = false;
+  let showDetailsModal = false;
+  type Order = {
+    id: string;
+    customer: string;
+    items: number;
+    amount: string;
+    paymentStatus: string;
+    date: string;
+    orderStatus: string;
+  };
+
+  let selectedOrder: Order | null = null;
+
+  function openOrderDetails(order: any) {
+    selectedOrder = order;
+    showDetailsModal = true;
+  }
 
   const getPaymentStatusClass = (status: string) => {
     switch (status) {
@@ -24,14 +45,13 @@
     }
   };
 
-
   const getOrderStatusClass = (status: string) => {
     switch (status) {
       case "Completed": return "bg-green-500 text-white";
       case "In Progress": return "bg-orange-400 text-white";
       default: return "bg-gray-400 text-white";
     }
-  };
+  }; 
 </script>
 
 <div class="p-6 space-y-6">
@@ -42,7 +62,10 @@
     <button class="p-2 border border-border rounded bg-card text-muted-foreground hover:bg-muted">
       <Icon iconName="icon/printer" size={18} />
     </button>
-    <button class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity">
+    <button 
+      on:click={() => showCreateModal = true}
+      class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity"
+    >
       <Icon iconName="icon/plus" size={18} />
       <span>New Order</span>
     </button>
@@ -80,9 +103,7 @@
         <option>All</option>
       </select>
     </div>
-  </div>
-
-  <div class="bg-card border border-border rounded-lg overflow-hidden">
+  </div> <div class="bg-card border border-border rounded-lg overflow-hidden">
     <div class="p-4 border-b border-border">
       <h3 class="font-semibold text-foreground">Orders</h3>
     </div>
@@ -100,8 +121,7 @@
             <th class="px-4 py-4 font-medium uppercase tracking-wider">Order Status <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
             <th class="px-4 py-4 text-right font-medium uppercase tracking-wider">Actions</th>
           </tr>
-        </thead>
-        <tbody class="divide-y divide-border">
+        </thead> <tbody class="divide-y divide-border">
           {#each orders as order}
             <tr class="hover:bg-muted/20 transition-colors">
               <td class="px-6 py-4 text-center"><input type="checkbox" class="rounded border-border" /></td>
@@ -121,14 +141,16 @@
                 </span>
               </td>
               <td class="px-4 py-4 text-right">
-                <button class="p-1.5 hover:bg-muted rounded text-muted-foreground">
+                <button 
+                  on:click={() => openOrderDetails(order)}
+                  class="p-1.5 hover:bg-muted rounded text-muted-foreground"
+                >
                   <Icon iconName="icon/eye" size={16} />
                 </button>
               </td>
             </tr>
           {/each}
-        </tbody>
-      </table>
+        </tbody> </table>
     </div>
 
     <div class="p-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
@@ -149,6 +171,16 @@
         <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">15</button>
         <button class="p-1 border border-border rounded hover:bg-muted"><Icon iconName="icon/chevron-right" size={12} /></button>
       </div>
-    </div>
-  </div>
+    </div> </div>
 </div>
+
+<CreateOrderModal 
+  isOpen={showCreateModal} 
+  onClose={() => showCreateModal = false} 
+/>
+
+<OrderDetailsModal 
+  isOpen={showDetailsModal} 
+  order={selectedOrder} 
+  onClose={() => { showDetailsModal = false; selectedOrder = null; }} 
+/>

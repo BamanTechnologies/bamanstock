@@ -1,5 +1,23 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  // Import the modal components
+  import AddPaymentModal from "../../../../../lib/components/merchant/AddPaymentModal.svelte";
+  import PaymentDetailModal from "../../../../../lib/components/merchant/PaymentDetailModal.svelte";
+
+  // State management for modals 
+  let isAddModalOpen = false;
+  let isDetailModalOpen = false;
+  type Payment = {
+    orderId: string;
+    paymentId: string;
+    customer: string;
+    amount: string;
+    remaining: string;
+    status: string;
+    date: string;
+  };
+
+  let selectedPayment: Payment | null = null;
 
   const paymentKpis = [
     {
@@ -61,6 +79,12 @@
       default: return "bg-muted text-muted-foreground";
     }
   };
+
+  // Function to handle viewing payment details [cite: 30, 31]
+  const viewDetails = (payment: any) => {
+    selectedPayment = payment;
+    isDetailModalOpen = true;
+  };
 </script>
 
 <div class="p-6 space-y-6">
@@ -76,7 +100,10 @@
       <button class="p-2 border border-border rounded bg-card text-muted-foreground hover:bg-muted">
         <Icon iconName="icon/printer" size={18} />
       </button>
-      <button class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90">
+      <button 
+        on:click={() => isAddModalOpen = true}
+        class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90"
+      >
         <Icon iconName="icon/plus" size={18} />
         <span>Add Payment</span>
       </button>
@@ -146,7 +173,12 @@
               </td>
               <td class="px-4 py-4 text-muted-foreground whitespace-nowrap">{row.date}</td>
               <td class="px-4 py-4 text-right flex justify-end gap-1">
-                <button class="p-1.5 hover:bg-muted rounded text-muted-foreground"><Icon iconName="icon/eye" size={14} /></button>
+                <button 
+                  on:click={() => viewDetails(row)}
+                  class="p-1.5 hover:bg-muted rounded text-muted-foreground"
+                >
+                  <Icon iconName="icon/eye" size={14} />
+                </button>
                 <button class="p-1.5 hover:bg-muted rounded text-muted-foreground"><Icon iconName="icon/download" size={14} /></button>
                 <button class="p-1.5 hover:bg-muted rounded text-muted-foreground"><Icon iconName="icon/edit" size={14} /></button>
               </td>
@@ -177,3 +209,14 @@
     </div>
   </div>
 </div>
+
+<AddPaymentModal 
+  isOpen={isAddModalOpen} 
+  onClose={() => isAddModalOpen = false} 
+/>
+
+<PaymentDetailModal 
+  isOpen={isDetailModalOpen} 
+  payment={selectedPayment} 
+  onClose={() => isDetailModalOpen = false} 
+/>
