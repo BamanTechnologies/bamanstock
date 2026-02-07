@@ -130,29 +130,35 @@
               <img src="/path-to-merchant-avatar.png" alt="Profile" class="w-full h-full object-cover" />
             </button>
 
-            {#if profileDropdownOpen}
-              <div
-                bind:this={profileDropdownRef}
-                class="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-lg border border-border z-50"
-              >
-                <div class="p-4 border-b border-border">
-                  <p class="text-sm font-semibold">Alex Merchant</p>
-                  <p class="text-xs text-muted-foreground">alex@example.com</p>
-                </div>
-                <button 
-                  class="w-full px-4 py-2 text-left text-sm hover:bg-muted"
-                  onclick={() => goto("/merchant/dashboard/setting")}
-                >
-                  Settings
-                </button>
-                <button 
-                  class="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-muted"
-                  onclick={() => goto("/logout")}
-                >
-                  Log out
-                </button>
-              </div>
-            {/if}
+        {#if profileDropdownOpen}
+  <div
+    bind:this={profileDropdownRef}
+    class="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-lg border border-border z-50"
+  >
+    <div class="p-4 border-b border-border">
+      <p class="text-sm font-semibold">Alex Merchant</p>
+      <p class="text-xs text-muted-foreground">alex@example.com</p>
+    </div>
+    <button 
+      class="w-full px-4 py-2 text-left text-sm hover:bg-muted"
+      onclick={() => { goto("/merchant/dashboard/profile"); closeProfileDropdown(); }}
+    >
+      View Profile
+    </button>
+    <button 
+      class="w-full px-4 py-2 text-left text-sm hover:bg-muted"
+      onclick={() => { goto("/merchant/dashboard/setting"); closeProfileDropdown(); }}
+    >
+      Settings
+    </button>
+    <button 
+      class="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-muted"
+      onclick={() => goto("/logout")}
+    >
+      Log out
+    </button>
+  </div>
+{/if}
           </div>
         </div>
       </header>
