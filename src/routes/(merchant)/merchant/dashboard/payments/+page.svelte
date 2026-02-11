@@ -102,7 +102,7 @@
       </button>
       <button 
         on:click={() => isAddModalOpen = true}
-        class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90"
+        class="bg-[#4DA0E6] text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90"
       >
         <Icon iconName="icon/plus" size={18} />
         <span>Add Payment</span>
@@ -167,7 +167,7 @@
               <td class="px-4 py-4 text-foreground font-medium">{row.amount}</td>
               <td class="px-4 py-4 text-muted-foreground">{row.remaining}</td>
               <td class="px-4 py-4">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap {getStatusStyles(row.status)}">
+                <span class="px-2 py-1.5 rounded-sm text-[10px] font-medium whitespace-nowrap {getStatusStyles(row.status)}">
                   • {row.status}
                 </span>
               </td>
@@ -196,25 +196,39 @@
         </select>
         <span>Entries</span>
       </div>
-      <div class="flex items-center gap-1">
-        <button class="p-1 border border-border rounded hover:bg-muted"><Icon iconName="icon/chevron-left" size={12} /></button>
-        {#each [1, 2, 3] as page}
-          <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">{page}</button>
-        {/each}
-        <button class="w-6 h-6 flex items-center justify-center rounded bg-info text-white border-info">4</button>
-        <span class="px-1">...</span>
-        <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">15</button>
-        <button class="p-1 border border-border rounded hover:bg-muted"><Icon iconName="icon/chevron-right" size={12} /></button>
-      </div>
+ <div class="flex items-center gap-1">
+    <button class="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:bg-muted">
+        <Icon iconName="icon/chevron-left" size={12} />
+    </button>
+
+    {#each [1, 2, 3] as page}
+        <button class="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted">
+            {page}
+        </button>
+    {/each}
+
+    <button class="w-6 h-6 flex items-center justify-center rounded-full bg-[#4DA0E6] text-white border-[#4DA0E6]">
+        4
+    </button>
+
+    <span class="px-1">...</span>
+
+    <button class="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted">
+        15
+    </button>
+
+    <button class="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:bg-muted">
+        <Icon iconName="icon/chevron-right" size={12} />
+    </button>
+</div>
     </div>
   </div>
 </div>
 
 <AddPaymentModal 
   isOpen={isAddModalOpen} 
-  onClose={() => isAddModalOpen = false} 
+  on:close={() => isAddModalOpen = false} 
 />
-
 <PaymentDetailModal 
   isOpen={isDetailModalOpen} 
   payment={selectedPayment} 

@@ -99,7 +99,7 @@
     <div class="flex items-center gap-3">
       <button class="p-2 border border-border rounded bg-card text-red-500 hover:bg-muted"><Icon iconName="icon/file-text" size={18} /></button>
       <button class="p-2 border border-border rounded bg-card text-muted-foreground hover:bg-muted"><Icon iconName="icon/printer" size={18} /></button>
-      <button class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90">
+      <button class="bg-[#4DA0E6] text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90">
         <Icon iconName="icon/plus" size={18} />
         <span>Add Payment</span>
       </button>
@@ -170,7 +170,7 @@
               <td class="px-4 py-4 text-muted-foreground">{row.issueDate}</td>
               <td class="px-4 py-4 text-muted-foreground whitespace-nowrap">{row.dueDate}</td>
               <td class="px-4 py-4">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap {getStatusStyles(row.status)}">
+                <span class="px-2 py-1.5 rounded-sm text-[10px] font-medium whitespace-nowrap {getStatusStyles(row.status)}">
                   • {row.status}
                 </span>
               </td>

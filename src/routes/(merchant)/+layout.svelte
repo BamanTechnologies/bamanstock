@@ -39,7 +39,7 @@
     { title: "Stocks", icon: "icon/box", href: "/merchant/dashboard/stocks" },
     { title: "Credit", icon: "icon/credit-card", href: "/merchant/dashboard/credit" },
     { title: "Reports", icon: "icon/bar-chart", href: "/merchant/dashboard/reports" },
-    { title: "Setting", icon: "icon/dashboard/setting", href: "/merchant/dashboard/setting" },
+    { title: "Setting", icon: "icon/settings", href: "/merchant/dashboard/setting" },
   ];
 
   const pageTitle = $derived.by(() => {
@@ -116,53 +116,60 @@
       <header class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6">
         <SidebarTrigger class="-ml-1" />
         <h1 class="text-2xl font-semibold text-foreground">{pageTitle}</h1>
+        
         <div class="flex-1"></div>
-        <div class="flex items-center gap-4">
-          <Icon iconName="icon/bell" size={20} class="text-muted-foreground cursor-pointer" />
-          <Icon iconName="icon/settings" size={20} class="text-muted-foreground cursor-pointer" />
+
+        <div class="flex items-center gap-6">
+          <Icon iconName="icon/bell" size={22} class="text-muted-foreground cursor-pointer hover:text-foreground" />
+          <Icon iconName="icon/settings" size={22} class="text-muted-foreground cursor-pointer hover:text-foreground" />
           
+          <div class="w-7 h-4 bg-[#5D20F3] rounded-[2px] cursor-pointer shadow-sm"></div>
+
           <div class="relative" bind:this={profileButtonRef}>
             <button
               type="button"
               onclick={toggleProfileDropdown}
-              class="w-8 h-8 rounded-full overflow-hidden border border-border"
+              class="w-9 h-9 rounded-full bg-[#F1F5F9] border border-border flex items-center justify-center hover:bg-slate-200 transition-colors"
             >
-              <img src="/path-to-merchant-avatar.png" alt="Profile" class="w-full h-full object-cover" />
+              <Icon iconName="icon/user" size={18} class="text-slate-600" />
             </button>
 
-        {#if profileDropdownOpen}
-  <div
-    bind:this={profileDropdownRef}
-    class="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-lg border border-border z-50"
-  >
-    <div class="p-4 border-b border-border">
-      <p class="text-sm font-semibold">Alex Merchant</p>
-      <p class="text-xs text-muted-foreground">alex@example.com</p>
-    </div>
-    <button 
-      class="w-full px-4 py-2 text-left text-sm hover:bg-muted"
-      onclick={() => { goto("/merchant/dashboard/profile"); closeProfileDropdown(); }}
-    >
-      View Profile
-    </button>
-    <button 
-      class="w-full px-4 py-2 text-left text-sm hover:bg-muted"
-      onclick={() => { goto("/merchant/dashboard/setting"); closeProfileDropdown(); }}
-    >
-      Settings
-    </button>
-    <button 
-      class="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-muted"
-      onclick={() => goto("/logout")}
-    >
-      Log out
-    </button>
-  </div>
-{/if}
+            {#if profileDropdownOpen}
+              <div
+                bind:this={profileDropdownRef}
+                class="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-xl border border-border z-50 overflow-hidden"
+              >
+                <div class="p-4 border-b border-border bg-slate-50/50">
+                  <p class="text-sm font-semibold text-foreground">Alex Merchant</p>
+                  <p class="text-xs text-muted-foreground">alex@example.com</p>
+                </div>
+                <div class="py-1">
+                  <button 
+                    class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
+                    onclick={() => { goto("/merchant/dashboard/profile"); closeProfileDropdown(); }}
+                  >
+                    View Profile
+                  </button>
+                  <button 
+                    class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
+                    onclick={() => { goto("/merchant/dashboard/setting"); closeProfileDropdown(); }}
+                  >
+                    Settings
+                  </button>
+                  <button 
+                    class="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-red-50 transition-colors"
+                    onclick={() => goto("/logout")}
+                  >
+                    Log out
+                  </button>
+                </div>
+              </div>
+            {/if}
           </div>
         </div>
       </header>
-      <main class="flex flex-1 flex-col overflow-auto">
+      
+      <main class="flex flex-1 flex-col overflow-auto bg-slate-50/30">
         {@render children()}
       </main>
     </SidebarInset>

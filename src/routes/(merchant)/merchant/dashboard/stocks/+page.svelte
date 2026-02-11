@@ -60,13 +60,13 @@
     <div class="flex gap-3">
       <button 
         on:click={() => isRestockModalOpen = true} 
-        class="border border-info text-info px-4 py-2 rounded text-sm hover:bg-blue-50">
+        class="border border-[#4DA0E6] text-[#4DA0E6] px-4 py-2 rounded text-sm hover:bg-blue-50">
         Restock Item
       </button>
 
       <button 
         on:click={() => isAddModalOpen = true} 
-        class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 text-sm">
+        class="bg-[#4DA0E6] text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 text-sm">
         <Icon iconName="icon/plus" size={18} />
         <span>Add Stock</span> 
       </button>
@@ -114,14 +114,14 @@
               <td class="px-4 py-4">${item.price.toLocaleString()}</td>
               <td class="px-4 py-4">{item.qty}</td> 
               <td class="px-4 py-4">
-                <span class="px-3 py-1 rounded-full text-[10px] font-bold {getStatusClass(item.status)}">
+                <span class="px-3 py-1.5 rounded-sm text-[10px] font-bold {getStatusClass(item.status)}">
                   {item.status}
                 </span> 
               </td>
               <td class="px-4 py-4 text-right flex justify-end gap-2">
                 <button class="p-1.5 border border-border rounded hover:bg-muted">
                   <Icon iconName="icon/edit" size={14} />
-                </button>
+                </button> 
                 <button class="p-1.5 border border-border rounded hover:bg-muted">
                   <Icon iconName="icon/refresh-cw" size={14} />
                 </button>

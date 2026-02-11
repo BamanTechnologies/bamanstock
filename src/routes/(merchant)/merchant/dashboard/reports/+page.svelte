@@ -1,9 +1,43 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import GenerateReportModal from "../../../../../lib/components/merchant/GenerateReportModal.svelte";
+  import ReportPreviewModal from "../../../../../lib/components/merchant/ReportPreviewModal.svelte";
 
+  let activeTab = "Credit & Payment";
 
-  let activeTab = "Sales"; 
+  let showGenerateModal = false;
+  let showPreviewModal = false;
 
+  const handleOpenGenerate = () => {
+    showGenerateModal = true;
+  };
+
+  const handleOpenPreview = () => {
+    showGenerateModal = false; // Hide first modal
+    showPreviewModal = true;
+  };
+
+  // --- SALES DATA ---
+  const salesStats = [
+    { label: "Total Revenue", value: "$40,565,000", growth: "25.5%", icon: "icon/package", color: "green" },
+    { label: "Total Orders", value: "8690", growth: "12.2%", icon: "icon/alert-circle", color: "yellow" },
+    { label: "Total Transaction", value: "4558", growth: "16.3%", icon: "icon/x-circle", color: "red" }
+  ] as const;
+
+  const salesData = [
+    { id: "PT001", item: "Lenovo IdeaPad 3", customer: "Stan Gaunter", amount: "$3000", status: "Paid", date: "24 Dec 2024" },
+    { id: "PT002", item: "Beats Pro", customer: "Stan Gaunter", amount: "$1600", status: "Partially Paid", date: "10 Dec 2024" },
+    { id: "PT003", item: "Nike Jordan", customer: "Stan Gaunter", amount: "$880", status: "Not Paid", date: "27 Nov 2024" },
+    { id: "PT004", item: "Apple Series 5 Watch", customer: "Stan Gaunter", amount: "$1200", status: "Paid", date: "18 Nov 2024" },
+    { id: "PT005", item: "Amazon Echo Dot", customer: "Stan Gaunter", amount: "$400", status: "Partially Paid", date: "06 Nov 2024" },
+    { id: "PT006", item: "Sanford Chair Sofa", customer: "Stan Gaunter", amount: "$2240", status: "Not Paid", date: "25 Oct 2024" },
+    { id: "PT007", item: "Red Premium Satchel", customer: "Stan Gaunter", amount: "$900", status: "Paid", date: "14 Oct 2024" },
+    { id: "PT008", item: "Iphone 14 Pro", customer: "Stan Gaunter", amount: "$6480", status: "Partially Paid", date: "03 Oct 2024" },
+    { id: "PT009", item: "Gaming Chair", customer: "Stan Gaunter", amount: "$2000", status: "Not Paid", date: "14 Oct 2024" },
+    { id: "PT010", item: "Borealis Backpack", customer: "Stan Gaunter", amount: "$900", status: "Partially Paid", date: "03 Oct 2024" },
+  ];
+
+  // --- STOCK DATA ---
   const stockData = [
     { name: "Lenovo IdeaPad 3", category: "Computers", location: "Branch #2", sold: "05", remaining: 100, status: "Adequate" },
     { name: "Beats Pro", category: "Electronics", location: "Branch #2", sold: "10", remaining: 140, status: "Low" },
@@ -17,25 +51,34 @@
     { name: "Borealis Backpack", category: "Bags", location: "Branch #2", sold: "20", remaining: 550, status: "Low" },
   ];
 
+const creditStats = [
+  { label: "Total Credit Issued", value: "$54,000", growth: "-19%", color: "green", icon: "icon/package" },
+  { label: "Outstanding Credit (Unpaid)", value: "$45,600", growth: "+35%", color: "yellow", icon: "icon/alert-circle" },
+  { label: "Overdue Credit", value: "$12,000", growth: "-20%", color: "red", icon: "icon/x-circle" },
+  { label: "Collected This Month", value: "$6700", growth: "+41%", color: "info", icon: "icon/check-circle" }
+] as const;
 
-  const salesStats = [
-    { label: "Total Revenue", value: "$40,565,000", growth: "25.5%", icon: "icon/package", color: "green" },
-    { label: "Total Orders", value: "8690", growth: "12.2%", icon: "icon/alert-circle", color: "yellow" },
-    { label: "Total Transaction", value: "4558", growth: "16.3%", icon: "icon/x-circle", color: "red" }
-  ] as const;
+  const creditTableData = [
+    { id: "PT001", customer: "Stan Gaunter", credit: "$3000", paid: "$3000", balance: "$0", issue: "24 Dec 2024", due: "24 Dec 2024", status: "Paid" },
+    { id: "PT002", customer: "Stan Gaunter", credit: "$1600", paid: "$1600", balance: "$1600", issue: "10 Dec 2024", due: "10 Dec 2024", status: "Partially Paid" },
+    { id: "PT003", customer: "Stan Gaunter", credit: "$880", paid: "$880", balance: "$880", issue: "27 Nov 2024", due: "27 Nov 2024", status: "Not Paid" },
+    { id: "PT004", customer: "Stan Gaunter", credit: "$1200", paid: "$1200", balance: "$0", issue: "18 Nov 2024", due: "18 Nov 2024", status: "Paid" },
+    { id: "PT005", customer: "Stan Gaunter", credit: "$400", paid: "$400", balance: "$40", issue: "06 Nov 2024", due: "06 Nov 2024", status: "Partially Paid" },
+    { id: "PT006", customer: "Stan Gaunter", credit: "$2240", paid: "$2240", balance: "$2240", issue: "25 Oct 2024", due: "25 Oct 2024", status: "Not Paid" },
+    { id: "PT007", customer: "Stan Gaunter", credit: "$900", paid: "$900", balance: "$0", issue: "14 Oct 2024", due: "14 Oct 2024", status: "Paid" },
+    { id: "PT008", customer: "Stan Gaunter", credit: "$6480", paid: "$6480", balance: "$480", issue: "03 Oct 2024", due: "03 Oct 2024", status: "Partially Paid" },
+    { id: "PT009", customer: "Stan Gaunter", credit: "$2000", paid: "$2000", balance: "$2000", issue: "14 Oct 2024", due: "14 Oct 2024", status: "Not Paid" },
+    { id: "PT010", customer: "Stan Gaunter", credit: "$900", paid: "$900", balance: "$300", issue: "03 Oct 2024", due: "03 Oct 2024", status: "Partially Paid" },
+  ];
 
-
-  const salesData = [
-    { id: "PT001", item: "Lenovo IdeaPad 3", customer: "Stan Gaunter", amount: "$3000", status: "Paid", date: "24 Dec 2024" },
-    { id: "PT002", item: "Beats Pro", customer: "Stan Gaunter", amount: "$1600", status: "Partially Paid", date: "10 Dec 2024" },
-    { id: "PT003", item: "Nike Jordan", customer: "Stan Gaunter", amount: "$880", status: "Not Paid", date: "27 Nov 2024" },
-    { id: "PT004", item: "Apple Series 5 Watch", customer: "Stan Gaunter", amount: "$1200", status: "Paid", date: "18 Nov 2024" },
-    { id: "PT005", item: "Amazon Echo Dot", customer: "Stan Gaunter", amount: "$400", status: "Partially Paid", date: "06 Nov 2024" },
-    { id: "PT006", item: "Sanford Chair Sofa", customer: "Stan Gaunter", amount: "$2240", status: "Not Paid", date: "25 Oct 2024" },
-    { id: "PT007", item: "Red Premium Satchel", customer: "Stan Gaunter", amount: "$900", status: "Paid", date: "14 Oct 2024" },
-    { id: "PT008", item: "Iphone 14 Pro", customer: "Stan Gaunter", amount: "$6480", status: "Partially Paid", date: "03 Oct 2024" },
-    { id: "PT009", item: "Gaming Chair", customer: "Stan Gaunter", amount: "$2000", status: "Not Paid", date: "14 Oct 2024" },
-    { id: "PT010", item: "Borealis Backpack", customer: "Stan Gaunter", amount: "$900", status: "Partially Paid", date: "03 Oct 2024" },
+  const distribution = [
+    { label: "Electronics", value: 60 },
+    { label: "Clothing", value: 50 },
+    { label: "Home", value: 65 },
+    { label: "Beauty", value: 40 },
+    { label: "Sports", value: 85 },
+    { label: "Toys", value: 90 },
+    { label: "Furniture", value: 82 },
   ];
 
   const getPaymentStatusClass = (status: string) => {
@@ -55,17 +98,6 @@
       default: return "bg-gray-400 text-white";
     }
   };
-
-
-  const distribution = [
-    { label: "Electronics", value: 60 },
-    { label: "Clothing", value: 50 },
-    { label: "Home", value: 65 },
-    { label: "Beauty", value: 40 },
-    { label: "Sports", value: 85 },
-    { label: "Toys", value: 90 },
-    { label: "Furniture", value: 82 },
-  ];
 </script>
 
 <div class="p-6 space-y-6 bg-[#F9FAFB] min-h-screen">
@@ -76,10 +108,12 @@
         <Icon iconName="icon/calendar" size={14} />
         <span>01 Jan 2024 - 07 Jan 2024</span>
       </div>
-      <button class="bg-red-500 text-white px-4 py-2 rounded text-xs flex items-center gap-2 font-medium">
-        <Icon iconName="icon/file-text" size={14} />
-        Export Report 
-      </button>
+     <button 
+  on:click={handleOpenGenerate}
+  class="bg-red-500 text-white px-4 py-2 rounded text-xs flex items-center gap-2 font-medium">
+  <Icon iconName="icon/file-text" size={14} />
+  <span>Export Report</span> 
+</button>
     </div>
   </div>
 
@@ -181,7 +215,7 @@
               <td class="px-4 py-4 text-muted-foreground text-xs">{sale.customer}</td>
               <td class="px-4 py-4 text-xs font-bold">{sale.amount}</td>
               <td class="px-4 py-4">
-                <span class="px-2 py-0.5 rounded text-[9px] font-bold {getPaymentStatusClass(sale.status)}">
+                <span class="px-2 py-1.5 rounded text-[9px] font-bold {getPaymentStatusClass(sale.status)}">
                   {sale.status}
                 </span>
               </td>
@@ -190,7 +224,6 @@
           {/each}
         </tbody>
       </table>
-      
       <div class="p-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
         <div>Row Per Page <select class="border rounded mx-2 p-1"><option>10</option></select> Entries</div>
         <div class="flex gap-1 items-center">
@@ -294,7 +327,7 @@
               <td class="px-4 py-4 text-xs">{item.sold}</td>
               <td class="px-4 py-4 text-xs">{item.remaining}</td>
               <td class="px-4 py-4">
-                <span class="px-3 py-1 rounded-full text-[10px] {getStockStatusClass(item.status)}"> 
+              <span class="px-3 py-1.5 rounded-sm text-[10px] {getStockStatusClass(item.status)}"> 
                   {item.status}
                 </span>
               </td>
@@ -303,5 +336,116 @@
         </tbody>
       </table>
     </div>
+
+  {:else if activeTab === "Credit & Payment"}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+   {#each creditStats as stat}
+  <div class="bg-white p-5 rounded-lg border border-border flex justify-between items-start">
+    <div>
+      <p class="text-xs text-muted-foreground flex items-center gap-2 font-medium">
+        <span class="p-1 bg-{stat.color === 'info' ? 'blue' : stat.color}-50 rounded text-{stat.color === 'info' ? 'blue' : stat.color}-600">
+          <Icon iconName={stat.icon} size={14} />
+        </span> 
+        {stat.label}
+      </p>
+      <h2 class="text-xl font-bold mt-2">{stat.value}</h2>
+      <div class="flex items-center gap-1 mt-2">
+        <span class="text-[10px] font-bold {stat.growth.startsWith('-') ? 'text-red-500' : 'text-green-500'}">
+            {stat.growth}
+        </span>
+        <span class="text-[10px] text-muted-foreground">vs Last Month</span>
+      </div>
+    </div>
+    <button class="text-gray-400"><Icon iconName="icon/more-vertical" size={16} /></button>
+  </div>
+{/each}
+    </div>
+
+    <div class="grid grid-cols-3 gap-6">
+        {#each ['Location', 'Category', 'Status'] as label}
+          <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-medium text-muted-foreground uppercase">{label}</label>
+              <select class="bg-white border rounded px-3 py-2 text-xs"><option>All</option></select>
+          </div>
+        {/each}
+    </div>
+
+    <div class="bg-white border border-border rounded-lg overflow-hidden">
+      <div class="p-4 flex justify-between items-center border-b border-border">
+        <h3 class="text-sm font-bold">Credit Table</h3>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded text-[10px]">
+                <Icon iconName="icon/calendar" size={12} />
+                <span>01 Jan 2024 - 07 Jan 2024</span>
+            </div>
+            <select class="border rounded px-2 py-1.5 text-[10px] bg-white"><option>Customer</option></select>
+            <select class="border rounded px-2 py-1.5 text-[10px] bg-white"><option>Status</option></select>
+            <div class="flex items-center gap-2 pl-2 border-l">
+                <span class="text-[10px] text-muted-foreground font-medium">Overdue</span>
+                <div class="w-8 h-4 bg-slate-200 rounded-full relative">
+                    <div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow-sm"></div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-left text-[10px] uppercase text-muted-foreground"> 
+          <tr>
+            <th class="px-6 py-4 w-10"><input type="checkbox" /></th>
+            <th class="px-4 py-4">Order ID ⇅</th>
+            <th class="px-4 py-4">Customer Name</th>
+            <th class="px-4 py-4 text-right">Credit Amount ⇅</th>
+            <th class="px-4 py-4 text-right">Amount Paid ⇅</th>
+            <th class="px-4 py-4 text-right">Balance ⇅</th>
+            <th class="px-4 py-4">Issue Date ⇅</th>
+            <th class="px-4 py-4">Due Date ⇅</th>
+            <th class="px-4 py-4">Payment Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          {#each creditTableData as row}
+            <tr class="hover:bg-gray-50/50">
+              <td class="px-6 py-4"><input type="checkbox" /></td> 
+              <td class="px-4 py-4 text-xs font-medium text-muted-foreground">{row.id}</td>
+              <td class="px-4 py-4 text-xs font-medium">{row.customer}</td>
+              <td class="px-4 py-4 text-xs text-right font-medium">{row.credit}</td>
+              <td class="px-4 py-4 text-xs text-right font-medium">{row.paid}</td>
+              <td class="px-4 py-4 text-xs text-right font-bold">{row.balance}</td>
+              <td class="px-4 py-4 text-xs text-muted-foreground">{row.issue}</td>
+              <td class="px-4 py-4 text-xs text-muted-foreground">{row.due}</td>
+            <td class="px-4 py-4">
+  <span class="px-2 py-1.5 rounded text-[9px] font-bold {getPaymentStatusClass(row.status)}">
+    {row.status}
+  </span>
+</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+      <div class="p-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
+        <div>Row Per Page <select class="border rounded mx-2 p-1"><option>10</option></select> Entries</div>
+        <div class="flex gap-1 items-center">
+            <button class="px-2 py-1">{"<"}</button>
+            <button class="px-2 py-1">1</button>
+            <button class="px-2 py-1">2</button>
+            <button class="px-2 py-1">3</button>
+            <button class="px-2 py-1 bg-info text-white rounded-full px-3">4</button>
+            <span class="px-1">...</span>
+            <button class="px-2 py-1">15</button>
+            <button class="px-2 py-1">{">"}</button>
+        </div>
+      </div>
+    </div>
   {/if}
+
+  <GenerateReportModal 
+  show={showGenerateModal} 
+  on:close={() => showGenerateModal = false}
+  on:preview={handleOpenPreview}
+/>
+
+<ReportPreviewModal 
+  show={showPreviewModal} 
+  on:close={() => showPreviewModal = false}
+/>
 </div>

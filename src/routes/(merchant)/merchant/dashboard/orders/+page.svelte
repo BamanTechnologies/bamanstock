@@ -64,7 +64,7 @@
     </button>
     <button 
       on:click={() => showCreateModal = true}
-      class="bg-info text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity"
+      class="bg-[#4DA0E6] text-white px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity"
     >
       <Icon iconName="icon/plus" size={18} />
       <span>New Order</span>
@@ -109,17 +109,17 @@
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="bg-muted/30">
+        <thead class="bg-muted">
           <tr class="text-left text-xs text-muted-foreground border-b border-border">
-            <th class="px-6 py-4 w-10 text-center"><input type="checkbox" class="rounded border-border" /></th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Order ID <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Customer Name</th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Items <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Total Amount <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Payment Status <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Date <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
-            <th class="px-4 py-4 font-medium uppercase tracking-wider">Order Status <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
-            <th class="px-4 py-4 text-right font-medium uppercase tracking-wider">Actions</th>
+            <th class="px-6 py-2 w-10 text-center"><input type="checkbox" class="rounded border-border" /></th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Order ID <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Customer Name</th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Items <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Total Amount <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Payment Status <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Date <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
+            <th class="px-4 py-2 font-medium uppercase tracking-wider">Order Status <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>
+            
           </tr>
         </thead> <tbody class="divide-y divide-border">
           {#each orders as order}
@@ -130,13 +130,13 @@
               <td class="px-4 py-4 text-muted-foreground">{order.items}</td>
               <td class="px-4 py-4 text-foreground font-medium">{order.amount}</td>
               <td class="px-4 py-4">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold border {getPaymentStatusClass(order.paymentStatus)}">
+                <span class="px-2.5 py-1.5 rounded-sm text-[10px] font-semibold border {getPaymentStatusClass(order.paymentStatus)}">
                   • {order.paymentStatus}
                 </span>
               </td>
               <td class="px-4 py-4 text-muted-foreground">{order.date}</td>
               <td class="px-4 py-4">
-                <span class="px-3 py-1 rounded-full text-[10px] font-medium {getOrderStatusClass(order.orderStatus)}">
+                <span class="px-3 py-1.5 rounded-sm text-[10px] font-medium {getOrderStatusClass(order.orderStatus)}">
                   • {order.orderStatus}
                 </span>
               </td>
@@ -161,16 +161,25 @@
         </select>
         <span>Entries</span>
       </div>
-      <div class="flex items-center gap-1">
-        <button class="p-1 border border-border rounded hover:bg-muted disabled:opacity-50"><Icon iconName="icon/chevron-left" size={12} /></button>
-        <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">1</button>
-        <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">2</button>
-        <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">3</button>
-        <button class="w-6 h-6 flex items-center justify-center rounded bg-info text-white border-info">4</button>
-        <span class="px-1">...</span>
-        <button class="w-6 h-6 flex items-center justify-center rounded border border-border hover:bg-muted">15</button>
-        <button class="p-1 border border-border rounded hover:bg-muted"><Icon iconName="icon/chevron-right" size={12} /></button>
-      </div>
+ <div class="flex items-center gap-2">
+  <button class="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:bg-muted disabled:opacity-50">
+    <Icon iconName="icon/chevron-left" size={12} />
+  </button>
+
+  <button class="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted">1</button>
+  <button class="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted">2</button>
+  <button class="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted">3</button>
+  
+  <button class="w-6 h-6 flex items-center justify-center rounded-full bg-[#4DA0E6] text-white border-info">4</button>
+  
+  <span class="px-1">...</span>
+  
+  <button class="w-6 h-6 flex items-center justify-center rounded-full border border-border hover:bg-muted">15</button>
+
+  <button class="w-6 h-6 flex items-center justify-center border border-border rounded-full hover:bg-muted">
+    <Icon iconName="icon/chevron-right" size={12} />
+  </button>
+</div>
     </div> </div>
 </div>
 
