@@ -21,7 +21,7 @@
       <div class="max-w-4xl mx-auto text-center space-y-8">
         <!-- Main Headline -->
         <h1
-          class="text-5xl lg:text-6xl font-bold text-foreground leading-tight"
+          class="text-5xl text-blue-900 lg:text-6xl font-bold  leading-tight"
         >
           Manage Your Stock. Know Your Business.
         </h1>

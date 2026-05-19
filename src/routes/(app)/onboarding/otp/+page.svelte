@@ -334,7 +334,7 @@
               if (role === "investor") {
                 goto("/investor");
               } else {
-                goto("/merchant");
+                goto("/merchant/dashboard");
               }
             }}
             disabled={!isComplete}
