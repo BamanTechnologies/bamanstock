@@ -21,6 +21,8 @@
 
   let { children } = $props();
 
+  let showProfileDropdown = $state(false);
+
   // Get page title based on current route
   const pageTitle = $derived.by(() => {
     const path = $page.url.pathname;
@@ -122,9 +124,23 @@
         <header
           class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6"
         >
-          <SidebarTrigger class="-ml-1" />
-          <h1 class="text-2xl font-semibold text-foreground">{pageTitle}</h1>
+          <!-- Search bar (left) -->
+          <div class="relative w-72">
+            <input
+              type="text"
+              placeholder="Search"
+              class="w-full rounded-full border border-border pl-10 pr-4 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-border"
+            />
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+          </div>
+
           <div class="flex-1"></div>
+
+          <!-- Right icons -->
           <div class="flex items-center gap-4">
             <Icon
               iconName="icon/bell"
@@ -136,14 +152,44 @@
               size={20}
               class="text-muted-foreground cursor-pointer hover:text-foreground"
             />
-            <!-- UK Flag - add to flags when available -->
-            <div
-              class="w-6 h-4 border border-border rounded cursor-pointer bg-blue-600"
-            ></div>
-            <div
-              class="w-8 h-8 rounded-full bg-muted flex items-center justify-center cursor-pointer"
-            >
-              <Icon iconName="icon/user" size={16} />
+            <!-- UK flag emoji in circle -->
+            <div class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-base cursor-pointer overflow-hidden">
+              🇬🇧
+            </div>
+            <!-- Profile avatar + dropdown -->
+            <div class="relative">
+              <img
+                src="/Yohannes Abayneh.png"
+                alt="Profile"
+                class="w-8 h-8 rounded-full object-cover cursor-pointer border border-border"
+                onclick={() => (showProfileDropdown = !showProfileDropdown)}
+              />
+              {#if showProfileDropdown}
+                <div class="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  <!-- User info -->
+                  <div class="flex items-center gap-3 px-4 py-3 border-b border-border">
+                    <img src="/Yohannes Abayneh.png" alt="Profile" class="w-9 h-9 rounded-full object-cover shrink-0" />
+                    <div>
+                      <p class="text-sm font-semibold text-foreground">Yohannes Abayneh</p>
+                      <a href="/dashboard/profile" class="text-xs text-info hover:underline" onclick={() => (showProfileDropdown = false)}>
+                        View Profile →
+                      </a>
+                    </div>
+                  </div>
+                  <!-- Actions -->
+                  <a href="/dashboard/setting" class="flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors" onclick={() => (showProfileDropdown = false)}>
+                    <span class="flex items-center gap-2">
+                      <Icon iconName="icon/settings" size={16} class="text-muted-foreground" />
+                      Change theme
+                    </span>
+                    <Icon iconName="icon/chevron-right" size={14} class="text-muted-foreground" />
+                  </a>
+                  <a href="/logout" class="flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors">
+                    <Icon iconName="icon/log-out" size={16} />
+                    Log out
+                  </a>
+                </div>
+              {/if}
             </div>
           </div>
         </header>
