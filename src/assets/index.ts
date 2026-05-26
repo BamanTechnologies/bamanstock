@@ -34,10 +34,15 @@ const icon = {
 	'icon/users': () => import('@lucide/svelte/icons/users'),
 	'icon/bell': () => import('@lucide/svelte/icons/bell'),
 	'icon/mail': () => import('@lucide/svelte/icons/mail'),
+	'icon/phone': () => import('@lucide/svelte/icons/phone'),
+	'icon/message-circle': () => import('@lucide/svelte/icons/message-circle'),
+	'icon/smile': () => import('@lucide/svelte/icons/smile'),
+	'icon/file-text': () => import('@lucide/svelte/icons/file-text'),
 	
 	// Actions
 	'icon/plus': () => import('@lucide/svelte/icons/plus'),
 	'icon/minus': () => import('@lucide/svelte/icons/minus'),
+	// 'icon/minus': () => import('@lucide/svelte/icons/minus'),
 	'icon/x': () => import('@lucide/svelte/icons/x'),
 	'icon/check': () => import('@lucide/svelte/icons/check'),
 	'icon/edit': () => import('@lucide/svelte/icons/edit'),
@@ -45,6 +50,7 @@ const icon = {
 	'icon/save': () => import('@lucide/svelte/icons/save'),
 	'icon/download': () => import('@lucide/svelte/icons/download'),
 	'icon/upload': () => import('@lucide/svelte/icons/upload'),
+	'icon/upload-cloud': () => import('@lucide/svelte/icons/upload-cloud'),
 	
 	// Commerce
 	'icon/shopping-cart': () => import('@lucide/svelte/icons/shopping-cart'),
@@ -53,6 +59,11 @@ const icon = {
 	'icon/credit-card': () => import('@lucide/svelte/icons/credit-card'),
 	'icon/store': () => import('@lucide/svelte/icons/store'),
 	'icon/trending-up': () => import('@lucide/svelte/icons/trending-up'),
+	'icon/building': () => import('@lucide/svelte/icons/building'),
+	'icon/bar-chart': () => import('@lucide/svelte/icons/bar-chart'),
+	'icon/user-circle': () => import('@lucide/svelte/icons/user-circle'),
+	'icon/star': () => import('@lucide/svelte/icons/star'),
+	'icon/quote': () => import('@lucide/svelte/icons/quote'),
 	
 	// Media & Files
 	'icon/image': () => import('@lucide/svelte/icons/image'),
@@ -66,6 +77,15 @@ const icon = {
 	'icon/arrow-down': () => import('@lucide/svelte/icons/arrow-down'),
 	'icon/chevron-left': () => import('@lucide/svelte/icons/chevron-left'),
 	'icon/chevron-right': () => import('@lucide/svelte/icons/chevron-right'),
+	'icon/chevron-up': () => import('@lucide/svelte/icons/chevron-up'),
+	'icon/chevron-down': () => import('@lucide/svelte/icons/chevron-down'),
+	'icon/user-plus': () => import('@lucide/svelte/icons/user-plus'),
+	'icon/tag': () => import('@lucide/svelte/icons/tag'),
+	'icon/layout-grid': () => import('@lucide/svelte/icons/layout-grid'),
+	'icon/map-pin': () => import('@lucide/svelte/icons/map-pin'),
+	'icon/box': () => import('@lucide/svelte/icons/box'),
+	'icon/log-out': () => import('@lucide/svelte/icons/log-out'),
+	'icon/user-minus': () => import('@lucide/svelte/icons/user-minus'),
 	
 	// Status & Feedback
 	'icon/info': () => import('@lucide/svelte/icons/info'),
@@ -74,6 +94,30 @@ const icon = {
 	'icon/x-circle': () => import('@lucide/svelte/icons/x-circle'),
 	'icon/eye': () => import('@lucide/svelte/icons/eye'),
 	'icon/eye-off': () => import('@lucide/svelte/icons/eye-off'),
+	'icon/refresh-cw': () => import('@lucide/svelte/icons/refresh-cw'),
+	'icon/shield': () => import('@lucide/svelte/icons/shield'),
+	'icon/shield-check': () => import('@lucide/svelte/icons/shield-check'),
+	'icon/lock': () => import('@lucide/svelte/icons/lock'),
+	'icon/help-circle': () => import('@lucide/svelte/icons/help-circle'),
+	'icon/send': () => import('@lucide/svelte/icons/send'),
+	'icon/sun': () => import('@lucide/svelte/icons/sun'),
+	'icon/moon': () => import('@lucide/svelte/icons/moon'),
+	'icon/monitor': () => import('@lucide/svelte/icons/monitor'),
+	'icon/languages': () => import('@lucide/svelte/icons/languages'),
+	'icon/more-vertical': () => import('@lucide/svelte/icons/more-vertical'),
+	'icon/printer': () => import('@lucide/svelte/icons/printer'),
+	'icon/laptop': () => import('@lucide/svelte/icons/laptop'),
+	'icon/headphones': () => import('@lucide/svelte/icons/headphones'),
+	'icon/watch': () => import('@lucide/svelte/icons/watch'),
+	'icon/shoe': () => import('@lucide/svelte/icons/shopping-bag'),
+	'icon/chair': () => import('@lucide/svelte/icons/box'),
+	'icon/briefcase': () => import('@lucide/svelte/icons/shopping-bag'),
+	'icon/line-chart': () => import('@lucide/svelte/icons/line-chart'),
+	'icon/calendar': () => import('@lucide/svelte/icons/calendar'),
+	'icon/dollar-sign': () => import('@lucide/svelte/icons/dollar-sign'),
+	'icon/clock': () => import('@lucide/svelte/icons/clock'),
+
+	'icon/activity': () => import('@lucide/svelte/icons/activity'),
 	
 	// Custom SVG icons can be added here:
 	// 'icon/custom-name': () => import('./icon/custom-name.svg?component'),
@@ -84,8 +128,10 @@ const icon = {
 // Social media platform icons
 // ============================================================================
 const social = {
-	// Add social media icons here as needed
-	// Example: 'social/Facebook': () => import('./social/Facebook.svg?component'),
+	'social/youtube': () => import('@lucide/svelte/icons/youtube'),
+	'social/twitter': () => import('@lucide/svelte/icons/twitter'),
+	'social/instagram': () => import('@lucide/svelte/icons/instagram'),
+	'social/facebook': () => import('@lucide/svelte/icons/facebook'),
 } as const;
 
 // ============================================================================
