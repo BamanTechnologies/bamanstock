@@ -108,9 +108,9 @@
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <a href="/logout" class="block">
-                <SidebarMenuButton>
-                  <Icon iconName="icon/log-out" size={20} />
+              <a href="/" class="block">
+                <SidebarMenuButton class="text-red-500 hover:text-red-600 hover:cursor-pointer">
+                  <Icon iconName="icon/log-out" size={20} class="text-red-500" />
                   <span>Logout</span>
                 </SidebarMenuButton>
               </a>
@@ -184,7 +184,7 @@
                     </span>
                     <Icon iconName="icon/chevron-right" size={14} class="text-muted-foreground" />
                   </a>
-                  <a href="/logout" class="flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors">
+                  <a href="/" class="flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors">
                     <Icon iconName="icon/log-out" size={16} />
                     Log out
                   </a>

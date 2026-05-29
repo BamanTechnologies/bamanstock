@@ -3,6 +3,9 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { goto } from "$app/navigation";
+  import InviteMerchantModal from "$lib/components/investor/InviteMerchantModal.svelte";
+
+  let isInviteModalOpen = $state(false);
 
   // Mock data - replace with real data later
   const summaryCards = [
@@ -170,7 +173,7 @@
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-info text-info-foreground hover:bg-info/90">
+    <Button class="bg-info text-info-foreground hover:bg-info/90" onclick={() => (isInviteModalOpen = true)}>
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       Invite Merchant
     </Button>
@@ -228,3 +231,5 @@
     }}
   />
 </div>
+
+<InviteMerchantModal bind:isOpen={isInviteModalOpen} />
