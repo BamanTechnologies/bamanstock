@@ -30,8 +30,8 @@
     if (path.startsWith("/dashboard/merchants")) return "Merchants";
     if (path.includes("/location")) return "Location";
     if (path.includes("/stock")) return "Stock";
-    if (path.includes("/reports")) return "Reports";
-    if (path.includes("/setting")) return "Setting";
+    if (path.includes("/report")) return "Report";
+    if (path.includes("/setting")) return "Settings";
     if (path === "/dashboard") return "Dashboard";
     return "Dashboard";
   });
@@ -44,8 +44,8 @@
     { title: "Merchants", icon: "icon/users", href: "/dashboard/merchants" },
     { title: "Location", icon: "icon/map-pin", href: "/dashboard/location" },
     { title: "Stock", icon: "icon/box", href: "/dashboard/stock" },
-    { title: "Reports", icon: "icon/bar-chart", href: "/dashboard/reports" },
-    { title: "Setting", icon: "icon/settings", href: "/dashboard/setting" },
+    { title: "Report",   icon: "icon/bar-chart", href: "/dashboard/reports" },
+    { title: "Settings", icon: "icon/settings", href: "/dashboard/setting" },
   ];
 </script>
 
