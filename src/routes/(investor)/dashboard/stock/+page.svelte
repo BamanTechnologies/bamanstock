@@ -8,106 +8,26 @@
 
   // Mock stock data - replace with real data later
   let stockItems = $state([
-    {
-      id: 1,
-      name: "Lenovo IdeaPad 3",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$3,506",
-      qty: 100,
-      status: "Adequate",
-      icon: "icon/laptop",
-    },
-    {
-      id: 2,
-      name: "Beats Pro",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$7,981",
-      qty: 140,
-      status: "Low",
-      icon: "icon/headphones",
-    },
-    {
-      id: 3,
-      name: "Nike Jordan",
-      category: "Cloth",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$450",
-      qty: 300,
-      status: "Out",
-      icon: "icon/shoe",
-    },
-    {
-      id: 4,
-      name: "Apple Series 5 Watch",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$3,506",
-      qty: 450,
-      status: "Adequate",
-      icon: "icon/watch",
-    },
-    {
-      id: 5,
-      name: "Amazon Echo Dot",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$902",
-      qty: 320,
-      status: "Low",
-      icon: "icon/package",
-    },
-    {
-      id: 6,
-      name: "Sanford Chair Sofa",
-      category: "Furniture",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$7,981",
-      qty: 650,
-      status: "Out",
-      icon: "icon/chair",
-    },
-    {
-      id: 7,
-      name: "Red Premium Satchel",
-      category: "Accessories",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$450",
-      qty: 700,
-      status: "Adequate",
-      icon: "icon/briefcase",
-    },
-    {
-      id: 8,
-      name: "Iphone 14 Pro",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$3,506",
-      qty: 630,
-      status: "Low",
-      icon: "icon/package",
-    },
-    {
-      id: 9,
-      name: "Gaming Chair",
-      category: "Furniture",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$7,981",
-      qty: 410,
-      status: "Out",
-      icon: "icon/chair",
-    },
-    {
-      id: 10,
-      name: "Borealis Backpack",
-      category: "Accessories",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$450",
-      qty: 550,
-      status: "Low",
-      icon: "icon/briefcase",
-    },
+    { id: 1,  name: "Lenovo IdeaPad 3",     category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$3,506",  qty: 100, status: "Adequate", icon: "icon/package" },
+    { id: 2,  name: "Beats Pro Headphones", category: "Electronics", assignedMerchant: "Stan Gaunter",    unitPrice: "$7,981",  qty: 8,   status: "Low",      icon: "icon/package" },
+    { id: 3,  name: "Nike Jordan Shoes",    category: "Cloth",       assignedMerchant: "Carlos Curran",   unitPrice: "$450",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 4,  name: "Apple Watch Series 9", category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$4,299",  qty: 450, status: "Adequate", icon: "icon/package" },
+    { id: 5,  name: "Amazon Echo Dot",      category: "Electronics", assignedMerchant: "Beth Noah",       unitPrice: "$902",    qty: 12,  status: "Low",      icon: "icon/package" },
+    { id: 6,  name: "Sanford Sofa",         category: "Furniture",   assignedMerchant: "James Morgan",    unitPrice: "$7,981",  qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 7,  name: "Premium Satchel Bag",  category: "Accessories", assignedMerchant: "Olivia Chen",     unitPrice: "$450",    qty: 700, status: "Adequate", icon: "icon/package" },
+    { id: 8,  name: "iPhone 15 Pro",        category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$5,200",  qty: 9,   status: "Low",      icon: "icon/package" },
+    { id: 9,  name: "Gaming Chair Pro",     category: "Furniture",   assignedMerchant: "Marcus Davis",    unitPrice: "$7,981",  qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 10, name: "Borealis Backpack",    category: "Accessories", assignedMerchant: "Sarah Johnson",   unitPrice: "$450",    qty: 550, status: "Low",      icon: "icon/package" },
+    { id: 11, name: "Samsung 4K TV 55\"",   category: "Electronics", assignedMerchant: "Stan Gaunter",    unitPrice: "$12,500", qty: 210, status: "Adequate", icon: "icon/package" },
+    { id: 12, name: "Levi's Denim Jacket",  category: "Cloth",       assignedMerchant: "Carlos Curran",   unitPrice: "$320",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 13, name: "Office Desk Premium",  category: "Furniture",   assignedMerchant: "Daniel Park",     unitPrice: "$3,200",  qty: 85,  status: "Adequate", icon: "icon/package" },
+    { id: 14, name: "Fitbit Charge 6",      category: "Electronics", assignedMerchant: "Fatima Hassan",   unitPrice: "$1,800",  qty: 5,   status: "Low",      icon: "icon/package" },
+    { id: 15, name: "Leather Wallet",       category: "Accessories", assignedMerchant: "Lucas Ferreira",  unitPrice: "$180",    qty: 320, status: "Adequate", icon: "icon/package" },
+    { id: 16, name: "Running Shoes Nike",   category: "Cloth",       assignedMerchant: "Nina Patel",      unitPrice: "$520",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 17, name: "iPad Air 5th Gen",     category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$6,900",  qty: 180, status: "Adequate", icon: "icon/package" },
+    { id: 18, name: "Bookshelf 5-Tier",     category: "Furniture",   assignedMerchant: "Kwame Asante",    unitPrice: "$1,200",  qty: 14,  status: "Low",      icon: "icon/package" },
+    { id: 19, name: "Adidas Hoodie",        category: "Cloth",       assignedMerchant: "Priya Sharma",    unitPrice: "$280",    qty: 420, status: "Adequate", icon: "icon/package" },
+    { id: 20, name: "Sony WH-1000XM5",      category: "Electronics", assignedMerchant: "Thomas Green",    unitPrice: "$3,100",  qty: 7,   status: "Low",      icon: "icon/package" },
   ]);
 
   let searchQuery = $state("");
@@ -159,12 +79,7 @@
       ) {
         return false;
       }
-      if (
-        assignedMerchantFilter &&
-        item.assignedMerchant !== "Richard Wilson"
-      ) {
-        return false;
-      }
+      if (assignedMerchantFilter && item.assignedMerchant.toLowerCase().replace(/\s+/g, "-") !== assignedMerchantFilter) return false;
       if (categoryFilter && item.category.toLowerCase() !== categoryFilter) {
         return false;
       }
@@ -255,7 +170,11 @@
       options: [
         { value: "", label: "All Merchants" },
         { value: "richard-wilson", label: "Richard Wilson" },
-        { value: "other", label: "Other" },
+        { value: "stan-gaunter", label: "Stan Gaunter" },
+        { value: "carlos-curran", label: "Carlos Curran" },
+        { value: "beth-noah", label: "Beth Noah" },
+        { value: "james-morgan", label: "James Morgan" },
+        { value: "others", label: "Others" },
       ],
     },
     {

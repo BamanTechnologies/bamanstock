@@ -2,15 +2,20 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+
+  const tabs = ["Sales", "Revenue & Profit", "Payments", "Stock Movement", "Low Stock"];
 
   let activeTab = $state("Sales");
-  const tabs = [
-    "Sales",
-    "Revenue & Profit",
-    "Payments",
-    "Stock Movement",
-    "Low Stock",
-  ];
+  $effect(() => {
+    activeTab = $page.url.searchParams.get("tab") ?? activeTab;
+  });
+
+  function switchTab(tab: string) {
+    activeTab = tab;
+    goto(`?tab=${encodeURIComponent(tab)}`, { replaceState: true, noScroll: true });
+  }
 
   // Revenue & Profit tab data
   const revenueKpiCards = [
@@ -72,34 +77,10 @@
 
   // Payments tab data
   const paymentsKpiCards = [
-    {
-      label: "Total Amount",
-      value: "$4,56,000",
-      icon: "icon/bar-chart",
-      iconColor: "bg-green-100",
-      textColor: "text-green-600",
-    },
-    {
-      label: "Total Paid",
-      value: "$2,56,42",
-      icon: "icon/credit-card",
-      iconColor: "bg-blue-100",
-      textColor: "text-blue-600",
-    },
-    {
-      label: "Total Unpaid",
-      value: "$1,52,45",
-      icon: "icon/dollar-sign",
-      iconColor: "bg-orange-100",
-      textColor: "text-orange-600",
-    },
-    {
-      label: "Overdue",
-      value: "$2,56,12",
-      icon: "icon/alert-triangle",
-      iconColor: "bg-red-100",
-      textColor: "text-red-600",
-    },
+    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconColor: "bg-green-100",  textColor: "text-green-600",  borderColor: "border-l-green-500"  },
+    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconColor: "bg-blue-100",   textColor: "text-blue-600",   borderColor: "border-l-blue-500"   },
+    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconColor: "bg-orange-100", textColor: "text-orange-600", borderColor: "border-l-orange-500" },
+    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconColor: "bg-red-100",    textColor: "text-red-600",    borderColor: "border-l-red-500"    },
   ];
 
   // Mock payments report data
@@ -553,36 +534,9 @@
 
   // Low Stock tab data
   const lowStockKpiCards = [
-    {
-      label: "Total Low Stock Items",
-      value: "142",
-      change: "25.5",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/alert-triangle",
-      iconColor: "bg-green-100",
-      textColor: "text-green-600",
-    },
-    {
-      label: "Critical Stock Items",
-      value: "35",
-      change: "12.2",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/shopping-bag",
-      iconColor: "bg-blue-100",
-      textColor: "text-blue-600",
-    },
-    {
-      label: "Value at Risk",
-      value: "$12,890.75",
-      change: "16.3",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/eye",
-      iconColor: "bg-pink-100",
-      textColor: "text-pink-600",
-    },
+    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100", textColor: "text-green-600" },
+    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100",  textColor: "text-blue-600"  },
+    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100",  textColor: "text-pink-600"  },
   ];
 
   // Mock low stock data
@@ -1207,7 +1161,7 @@
     <div class="flex gap-6">
       {#each tabs as tab}
         <button
-          onclick={() => (activeTab = tab)}
+          onclick={() => switchTab(tab)}
           class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab
             ? 'border-info text-info font-medium'
             : 'border-transparent text-muted-foreground hover:text-foreground'}"
@@ -1219,7 +1173,7 @@
   </div>
 
   <!-- Tab Content -->
-  {#if activeTab === "Sales"}
+    {#if activeTab === "Sales"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1259,7 +1213,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex flex-wrap gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
+          <div class="flex-1 min-w-50">
             <label
               for="date-range"
               class="text-sm font-medium text-foreground mb-2 block"
@@ -1287,7 +1241,7 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="location-filter"
               label="Location"
@@ -1297,7 +1251,7 @@
           </div>
 
           <!-- Merchant Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="merchant-filter"
               label="Merchant"
@@ -1307,7 +1261,7 @@
           </div>
 
           <!-- Category Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="category-filter"
               label="Category"
@@ -1317,7 +1271,7 @@
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="products-filter"
               label="Products"
@@ -1389,7 +1343,8 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Revenue & Profit"}
+  {/if}
+  {#if activeTab === "Revenue & Profit"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1462,22 +1417,54 @@
             </div>
           </div>
 
-          <!-- Chart Placeholder -->
-          <div
-            class="w-full h-64 bg-muted/30 rounded-lg flex items-center justify-center border border-border"
-          >
-            <div class="text-center">
-              <Icon
-                iconName="icon/line-chart"
-                size={48}
-                class="text-muted-foreground mx-auto mb-2"
-              />
-              <p class="text-sm text-muted-foreground">
-                Chart will be rendered here
-              </p>
-              <p class="text-xs text-muted-foreground mt-1">
-                (Chart.js/Recharts integration needed)
-              </p>
+          <!-- Revenue vs Profit SVG Chart -->
+          <div class="flex gap-3">
+            <!-- Y-axis labels -->
+            <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-10 shrink-0 text-right">
+              <span>$60k</span>
+              <span>$50k</span>
+              <span>$40k</span>
+              <span>$30k</span>
+              <span>$20k</span>
+              <span>$10k</span>
+            </div>
+            <div class="flex-1 relative h-64">
+              <svg viewBox="0 0 860 200" class="w-full h-full" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="revGradReport" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.01" />
+                  </linearGradient>
+                  <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#ec4899" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#ec4899" stop-opacity="0.01" />
+                  </linearGradient>
+                </defs>
+                <!-- Grid lines -->
+                {#each [0, 40, 80, 120, 160, 200] as y}
+                  <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.07" stroke-width="1" />
+                {/each}
+                <!-- Revenue area + line -->
+                <path d="M0,160 C60,145 120,125 200,130 C280,135 340,100 430,65 C510,32 580,110 660,100 C730,92 800,108 860,112 L860,200 L0,200 Z" fill="url(#revGradReport)" />
+                <path d="M0,160 C60,145 120,125 200,130 C280,135 340,100 430,65 C510,32 580,110 660,100 C730,92 800,108 860,112" fill="none" stroke="#3b82f6" stroke-width="2.5" />
+                <!-- Profit area + line -->
+                <path d="M0,180 C60,172 120,165 200,162 C280,158 340,148 430,138 C510,128 580,145 660,140 C730,136 800,142 860,144 L860,200 L0,200 Z" fill="url(#profitGrad)" />
+                <path d="M0,180 C60,172 120,165 200,162 C280,158 340,148 430,138 C510,128 580,145 660,140 C730,136 800,142 860,144" fill="none" stroke="#ec4899" stroke-width="2.5" />
+                <!-- Revenue dots -->
+                {#each [[0,160],[200,130],[430,65],[660,100],[860,112]] as [cx,cy]}
+                  <circle {cx} {cy} r="4" fill="#3b82f6" />
+                {/each}
+                <!-- Profit dots -->
+                {#each [[0,180],[200,162],[430,138],[660,140],[860,144]] as [cx,cy]}
+                  <circle {cx} {cy} r="4" fill="#ec4899" />
+                {/each}
+              </svg>
+              <!-- X-axis labels -->
+              <div class="absolute bottom-0 left-0 right-0 flex justify-between">
+                {#each ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as m}
+                  <span class="text-[10px] text-muted-foreground">{m}</span>
+                {/each}
+              </div>
             </div>
           </div>
         </div>
@@ -1495,24 +1482,52 @@
                 { value: "this-year", label: "This Year" },
               ]}
               value="this-week"
-              class="min-w-[120px]"
+              class="min-w-30"
             />
           </div>
 
-          <div class="space-y-4">
-            {#each revenueByCategory as item}
-              <div
-                class="flex items-center justify-between pb-4 border-b border-border last:border-0"
-              >
-                <div>
-                  <p class="text-sm font-medium text-foreground mb-1">
-                    {item.category}
-                  </p>
-                  <p class="text-xs text-muted-foreground">{item.items}</p>
+          <!-- Donut chart for category distribution -->
+          <div class="flex justify-center mb-4">
+            <svg viewBox="0 0 160 160" class="w-36 h-36">
+              <defs>
+                <linearGradient id="elecGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#3b82f6" /><stop offset="100%" stop-color="#6366f1" />
+                </linearGradient>
+              </defs>
+              <!-- Electronics 35% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="url(#elecGrad)" stroke-width="26"
+                stroke-dasharray="123.2 351.9" stroke-dashoffset="0" transform="rotate(-90 80 80)" />
+              <!-- Clothing 25% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#ec4899" stroke-width="26"
+                stroke-dasharray="87.9 351.9" stroke-dashoffset="-123.2" transform="rotate(-90 80 80)" />
+              <!-- Home Supplies 22% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#f59e0b" stroke-width="26"
+                stroke-dasharray="77.4 351.9" stroke-dashoffset="-211.1" transform="rotate(-90 80 80)" />
+              <!-- Beauty 10% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#22c55e" stroke-width="26"
+                stroke-dasharray="35.2 351.9" stroke-dashoffset="-288.5" transform="rotate(-90 80 80)" />
+              <!-- Groceries 8% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#a855f7" stroke-width="26"
+                stroke-dasharray="28.2 351.9" stroke-dashoffset="-323.7" transform="rotate(-90 80 80)" />
+              <circle cx="80" cy="80" r="43" class="fill-card" />
+              <text x="80" y="76" font-size="11" fill="currentColor" text-anchor="middle" font-weight="700">$40.6M</text>
+              <text x="80" y="90" font-size="8" fill="#6b7280" text-anchor="middle">Total</text>
+            </svg>
+          </div>
+
+          <!-- Legend + list -->
+          <div class="space-y-3">
+            {#each revenueByCategory as item, i}
+              {@const colors = ["bg-blue-500","bg-pink-500","bg-amber-500","bg-green-500","bg-purple-500"]}
+              <div class="flex items-center justify-between pb-3 border-b border-border last:border-0">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full {colors[i]} shrink-0"></span>
+                  <div>
+                    <p class="text-sm font-medium text-foreground">{item.category}</p>
+                    <p class="text-xs text-muted-foreground">{item.items}</p>
+                  </div>
                 </div>
-                <p class="text-sm font-semibold text-foreground">
-                  {item.revenue}
-                </p>
+                <p class="text-sm font-semibold text-foreground">{item.revenue}</p>
               </div>
             {/each}
           </div>
@@ -1523,7 +1538,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex flex-wrap gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
+          <div class="flex-1 min-w-50">
             <label
               for="revenue-date-range"
               class="text-sm font-medium text-foreground mb-2 block"
@@ -1551,7 +1566,7 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="revenue-location-filter"
               label="Location"
@@ -1561,7 +1576,7 @@
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="revenue-products-filter"
               label="Products"
@@ -1635,26 +1650,18 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Payments"}
+  {/if}
+  {#if activeTab === "Payments"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {#each paymentsKpiCards as kpi}
-          <div
-            class="bg-card border border-border rounded-lg p-6 flex items-center gap-4"
-          >
-            <div
-              class="{kpi.iconColor} w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-            >
-              <Icon
-                iconName={kpi.icon as any}
-                size={32}
-                class={kpi.textColor}
-              />
+          <div class="bg-card border border-border border-l-4 {kpi.borderColor} rounded-lg p-5 flex items-center gap-4">
+            <div class="{kpi.iconColor} w-14 h-14 rounded-xl flex items-center justify-center shrink-0">
+              <Icon iconName={kpi.icon as any} size={28} class={kpi.textColor} />
             </div>
-
             <div class="flex flex-col">
-              <span class="text-muted-foreground font-medium">{kpi.label}</span>
+              <span class="text-sm text-muted-foreground">{kpi.label}</span>
               <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
             </div>
           </div>
@@ -1665,7 +1672,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex flex-wrap gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
+          <div class="flex-1 min-w-50">
             <label
               for="payments-date-range"
               class="text-sm font-medium text-foreground mb-2 block"
@@ -1693,7 +1700,7 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="payments-location-filter"
               label="Location"
@@ -1703,7 +1710,7 @@
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="payments-products-filter"
               label="Products"
@@ -1775,7 +1782,8 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Stock Movement"}
+  {/if}
+  {#if activeTab === "Stock Movement"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1816,7 +1824,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex flex-wrap gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
+          <div class="flex-1 min-w-50">
             <label
               for="stock-movement-date-range"
               class="text-sm font-medium text-foreground mb-2 block"
@@ -1844,7 +1852,7 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="stock-movement-location-filter"
               label="Location"
@@ -1854,7 +1862,7 @@
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="stock-movement-products-filter"
               label="Products"
@@ -1918,7 +1926,8 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Low Stock"}
+  {/if}
+  {#if activeTab === "Low Stock"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1949,7 +1958,7 @@
   </button>
 </div>
             <div class="flex items-center justify-between mb-2">
-              <p class="text-3xl font-bold text-foreground">{kpi.value}</p>
+              <p class="text-3xl font-bold {kpi.valueColor}">{kpi.value}</p>
             </div>
            <div class="flex flex-row gap-4">
 
@@ -1969,7 +1978,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex flex-wrap gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
+          <div class="flex-1 min-w-50">
             <label
               for="low-stock-date-range"
               class="text-sm font-medium text-foreground mb-2 block"
@@ -1997,7 +2006,7 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="low-stock-location-filter"
               label="Location"
@@ -2007,7 +2016,7 @@
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="low-stock-products-filter"
               label="Products"
@@ -2070,11 +2079,6 @@
           />
         {/if}
       </div>
-    </div>
-  {:else}
-    <!-- Placeholder for other tabs -->
-    <div class="bg-card border border-border rounded-lg p-8">
-      <p class="text-muted-foreground">{activeTab} content goes here</p>
     </div>
   {/if}
 </div>

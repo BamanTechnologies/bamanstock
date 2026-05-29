@@ -8,53 +8,45 @@
   const summaryCards = [
     {
       label: "Total Merchants",
-      value: "148",
+      value: "20",
       icon: "icon/user",
       color: "bg-green-100",
     },
     {
       label: "Active Merchants",
-      value: "36",
+      value: "13",
       icon: "icon/users",
       color: "bg-blue-100",
     },
     {
       label: "Merchant per Location",
-      value: "7",
+      value: "4",
       icon: "icon/building",
       color: "bg-purple-100",
     },
   ];
 
   const merchants = [
-    {
-      name: "Richard Wilson",
-      revenue: "$156,900",
-      transactions: "785",
-      location: "Branch #2",
-      status: "Invited",
-    },
-    {
-      name: "Richard Wilson",
-      revenue: "$156,900",
-      transactions: "785",
-      location: "Branch #2",
-      status: "Active",
-    },
-    {
-      name: "Richard Wilson",
-      revenue: "$156,900",
-      transactions: "785",
-      location: "Branch #2",
-      status: "Declined",
-    },
-    ...Array(7).fill({
-      name: "Richard Wilson",
-      revenue: "$156,900",
-      transactions: "785",
-      location: "Branch #2",
-      status: "Active",
-    }),
+    { name: "Richard Wilson",   revenue: "$156,900", transactions: "785", location: "Branch #1", status: "Active" },
+    { name: "Stan Gaunter",     revenue: "$98,450",  transactions: "521", location: "Branch #2", status: "Active" },
+    { name: "Carlos Curran",    revenue: "$74,200",  transactions: "390", location: "Branch #3", status: "Invited" },
+    { name: "Beth Noah",        revenue: "$62,300",  transactions: "318", location: "Branch #1", status: "Active" },
+    { name: "Yohannes Abayneh", revenue: "$48,760",  transactions: "241", location: "Branch #4", status: "Active" },
+    { name: "Emma Collins",     revenue: "$38,900",  transactions: "198", location: "Branch #2", status: "Invited" },
+    { name: "James Morgan",     revenue: "$29,500",  transactions: "154", location: "Branch #5", status: "Active" },
+    { name: "Olivia Chen",      revenue: "$24,780",  transactions: "132", location: "Branch #3", status: "Declined" },
+    { name: "Marcus Davis",     revenue: "$21,340",  transactions: "110", location: "Branch #1", status: "Active" },
+    { name: "Sarah Johnson",    revenue: "$19,800",  transactions: "97",  location: "Branch #2", status: "Active" },
+    { name: "Daniel Park",      revenue: "$17,200",  transactions: "88",  location: "Branch #4", status: "Invited" },
+    { name: "Fatima Hassan",    revenue: "$15,600",  transactions: "79",  location: "Branch #5", status: "Active" },
+    { name: "Lucas Ferreira",   revenue: "$13,900",  transactions: "71",  location: "Branch #3", status: "Active" },
+    { name: "Nina Patel",       revenue: "$12,400",  transactions: "64",  location: "Branch #1", status: "Declined" },
+    { name: "Kwame Asante",     revenue: "$10,890",  transactions: "58",  location: "Branch #2", status: "Active" },
+    { name: "Priya Sharma",     revenue: "$9,750",   transactions: "51",  location: "Branch #4", status: "Invited" },
+    { name: "Thomas Green",     revenue: "$8,620",   transactions: "45",  location: "Branch #5", status: "Active" },
+    { name: "Amara Obi",        revenue: "$7,480",   transactions: "39",  location: "Branch #3", status: "Active" },
+    { name: "Lena Müller",      revenue: "$6,340",   transactions: "33",  location: "Branch #1", status: "Declined" },
+    { name: "Ravi Kumar",       revenue: "$5,200",   transactions: "27",  location: "Branch #2", status: "Active" },
   ];
 
   function getStatusClass(status: string) {
@@ -126,8 +118,11 @@
       label: "Location",
       options: [
         { value: "", label: "All Locations" },
-        { value: "branch-1", label: "Branch #1" },
-        { value: "branch-2", label: "Branch #2" },
+        { value: "Branch #1", label: "Branch #1" },
+        { value: "Branch #2", label: "Branch #2" },
+        { value: "Branch #3", label: "Branch #3" },
+        { value: "Branch #4", label: "Branch #4" },
+        { value: "Branch #5", label: "Branch #5" },
       ],
     },
     {
