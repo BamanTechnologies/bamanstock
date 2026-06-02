@@ -90,6 +90,7 @@ const icon = {
 	// Status & Feedback
 	'icon/info': () => import('@lucide/svelte/icons/info'),
 	'icon/alert-circle': () => import('@lucide/svelte/icons/alert-circle'),
+	'icon/alert-triangle': () => import('@lucide/svelte/icons/alert-triangle'),
 	'icon/check-circle': () => import('@lucide/svelte/icons/check-circle'),
 	'icon/x-circle': () => import('@lucide/svelte/icons/x-circle'),
 	'icon/eye': () => import('@lucide/svelte/icons/eye'),

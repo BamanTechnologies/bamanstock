@@ -7,9 +7,10 @@
 
   const tabs = ["Sales", "Revenue & Profit", "Payments", "Stock Movement", "Low Stock"];
 
-  let activeTab = $state("Sales");
+  let activeTab = $state($page.url.searchParams.get("tab") ?? "Sales");
   $effect(() => {
-    activeTab = $page.url.searchParams.get("tab") ?? activeTab;
+    const tab = $page.url.searchParams.get("tab");
+    if (tab !== null) activeTab = tab;
   });
 
   function switchTab(tab: string) {
@@ -77,10 +78,10 @@
 
   // Payments tab data
   const paymentsKpiCards = [
-    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconColor: "bg-green-100",  textColor: "text-green-600",  borderColor: "border-l-green-500"  },
-    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconColor: "bg-blue-100",   textColor: "text-blue-600",   borderColor: "border-l-blue-500"   },
-    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconColor: "bg-orange-100", textColor: "text-orange-600", borderColor: "border-l-orange-500" },
-    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconColor: "bg-red-100",    textColor: "text-red-600",    borderColor: "border-l-red-500"    },
+    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBg: "#f0fdf4", iconColor: "#16a34a", borderColor: "border-l-green-500"  },
+    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBg: "#eff6ff", iconColor: "#3b82f6", borderColor: "border-l-blue-500"   },
+    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBg: "#fff7ed", iconColor: "#f97316", borderColor: "border-l-orange-500" },
+    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBg: "#fef2f2", iconColor: "#ef4444", borderColor: "border-l-red-500"    },
   ];
 
   // Mock payments report data
@@ -311,6 +312,7 @@
       icon: "icon/package",
       iconColor: "bg-green-100",
       textColor: "text-green-600",
+      borderColor: "border-l-green-500",
     },
     {
       label: "Total Stock Out",
@@ -321,6 +323,7 @@
       icon: "icon/shopping-bag",
       iconColor: "bg-blue-100",
       textColor: "text-blue-600",
+      borderColor: "border-l-blue-500",
     },
     {
       label: "Number of Transfers",
@@ -331,6 +334,7 @@
       icon: "icon/refresh-cw",
       iconColor: "bg-pink-100",
       textColor: "text-pink-600",
+      borderColor: "border-l-pink-500",
     },
   ];
 
@@ -534,9 +538,9 @@
 
   // Low Stock tab data
   const lowStockKpiCards = [
-    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100", textColor: "text-green-600" },
-    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100",  textColor: "text-blue-600"  },
-    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100",  textColor: "text-pink-600"  },
+    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100", textColor: "text-green-600", borderColor: "border-l-green-500" },
+    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100",  textColor: "text-blue-600",  borderColor: "border-l-blue-500"  },
+    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100",  textColor: "text-pink-600",  borderColor: "border-l-pink-500"  },
   ];
 
   // Mock low stock data
@@ -665,6 +669,18 @@
 
   let lowStockDateRange = $state("01-Jan-2025 - 12-Dec-2025");
   let lowStockSearchQuery = $state("");
+  let lowStockLocationFilter = $state("");
+  let lowStockCategoryFilter = $state("");
+
+  const lowStockCategoryOptions = [
+    { value: "", label: "All" },
+    { value: "computers", label: "Computers" },
+    { value: "electronics", label: "Electronics" },
+    { value: "shoe", label: "Shoe" },
+    { value: "furniture", label: "Furniture" },
+    { value: "bags", label: "Bags" },
+    { value: "phone", label: "Phone" },
+  ];
   let lowStockPage = $state(1);
   let lowStockRowsPerPage = $state(10);
   const lowStockTotalPages = $derived(
@@ -1211,73 +1227,37 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-50">
-            <label
-              for="date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
-              Choose Date
-            </label>
+          <div>
+            <label for="date-range" class="text-sm font-medium text-foreground mb-2 block">Choose Date</label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="date-range"
                 type="text"
                 bind:value={dateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker")}
               />
             </div>
           </div>
-
           <!-- Location Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="location-filter"
-              label="Location"
-              options={filters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="location-filter" label="Location" options={filters[0].options} placeholder="All" />
           </div>
-
           <!-- Merchant Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="merchant-filter"
-              label="Merchant"
-              options={filters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="merchant-filter" label="Merchant" options={filters[1].options} placeholder="All" />
           </div>
-
           <!-- Category Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="category-filter"
-              label="Category"
-              options={filters[2].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="category-filter" label="Category" options={filters[2].options} placeholder="All" />
           </div>
-
           <!-- Products Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="products-filter"
-              label="Products"
-              options={filters[3].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="products-filter" label="Products" options={filters[3].options} placeholder="All" />
           </div>
         </div>
       </div>
@@ -1656,11 +1636,11 @@
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {#each paymentsKpiCards as kpi}
-          <div class="bg-card border border-border border-l-4 {kpi.borderColor} rounded-lg p-5 flex items-center gap-4">
-            <div class="{kpi.iconColor} w-14 h-14 rounded-xl flex items-center justify-center shrink-0">
-              <Icon iconName={kpi.icon as any} size={28} class={kpi.textColor} />
+          <div class="bg-card border border-border border-l-[5px] {kpi.borderColor} rounded-2xl p-6 flex items-center gap-5">
+            <div style="background-color: {kpi.iconBg};" class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0">
+              <Icon iconName={kpi.icon as any} size={32} color={kpi.iconColor} />
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col gap-0.5">
               <span class="text-sm text-muted-foreground">{kpi.label}</span>
               <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
             </div>
@@ -1670,53 +1650,29 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-50">
-            <label
-              for="payments-date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
-              Choose Date
-            </label>
+          <div>
+            <label for="payments-date-range" class="text-sm font-medium text-foreground mb-2 block">Choose Date</label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="payments-date-range"
                 type="text"
                 bind:value={paymentsDateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker for payments");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker for payments")}
               />
             </div>
           </div>
-
           <!-- Location Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="payments-location-filter"
-              label="Location"
-              options={paymentsFilters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="payments-location-filter" label="Location" options={paymentsFilters[0].options} placeholder="All" />
           </div>
-
           <!-- Products Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="payments-products-filter"
-              label="Products"
-              options={paymentsFilters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="payments-products-filter" label="Products" options={paymentsFilters[1].options} placeholder="All" />
           </div>
         </div>
       </div>
@@ -1788,33 +1744,25 @@
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#each stockMovementKpiCards as kpi}
-          <div class="bg-card border border-border rounded-lg p-6">
-            <div class="flex flex-row gap-2 mb-4">
-              <div
-                class="{kpi.iconColor} w-8 h-8 rounded-lg flex items-center justify-center"
-              >
-                <Icon
-                  iconName={kpi.icon as any}
-                  size={24}
-                  class={kpi.textColor}
-                />
+          <div class="bg-card border border-border rounded-lg p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="{kpi.iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0">
+                  <Icon iconName={kpi.icon as any} size={18} class={kpi.textColor} />
+                </div>
+                <span class="text-sm text-muted-foreground">{kpi.label}</span>
               </div>
-              <span
-                class="flex items-center justify-center text-sm text-muted-foreground"
-                >{kpi.label}</span
-              >
+              <button type="button" class="p-1 hover:bg-muted rounded transition-colors" aria-label="More options">
+                <Icon iconName="icon/more-vertical" size={18} class="text-muted-foreground" />
+              </button>
             </div>
-            <p class="text-3xl font-bold text-foreground mb-2">{kpi.value}</p>
-            <div class="flex flex-row gap-4">
-              <div
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-              >
-                <Icon iconName="icon/arrow-up" size={12} />
+            <p class="text-2xl font-bold text-foreground mb-3">{kpi.value}</p>
+            <div class="flex items-center gap-3">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                <Icon iconName="icon/arrow-up" size={11} />
                 <span>{kpi.change}%</span>
               </div>
-              <p class="text-xs text-muted-foreground mt-1">
-                {kpi.changeLabel}
-              </p>
+              <p class="text-xs text-muted-foreground">{kpi.changeLabel}</p>
             </div>
           </div>
         {/each}
@@ -1822,76 +1770,48 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-50">
-            <label
-              for="stock-movement-date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
-              Choose Date
-            </label>
+          <div>
+            <label for="stock-movement-date-range" class="text-sm font-medium text-foreground mb-2 block">Choose Date</label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="stock-movement-date-range"
                 type="text"
                 bind:value={stockMovementDateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker for stock movement");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker for stock movement")}
               />
             </div>
           </div>
-
           <!-- Location Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="stock-movement-location-filter"
-              label="Location"
-              options={stockMovementFilters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="stock-movement-location-filter" label="Location" options={stockMovementFilters[0].options} placeholder="All" />
           </div>
-
           <!-- Products Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="stock-movement-products-filter"
-              label="Products"
-              options={stockMovementFilters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="stock-movement-products-filter" label="Products" options={stockMovementFilters[1].options} placeholder="All" />
           </div>
         </div>
       </div>
 
-      <!-- Search Bar -->
+      <!-- Stock Movement Table -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="relative">
+        <div class="relative mb-4">
           <Icon
             iconName="icon/search"
-            size={18}
+            size={16}
             class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
           />
           <input
             type="text"
             bind:value={stockMovementSearchQuery}
             placeholder="Search"
-            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
+            class="w-full max-w-xs pl-9 pr-4 py-2 border border-input rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
           />
         </div>
-      </div>
-
-      <!-- Stock Movement Table -->
-      <div class="bg-card border border-border rounded-lg p-6">
         {#if true}
           {@const paginatedStockMovementData = stockMovementData.slice(
             (stockMovementPage - 1) * stockMovementRowsPerPage,
@@ -1932,120 +1852,94 @@
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#each lowStockKpiCards as kpi}
-          <div class="bg-card border border-border rounded-lg p-6">
-           <div class="flex items-center justify-between mb-4">
-  <div class="flex items-center gap-3">
-    <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center">
-      <Icon
-        iconName={kpi.icon as any}
-        size={20}
-        class={kpi.textColor}
-      />
-    </div>
-    <span class="text-sm font-medium text-muted-foreground">{kpi.label}</span>
-  </div>
-
-  <button
-    type="button"
-    class="p-1 hover:bg-muted rounded transition-colors"
-    aria-label="More options"
-  >
-    <Icon
-      iconName="icon/more-vertical"
-      size={20}
-      class="text-muted-foreground"
-    />
-  </button>
-</div>
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-3xl font-bold {kpi.valueColor}">{kpi.value}</p>
+          <div class="bg-card border border-border rounded-lg p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="{kpi.iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0">
+                  <Icon iconName={kpi.icon as any} size={18} class={kpi.textColor} />
+                </div>
+                <span class="text-sm text-muted-foreground">{kpi.label}</span>
+              </div>
+              <button type="button" class="p-1 hover:bg-muted rounded transition-colors" aria-label="More options">
+                <Icon iconName="icon/more-vertical" size={18} class="text-muted-foreground" />
+              </button>
             </div>
-           <div class="flex flex-row gap-4">
-
-             <div
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-            >
-              <Icon iconName="icon/arrow-up" size={12} />
-              <span>{kpi.change}%</span>
+            <p class="text-2xl font-bold {kpi.valueColor} mb-3">{kpi.value}</p>
+            <div class="flex items-center gap-3">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                <Icon iconName="icon/arrow-up" size={11} />
+                <span>{kpi.change}%</span>
+              </div>
+              <p class="text-xs text-muted-foreground">{kpi.changeLabel}</p>
             </div>
-            <p class="text-xs text-muted-foreground mt-1">{kpi.changeLabel}</p>
-           </div>
           </div>
         {/each}
       </div>
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-50">
-            <label
-              for="low-stock-date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
+          <div>
+            <label for="low-stock-date-range" class="text-sm font-medium text-foreground mb-2 block">
               Choose Date
             </label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="low-stock-date-range"
                 type="text"
                 bind:value={lowStockDateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker for low stock");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker for low stock")}
               />
             </div>
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="low-stock-location-filter"
-              label="Location"
-              options={lowStockFilters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="low-stock-location-filter" label="Location" options={lowStockFilters[0].options} placeholder="All" />
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-37.5">
-            <Dropdown
-              id="low-stock-products-filter"
-              label="Products"
-              options={lowStockFilters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="low-stock-products-filter" label="Products" options={lowStockFilters[1].options} placeholder="All" />
           </div>
-        </div>
-      </div>
-
-      <!-- Search Bar -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="relative">
-          <Icon
-            iconName="icon/search"
-            size={18}
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <input
-            type="text"
-            bind:value={lowStockSearchQuery}
-            placeholder="Search"
-            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
-          />
         </div>
       </div>
 
       <!-- Low Stock Table -->
       <div class="bg-card border border-border rounded-lg p-6">
+        <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
+          <!-- Search -->
+          <div class="relative">
+            <Icon iconName="icon/search" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              bind:value={lowStockSearchQuery}
+              placeholder="Search"
+              class="h-9 w-48 pl-9 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
+            />
+          </div>
+          <!-- Inline filters -->
+          <div class="flex items-center gap-2">
+            <Dropdown
+              id="ls-table-location"
+              options={lowStockFilters[0].options}
+              bind:value={lowStockLocationFilter}
+              placeholder="Location"
+              class="w-36"
+            />
+            <Dropdown
+              id="ls-table-category"
+              options={lowStockCategoryOptions}
+              bind:value={lowStockCategoryFilter}
+              placeholder="Category"
+              class="w-36"
+            />
+          </div>
+        </div>
         {#if true}
           {@const paginatedLowStockData = lowStockData.slice(
             (lowStockPage - 1) * lowStockRowsPerPage,
