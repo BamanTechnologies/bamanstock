@@ -192,10 +192,10 @@
           onchange={(e) =>
             pagination.onRowsPerPageChange(Number(e.currentTarget.value))}
         >
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
         </select>
         <span class="text-sm text-muted-foreground">Entries</span>
       </div>

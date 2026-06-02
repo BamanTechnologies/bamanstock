@@ -1,0 +1,59 @@
+<script lang="ts">
+  import Icon from "$lib/components/ui/Icon/index.js";
+
+  interface Props {
+    label: string;
+    value: string;
+    change: string;
+    changeLabel: string;
+    valueColor?: string;
+    icon?: string;
+    iconColor?: string;
+    textColor?: string;
+  }
+
+  let {
+    label,
+    value,
+    change,
+    changeLabel,
+    valueColor = "text-foreground",
+    icon,
+    iconColor,
+    textColor,
+  }: Props = $props();
+</script>
+
+<div class="bg-card border border-border rounded-lg p-5">
+  <div class="flex items-center justify-between mb-3">
+    {#if icon}
+      <div class="flex items-center gap-2">
+        <div
+          class="{iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+        >
+          <Icon iconName={icon as any} size={18} class={textColor} />
+        </div>
+        <span class="text-sm text-muted-foreground">{label}</span>
+      </div>
+    {:else}
+      <span class="text-sm text-muted-foreground">{label}</span>
+    {/if}
+    <button
+      type="button"
+      class="p-1 hover:bg-muted rounded transition-colors"
+      aria-label="More options"
+    >
+      <Icon iconName="icon/more-vertical" size={18} class="text-muted-foreground" />
+    </button>
+  </div>
+  <p class="text-2xl font-bold {valueColor} mb-3">{value}</p>
+  <div class="flex items-center gap-3">
+    <div
+      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+    >
+      <Icon iconName="icon/arrow-up" size={11} />
+      <span>{change}%</span>
+    </div>
+    <p class="text-xs text-muted-foreground">{changeLabel}</p>
+  </div>
+</div>
