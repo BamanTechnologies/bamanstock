@@ -2,15 +2,21 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
 
-  let activeTab = $state("Sales");
-  const tabs = [
-    "Sales",
-    "Revenue & Profit",
-    "Payments",
-    "Stock Movement",
-    "Low Stock",
-  ];
+  const tabs = ["Sales", "Revenue & Profit", "Payments", "Stock Movement", "Low Stock"];
+
+  let activeTab = $state($page.url.searchParams.get("tab") ?? "Sales");
+  $effect(() => {
+    const tab = $page.url.searchParams.get("tab");
+    if (tab !== null) activeTab = tab;
+  });
+
+  function switchTab(tab: string) {
+    activeTab = tab;
+    goto(`?tab=${encodeURIComponent(tab)}`, { replaceState: true, noScroll: true });
+  }
 
   // Revenue & Profit tab data
   const revenueKpiCards = [
@@ -72,34 +78,10 @@
 
   // Payments tab data
   const paymentsKpiCards = [
-    {
-      label: "Total Amount",
-      value: "$4,56,000",
-      icon: "icon/bar-chart",
-      iconColor: "bg-green-100",
-      textColor: "text-green-600",
-    },
-    {
-      label: "Total Paid",
-      value: "$2,56,42",
-      icon: "icon/credit-card",
-      iconColor: "bg-blue-100",
-      textColor: "text-blue-600",
-    },
-    {
-      label: "Total Unpaid",
-      value: "$1,52,45",
-      icon: "icon/dollar-sign",
-      iconColor: "bg-orange-100",
-      textColor: "text-orange-600",
-    },
-    {
-      label: "Overdue",
-      value: "$2,56,12",
-      icon: "icon/alert-triangle",
-      iconColor: "bg-red-100",
-      textColor: "text-red-600",
-    },
+    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBg: "#f0fdf4", iconColor: "#16a34a", borderColor: "border-l-green-500"  },
+    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBg: "#eff6ff", iconColor: "#3b82f6", borderColor: "border-l-blue-500"   },
+    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBg: "#fff7ed", iconColor: "#f97316", borderColor: "border-l-orange-500" },
+    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBg: "#fef2f2", iconColor: "#ef4444", borderColor: "border-l-red-500"    },
   ];
 
   // Mock payments report data
@@ -330,6 +312,7 @@
       icon: "icon/package",
       iconColor: "bg-green-100",
       textColor: "text-green-600",
+      borderColor: "border-l-green-500",
     },
     {
       label: "Total Stock Out",
@@ -340,6 +323,7 @@
       icon: "icon/shopping-bag",
       iconColor: "bg-blue-100",
       textColor: "text-blue-600",
+      borderColor: "border-l-blue-500",
     },
     {
       label: "Number of Transfers",
@@ -350,6 +334,7 @@
       icon: "icon/refresh-cw",
       iconColor: "bg-pink-100",
       textColor: "text-pink-600",
+      borderColor: "border-l-pink-500",
     },
   ];
 
@@ -553,36 +538,9 @@
 
   // Low Stock tab data
   const lowStockKpiCards = [
-    {
-      label: "Total Low Stock Items",
-      value: "142",
-      change: "25.5",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/alert-triangle",
-      iconColor: "bg-green-100",
-      textColor: "text-green-600",
-    },
-    {
-      label: "Critical Stock Items",
-      value: "35",
-      change: "12.2",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/shopping-bag",
-      iconColor: "bg-blue-100",
-      textColor: "text-blue-600",
-    },
-    {
-      label: "Value at Risk",
-      value: "$12,890.75",
-      change: "16.3",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/eye",
-      iconColor: "bg-pink-100",
-      textColor: "text-pink-600",
-    },
+    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100", textColor: "text-green-600", borderColor: "border-l-green-500" },
+    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100",  textColor: "text-blue-600",  borderColor: "border-l-blue-500"  },
+    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100",  textColor: "text-pink-600",  borderColor: "border-l-pink-500"  },
   ];
 
   // Mock low stock data
@@ -711,6 +669,18 @@
 
   let lowStockDateRange = $state("01-Jan-2025 - 12-Dec-2025");
   let lowStockSearchQuery = $state("");
+  let lowStockLocationFilter = $state("");
+  let lowStockCategoryFilter = $state("");
+
+  const lowStockCategoryOptions = [
+    { value: "", label: "All" },
+    { value: "computers", label: "Computers" },
+    { value: "electronics", label: "Electronics" },
+    { value: "shoe", label: "Shoe" },
+    { value: "furniture", label: "Furniture" },
+    { value: "bags", label: "Bags" },
+    { value: "phone", label: "Phone" },
+  ];
   let lowStockPage = $state(1);
   let lowStockRowsPerPage = $state(10);
   const lowStockTotalPages = $derived(
@@ -1207,7 +1177,7 @@
     <div class="flex gap-6">
       {#each tabs as tab}
         <button
-          onclick={() => (activeTab = tab)}
+          onclick={() => switchTab(tab)}
           class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab
             ? 'border-info text-info font-medium'
             : 'border-transparent text-muted-foreground hover:text-foreground'}"
@@ -1219,7 +1189,7 @@
   </div>
 
   <!-- Tab Content -->
-  {#if activeTab === "Sales"}
+    {#if activeTab === "Sales"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1257,73 +1227,37 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
-            <label
-              for="date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
-              Choose Date
-            </label>
+          <div>
+            <label for="date-range" class="text-sm font-medium text-foreground mb-2 block">Choose Date</label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="date-range"
                 type="text"
                 bind:value={dateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker")}
               />
             </div>
           </div>
-
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="location-filter"
-              label="Location"
-              options={filters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="location-filter" label="Location" options={filters[0].options} placeholder="All" />
           </div>
-
           <!-- Merchant Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="merchant-filter"
-              label="Merchant"
-              options={filters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="merchant-filter" label="Merchant" options={filters[1].options} placeholder="All" />
           </div>
-
           <!-- Category Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="category-filter"
-              label="Category"
-              options={filters[2].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="category-filter" label="Category" options={filters[2].options} placeholder="All" />
           </div>
-
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="products-filter"
-              label="Products"
-              options={filters[3].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="products-filter" label="Products" options={filters[3].options} placeholder="All" />
           </div>
         </div>
       </div>
@@ -1389,7 +1323,8 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Revenue & Profit"}
+  {/if}
+  {#if activeTab === "Revenue & Profit"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1462,22 +1397,54 @@
             </div>
           </div>
 
-          <!-- Chart Placeholder -->
-          <div
-            class="w-full h-64 bg-muted/30 rounded-lg flex items-center justify-center border border-border"
-          >
-            <div class="text-center">
-              <Icon
-                iconName="icon/line-chart"
-                size={48}
-                class="text-muted-foreground mx-auto mb-2"
-              />
-              <p class="text-sm text-muted-foreground">
-                Chart will be rendered here
-              </p>
-              <p class="text-xs text-muted-foreground mt-1">
-                (Chart.js/Recharts integration needed)
-              </p>
+          <!-- Revenue vs Profit SVG Chart -->
+          <div class="flex gap-3">
+            <!-- Y-axis labels -->
+            <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-10 shrink-0 text-right">
+              <span>$60k</span>
+              <span>$50k</span>
+              <span>$40k</span>
+              <span>$30k</span>
+              <span>$20k</span>
+              <span>$10k</span>
+            </div>
+            <div class="flex-1 relative h-64">
+              <svg viewBox="0 0 860 200" class="w-full h-full" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="revGradReport" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.01" />
+                  </linearGradient>
+                  <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#ec4899" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#ec4899" stop-opacity="0.01" />
+                  </linearGradient>
+                </defs>
+                <!-- Grid lines -->
+                {#each [0, 40, 80, 120, 160, 200] as y}
+                  <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.07" stroke-width="1" />
+                {/each}
+                <!-- Revenue area + line -->
+                <path d="M0,160 C60,145 120,125 200,130 C280,135 340,100 430,65 C510,32 580,110 660,100 C730,92 800,108 860,112 L860,200 L0,200 Z" fill="url(#revGradReport)" />
+                <path d="M0,160 C60,145 120,125 200,130 C280,135 340,100 430,65 C510,32 580,110 660,100 C730,92 800,108 860,112" fill="none" stroke="#3b82f6" stroke-width="2.5" />
+                <!-- Profit area + line -->
+                <path d="M0,180 C60,172 120,165 200,162 C280,158 340,148 430,138 C510,128 580,145 660,140 C730,136 800,142 860,144 L860,200 L0,200 Z" fill="url(#profitGrad)" />
+                <path d="M0,180 C60,172 120,165 200,162 C280,158 340,148 430,138 C510,128 580,145 660,140 C730,136 800,142 860,144" fill="none" stroke="#ec4899" stroke-width="2.5" />
+                <!-- Revenue dots -->
+                {#each [[0,160],[200,130],[430,65],[660,100],[860,112]] as [cx,cy]}
+                  <circle {cx} {cy} r="4" fill="#3b82f6" />
+                {/each}
+                <!-- Profit dots -->
+                {#each [[0,180],[200,162],[430,138],[660,140],[860,144]] as [cx,cy]}
+                  <circle {cx} {cy} r="4" fill="#ec4899" />
+                {/each}
+              </svg>
+              <!-- X-axis labels -->
+              <div class="absolute bottom-0 left-0 right-0 flex justify-between">
+                {#each ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as m}
+                  <span class="text-[10px] text-muted-foreground">{m}</span>
+                {/each}
+              </div>
             </div>
           </div>
         </div>
@@ -1495,24 +1462,52 @@
                 { value: "this-year", label: "This Year" },
               ]}
               value="this-week"
-              class="min-w-[120px]"
+              class="min-w-30"
             />
           </div>
 
-          <div class="space-y-4">
-            {#each revenueByCategory as item}
-              <div
-                class="flex items-center justify-between pb-4 border-b border-border last:border-0"
-              >
-                <div>
-                  <p class="text-sm font-medium text-foreground mb-1">
-                    {item.category}
-                  </p>
-                  <p class="text-xs text-muted-foreground">{item.items}</p>
+          <!-- Donut chart for category distribution -->
+          <div class="flex justify-center mb-4">
+            <svg viewBox="0 0 160 160" class="w-36 h-36">
+              <defs>
+                <linearGradient id="elecGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#3b82f6" /><stop offset="100%" stop-color="#6366f1" />
+                </linearGradient>
+              </defs>
+              <!-- Electronics 35% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="url(#elecGrad)" stroke-width="26"
+                stroke-dasharray="123.2 351.9" stroke-dashoffset="0" transform="rotate(-90 80 80)" />
+              <!-- Clothing 25% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#ec4899" stroke-width="26"
+                stroke-dasharray="87.9 351.9" stroke-dashoffset="-123.2" transform="rotate(-90 80 80)" />
+              <!-- Home Supplies 22% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#f59e0b" stroke-width="26"
+                stroke-dasharray="77.4 351.9" stroke-dashoffset="-211.1" transform="rotate(-90 80 80)" />
+              <!-- Beauty 10% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#22c55e" stroke-width="26"
+                stroke-dasharray="35.2 351.9" stroke-dashoffset="-288.5" transform="rotate(-90 80 80)" />
+              <!-- Groceries 8% -->
+              <circle cx="80" cy="80" r="56" fill="none" stroke="#a855f7" stroke-width="26"
+                stroke-dasharray="28.2 351.9" stroke-dashoffset="-323.7" transform="rotate(-90 80 80)" />
+              <circle cx="80" cy="80" r="43" class="fill-card" />
+              <text x="80" y="76" font-size="11" fill="currentColor" text-anchor="middle" font-weight="700">$40.6M</text>
+              <text x="80" y="90" font-size="8" fill="#6b7280" text-anchor="middle">Total</text>
+            </svg>
+          </div>
+
+          <!-- Legend + list -->
+          <div class="space-y-3">
+            {#each revenueByCategory as item, i}
+              {@const colors = ["bg-blue-500","bg-pink-500","bg-amber-500","bg-green-500","bg-purple-500"]}
+              <div class="flex items-center justify-between pb-3 border-b border-border last:border-0">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full {colors[i]} shrink-0"></span>
+                  <div>
+                    <p class="text-sm font-medium text-foreground">{item.category}</p>
+                    <p class="text-xs text-muted-foreground">{item.items}</p>
+                  </div>
                 </div>
-                <p class="text-sm font-semibold text-foreground">
-                  {item.revenue}
-                </p>
+                <p class="text-sm font-semibold text-foreground">{item.revenue}</p>
               </div>
             {/each}
           </div>
@@ -1523,7 +1518,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex flex-wrap gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
+          <div class="flex-1 min-w-50">
             <label
               for="revenue-date-range"
               class="text-sm font-medium text-foreground mb-2 block"
@@ -1551,7 +1546,7 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="revenue-location-filter"
               label="Location"
@@ -1561,7 +1556,7 @@
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
+          <div class="flex-1 min-w-37.5">
             <Dropdown
               id="revenue-products-filter"
               label="Products"
@@ -1635,26 +1630,18 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Payments"}
+  {/if}
+  {#if activeTab === "Payments"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {#each paymentsKpiCards as kpi}
-          <div
-            class="bg-card border border-border rounded-lg p-6 flex items-center gap-4"
-          >
-            <div
-              class="{kpi.iconColor} w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-            >
-              <Icon
-                iconName={kpi.icon as any}
-                size={32}
-                class={kpi.textColor}
-              />
+          <div class="bg-card border border-border border-l-[5px] {kpi.borderColor} rounded-2xl p-6 flex items-center gap-5">
+            <div style="background-color: {kpi.iconBg};" class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0">
+              <Icon iconName={kpi.icon as any} size={32} color={kpi.iconColor} />
             </div>
-
-            <div class="flex flex-col">
-              <span class="text-muted-foreground font-medium">{kpi.label}</span>
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm text-muted-foreground">{kpi.label}</span>
               <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
             </div>
           </div>
@@ -1663,53 +1650,29 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
-            <label
-              for="payments-date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
-              Choose Date
-            </label>
+          <div>
+            <label for="payments-date-range" class="text-sm font-medium text-foreground mb-2 block">Choose Date</label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="payments-date-range"
                 type="text"
                 bind:value={paymentsDateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker for payments");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker for payments")}
               />
             </div>
           </div>
-
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="payments-location-filter"
-              label="Location"
-              options={paymentsFilters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="payments-location-filter" label="Location" options={paymentsFilters[0].options} placeholder="All" />
           </div>
-
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="payments-products-filter"
-              label="Products"
-              options={paymentsFilters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="payments-products-filter" label="Products" options={paymentsFilters[1].options} placeholder="All" />
           </div>
         </div>
       </div>
@@ -1775,38 +1738,31 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Stock Movement"}
+  {/if}
+  {#if activeTab === "Stock Movement"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#each stockMovementKpiCards as kpi}
-          <div class="bg-card border border-border rounded-lg p-6">
-            <div class="flex flex-row gap-2 mb-4">
-              <div
-                class="{kpi.iconColor} w-8 h-8 rounded-lg flex items-center justify-center"
-              >
-                <Icon
-                  iconName={kpi.icon as any}
-                  size={24}
-                  class={kpi.textColor}
-                />
+          <div class="bg-card border border-border rounded-lg p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="{kpi.iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0">
+                  <Icon iconName={kpi.icon as any} size={18} class={kpi.textColor} />
+                </div>
+                <span class="text-sm text-muted-foreground">{kpi.label}</span>
               </div>
-              <span
-                class="flex items-center justify-center text-sm text-muted-foreground"
-                >{kpi.label}</span
-              >
+              <button type="button" class="p-1 hover:bg-muted rounded transition-colors" aria-label="More options">
+                <Icon iconName="icon/more-vertical" size={18} class="text-muted-foreground" />
+              </button>
             </div>
-            <p class="text-3xl font-bold text-foreground mb-2">{kpi.value}</p>
-            <div class="flex flex-row gap-4">
-              <div
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-              >
-                <Icon iconName="icon/arrow-up" size={12} />
+            <p class="text-2xl font-bold text-foreground mb-3">{kpi.value}</p>
+            <div class="flex items-center gap-3">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                <Icon iconName="icon/arrow-up" size={11} />
                 <span>{kpi.change}%</span>
               </div>
-              <p class="text-xs text-muted-foreground mt-1">
-                {kpi.changeLabel}
-              </p>
+              <p class="text-xs text-muted-foreground">{kpi.changeLabel}</p>
             </div>
           </div>
         {/each}
@@ -1814,76 +1770,48 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
-            <label
-              for="stock-movement-date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
-              Choose Date
-            </label>
+          <div>
+            <label for="stock-movement-date-range" class="text-sm font-medium text-foreground mb-2 block">Choose Date</label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="stock-movement-date-range"
                 type="text"
                 bind:value={stockMovementDateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker for stock movement");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker for stock movement")}
               />
             </div>
           </div>
-
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="stock-movement-location-filter"
-              label="Location"
-              options={stockMovementFilters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="stock-movement-location-filter" label="Location" options={stockMovementFilters[0].options} placeholder="All" />
           </div>
-
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="stock-movement-products-filter"
-              label="Products"
-              options={stockMovementFilters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="stock-movement-products-filter" label="Products" options={stockMovementFilters[1].options} placeholder="All" />
           </div>
         </div>
       </div>
 
-      <!-- Search Bar -->
+      <!-- Stock Movement Table -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="relative">
+        <div class="relative mb-4">
           <Icon
             iconName="icon/search"
-            size={18}
+            size={16}
             class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
           />
           <input
             type="text"
             bind:value={stockMovementSearchQuery}
             placeholder="Search"
-            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
+            class="w-full max-w-xs pl-9 pr-4 py-2 border border-input rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
           />
         </div>
-      </div>
-
-      <!-- Stock Movement Table -->
-      <div class="bg-card border border-border rounded-lg p-6">
         {#if true}
           {@const paginatedStockMovementData = stockMovementData.slice(
             (stockMovementPage - 1) * stockMovementRowsPerPage,
@@ -1918,125 +1846,100 @@
         {/if}
       </div>
     </div>
-  {:else if activeTab === "Low Stock"}
+  {/if}
+  {#if activeTab === "Low Stock"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#each lowStockKpiCards as kpi}
-          <div class="bg-card border border-border rounded-lg p-6">
-           <div class="flex items-center justify-between mb-4">
-  <div class="flex items-center gap-3">
-    <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center">
-      <Icon
-        iconName={kpi.icon as any}
-        size={20}
-        class={kpi.textColor}
-      />
-    </div>
-    <span class="text-sm font-medium text-muted-foreground">{kpi.label}</span>
-  </div>
-
-  <button
-    type="button"
-    class="p-1 hover:bg-muted rounded transition-colors"
-    aria-label="More options"
-  >
-    <Icon
-      iconName="icon/more-vertical"
-      size={20}
-      class="text-muted-foreground"
-    />
-  </button>
-</div>
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-3xl font-bold text-foreground">{kpi.value}</p>
+          <div class="bg-card border border-border rounded-lg p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="{kpi.iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0">
+                  <Icon iconName={kpi.icon as any} size={18} class={kpi.textColor} />
+                </div>
+                <span class="text-sm text-muted-foreground">{kpi.label}</span>
+              </div>
+              <button type="button" class="p-1 hover:bg-muted rounded transition-colors" aria-label="More options">
+                <Icon iconName="icon/more-vertical" size={18} class="text-muted-foreground" />
+              </button>
             </div>
-           <div class="flex flex-row gap-4">
-
-             <div
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-            >
-              <Icon iconName="icon/arrow-up" size={12} />
-              <span>{kpi.change}%</span>
+            <p class="text-2xl font-bold {kpi.valueColor} mb-3">{kpi.value}</p>
+            <div class="flex items-center gap-3">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                <Icon iconName="icon/arrow-up" size={11} />
+                <span>{kpi.change}%</span>
+              </div>
+              <p class="text-xs text-muted-foreground">{kpi.changeLabel}</p>
             </div>
-            <p class="text-xs text-muted-foreground mt-1">{kpi.changeLabel}</p>
-           </div>
           </div>
         {/each}
       </div>
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Date Range -->
-          <div class="flex-1 min-w-[200px]">
-            <label
-              for="low-stock-date-range"
-              class="text-sm font-medium text-foreground mb-2 block"
-            >
+          <div>
+            <label for="low-stock-date-range" class="text-sm font-medium text-foreground mb-2 block">
               Choose Date
             </label>
             <div class="relative">
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
+              <Icon iconName="icon/calendar" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 id="low-stock-date-range"
                 type="text"
                 bind:value={lowStockDateRange}
                 readonly
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-                onclick={() => {
-                  // TODO: Open date picker
-                  console.log("Open date picker for low stock");
-                }}
+                class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
+                onclick={() => console.log("Open date picker for low stock")}
               />
             </div>
           </div>
 
           <!-- Location Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="low-stock-location-filter"
-              label="Location"
-              options={lowStockFilters[0].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="low-stock-location-filter" label="Location" options={lowStockFilters[0].options} placeholder="All" />
           </div>
 
           <!-- Products Filter -->
-          <div class="flex-1 min-w-[150px]">
-            <Dropdown
-              id="low-stock-products-filter"
-              label="Products"
-              options={lowStockFilters[1].options}
-              placeholder="All"
-            />
+          <div>
+            <Dropdown id="low-stock-products-filter" label="Products" options={lowStockFilters[1].options} placeholder="All" />
           </div>
-        </div>
-      </div>
-
-      <!-- Search Bar -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="relative">
-          <Icon
-            iconName="icon/search"
-            size={18}
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <input
-            type="text"
-            bind:value={lowStockSearchQuery}
-            placeholder="Search"
-            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
-          />
         </div>
       </div>
 
       <!-- Low Stock Table -->
       <div class="bg-card border border-border rounded-lg p-6">
+        <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
+          <!-- Search -->
+          <div class="relative">
+            <Icon iconName="icon/search" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              bind:value={lowStockSearchQuery}
+              placeholder="Search"
+              class="h-9 w-48 pl-9 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
+            />
+          </div>
+          <!-- Inline filters -->
+          <div class="flex items-center gap-2">
+            <Dropdown
+              id="ls-table-location"
+              options={lowStockFilters[0].options}
+              bind:value={lowStockLocationFilter}
+              placeholder="Location"
+              class="w-36"
+            />
+            <Dropdown
+              id="ls-table-category"
+              options={lowStockCategoryOptions}
+              bind:value={lowStockCategoryFilter}
+              placeholder="Category"
+              class="w-36"
+            />
+          </div>
+        </div>
         {#if true}
           {@const paginatedLowStockData = lowStockData.slice(
             (lowStockPage - 1) * lowStockRowsPerPage,
@@ -2070,11 +1973,6 @@
           />
         {/if}
       </div>
-    </div>
-  {:else}
-    <!-- Placeholder for other tabs -->
-    <div class="bg-card border border-border rounded-lg p-8">
-      <p class="text-muted-foreground">{activeTab} content goes here</p>
     </div>
   {/if}
 </div>

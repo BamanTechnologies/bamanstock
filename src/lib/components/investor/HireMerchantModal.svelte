@@ -35,8 +35,6 @@
     onSendInvitation,
   }: HireMerchantModalProps = $props();
 
-  // Color constants from Figma
-  const PRIMARY_BLUE = "var(--primary-blue)";
 
   let selectedLocation = $state("");
   let categories = $state<string[]>([]);
@@ -56,15 +54,9 @@
   ];
 
   const statusConfig = {
-    active: { label: "Active", class: "bg-success text-success-foreground" },
-    declined: {
-      label: "Declined",
-      class: "bg-destructive text-destructive-foreground",
-    },
-    invited: {
-      label: "Invited",
-      class: "bg-info text-info-foreground",
-    },
+    active:   { label: "Active",   class: "bg-[rgba(62,183,128,0.19)] text-[#3eb780]" },
+    declined: { label: "Declined", class: "bg-[rgba(239,68,68,0.15)] text-red-500" },
+    invited:  { label: "Invited",  class: "bg-[rgba(59,130,246,0.15)] text-blue-500" },
   } as const;
 
   function handleClose() {
@@ -156,9 +148,11 @@
   <div
     class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
     onclick={handleBackdropClick}
+    onkeydown={(e) => e.key === 'Escape' && handleClose()}
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
+    tabindex="-1"
   >
     <div
       class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
@@ -180,7 +174,7 @@
 
       <div class="p-6 space-y-6">
         {#if merchant}
-          <div class="flex items-center gap-3 pb-4 border-b border-border">
+          <div class="flex items-center gap-3">
             <div
               class="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0"
             >
@@ -210,33 +204,21 @@
                   {statusConfig[merchant.status].label}
                 </span>
               </div>
-              <div
-                class="flex items-center gap-2 text-sm"
-                style="color: {PRIMARY_BLUE};"
-              >
-                <Icon
-                  iconName="icon/trending-up"
-                  size={16}
-                  style="color: {PRIMARY_BLUE};"
-                />
+              <div class="flex items-center gap-2" style="color:#4DA0E6; font-family:'Raleway',sans-serif; font-size:12.26px; font-weight:400; line-height:20px;">
+                <Icon iconName="icon/trending-up" size={14} style="color:#4DA0E6;" />
                 <span>{merchant.productsSold}+ Product Sold</span>
               </div>
             </div>
           </div>
 
-          <div class="space-y-2 w-full">
+          <div class="space-y-2">
             <label class="text-sm font-medium text-foreground">
               Assign Location
             </label>
-            <div
-              bind:this={locationDropdownRef}
-              class="relative"
-              style="width: 624px;"
-            >
+            <div bind:this={locationDropdownRef} class="relative">
               <button
                 type="button"
-                class="w-full flex items-center justify-between"
-                style="box-sizing: border-box; display: flex; flex-direction: row; align-items: center; padding: 14px 12px; isolation: isolate; width: 624px; height: 46px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 6px; flex: none; order: 1; align-self: stretch; flex-grow: 0;"
+                class="w-full flex items-center justify-between px-3 py-3 border border-border rounded-lg bg-background text-sm hover:border-foreground/30 transition-colors"
                 onclick={toggleLocationDropdown}
               >
                 <span class="text-sm text-foreground truncate text-left">

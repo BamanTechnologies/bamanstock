@@ -25,8 +25,10 @@
   // Get the lazy loader function for this icon
   const iconLoader = $derived(IconMap[iconName]);
 
-  // Load the icon
-  const iconPromise = $derived(iconLoader());
+  // Load the icon — fall back to a rejected promise if icon is not registered
+  const iconPromise = $derived(
+    iconLoader ? iconLoader() : Promise.reject(new Error(`Icon not found: ${iconName}`))
+  );
 </script>
 
 {#await iconPromise then iconModule}

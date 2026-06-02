@@ -9,21 +9,24 @@
 
   // Mock location data - replace with real data later
   let locations = $state([
-    {
-      name: "Santa Clara Area #1",
-      totalStockValue: "$156,900",
-      merchants: "785",
-      lowStockItems: "35",
-      status: "Active",
-    },
-    ...Array(9).fill({
-      name: "Santa Clara Area #1",
-      totalStockValue: "$156,900",
-      merchants: "785",
-      lowStockItems: "35",
-      status: "Active",
-    }),
+    { id: 1,  name: "Santa Clara Area #1",   totalStockValue: "$156,900", merchants: "24", lowStockItems: "8",  status: "Active"   },
+    { id: 2,  name: "Downtown Branch #2",    totalStockValue: "$98,450",  merchants: "18", lowStockItems: "3",  status: "Active"   },
+    { id: 3,  name: "Eastside Warehouse #3", totalStockValue: "$74,200",  merchants: "15", lowStockItems: "12", status: "Active"   },
+    { id: 4,  name: "Northpark Plaza #4",    totalStockValue: "$62,300",  merchants: "11", lowStockItems: "5",  status: "Active"   },
+    { id: 5,  name: "Westfield Center #5",   totalStockValue: "$48,760",  merchants: "9",  lowStockItems: "2",  status: "Active"   },
+    { id: 6,  name: "Lakeside Hub #6",       totalStockValue: "$38,900",  merchants: "7",  lowStockItems: "0",  status: "Inactive" },
+    { id: 7,  name: "Riverside Depot #7",    totalStockValue: "$29,500",  merchants: "6",  lowStockItems: "4",  status: "Active"   },
+    { id: 8,  name: "Hilltop Store #8",      totalStockValue: "$24,780",  merchants: "5",  lowStockItems: "1",  status: "Active"   },
+    { id: 9,  name: "Harbor Point #9",       totalStockValue: "$21,340",  merchants: "4",  lowStockItems: "0",  status: "Inactive" },
+    { id: 10, name: "Midtown Market #10",    totalStockValue: "$19,800",  merchants: "3",  lowStockItems: "6",  status: "Active"   },
   ]);
+
+  let searchQuery = $state("");
+  const filteredLocations = $derived(
+    searchQuery
+      ? locations.filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : locations
+  );
 
   let isDeleteLocationModalOpen = $state(false);
   let locationToDelete = $state<(typeof locations)[0] | null>(null);
@@ -35,10 +38,9 @@
     status: boolean;
   } | null>(null);
 
-function getStatusClass(status: string) {
+  function getStatusClass(status: string) {
     switch (status) {
       case "Active":
-        // This will apply the green background and white text
         return "bg-success/70 text-success-foreground px-3 py-1 rounded-md font-medium";
       case "Inactive":
         return "bg-muted text-muted-foreground px-3 py-1 rounded-md font-medium";
@@ -47,11 +49,10 @@ function getStatusClass(status: string) {
     }
   }
 
-function getStatusDot(status: string) {
+  function getStatusDot(status: string) {
     switch (status) {
       case "Active":
-      
-        return "bg-current"; 
+        return "bg-current";
       case "Inactive":
         return "bg-current";
       default:
@@ -124,7 +125,7 @@ function getStatusDot(status: string) {
 
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(locations.length / rowsPerPage));
+  const totalPages = $derived(Math.ceil(filteredLocations.length / rowsPerPage));
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -136,13 +137,11 @@ function getStatusDot(status: string) {
   }
 
   function handleView(location: (typeof locations)[0]) {
-    // Navigate to location details page
     const locationId = location.name.toLowerCase().replace(/\s+/g, "-");
     goto(`/dashboard/location/${locationId}`);
   }
 
   function handleEdit(location: (typeof locations)[0]) {
-    // Convert location data to modal format
     locationToEdit = {
       name: location.name,
       address: "123 Industrial Way, Suite 400, Anytown, ST 12345", // Mock address
@@ -179,7 +178,9 @@ function getStatusDot(status: string) {
       // Create mode - add new location
       console.log("Creating location:", data);
       // TODO: Implement API call to create location
+      const newId = locations.length > 0 ? Math.max(...locations.map(l => l.id)) + 1 : 1;
       locations.push({
+        id: newId,
         name: data.name,
         totalStockValue: "$0",
         merchants: "0",
@@ -199,7 +200,6 @@ function getStatusDot(status: string) {
     if (locationToDelete) {
       console.log("Deleting location:", locationToDelete);
       // TODO: Implement API call to delete location
-      // Remove from local state after successful deletion
       const index = locations.findIndex((l) => l === locationToDelete);
       if (index > -1) {
         locations.splice(index, 1);
@@ -211,15 +211,16 @@ function getStatusDot(status: string) {
 
 <div class="flex-1 p-6 space-y-6">
   <!-- Header with Add Location Button -->
-<div class="flex items-center justify-end">
-  <Button
-    class="bg-primary-blue text-info-foreground hover:opacity-90"
-    onclick={handleAddLocation}
-  >
-    <Icon iconName="icon/plus" size={16} class="mr-2" />
-    Add Location
-  </Button>
-</div>
+  <div class="flex items-center justify-end">
+    <Button
+      class="bg-primary-blue text-info-foreground hover:opacity-90"
+      onclick={handleAddLocation}
+    >
+      <Icon iconName="icon/plus" size={16} class="mr-2" />
+      Add Location
+    </Button>
+  </div>
+
   <!-- Empty State or Table Section -->
   {#if locations.length === 0}
     <EmptyState
@@ -230,9 +231,16 @@ function getStatusDot(status: string) {
       onAction={handleAddLocation}
     />
   {:else}
+    <!-- Search input -->
+    <div class="relative w-72">
+      <input type="text" placeholder="Search locations..." bind:value={searchQuery}
+        class="w-full rounded-full border border-border pl-10 pr-4 py-2 text-sm bg-background" />
+      <Icon iconName="icon/search" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    </div>
+
     <DataTable
       {columns}
-      data={locations}
+      data={filteredLocations}
       searchable={true}
       searchPlaceholder="Search"
       {filters}

@@ -1,6 +1,8 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
   import { cn } from "$lib/utils.js";
+  import { onDestroy } from "svelte";
+  import { browser } from "$app/environment";
 
   interface DropdownOption {
     value: string;
@@ -32,15 +34,25 @@
     onchange,
   }: DropdownProps = $props();
 
-  // Convert value to string for comparison and display
   const stringValue = $derived(String(value || ""));
 
   let isOpen = $state(false);
   let dropdownRef = $state<HTMLDivElement | undefined>(undefined);
 
+  function handleClickOutside(event: MouseEvent) {
+    if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
+      isOpen = false;
+      if (browser) document.removeEventListener("click", handleClickOutside);
+    }
+  }
+
   function toggleDropdown() {
-    if (!disabled) {
-      isOpen = !isOpen;
+    if (disabled || !browser) return;
+    isOpen = !isOpen;
+    if (isOpen) {
+      document.addEventListener("click", handleClickOutside);
+    } else {
+      document.removeEventListener("click", handleClickOutside);
     }
   }
 
@@ -48,29 +60,16 @@
     if (!disabled) {
       value = optionValue;
       isOpen = false;
+      if (browser) document.removeEventListener("click", handleClickOutside);
       onchange?.(optionValue);
     }
   }
 
-  function handleClickOutside(event: MouseEvent) {
-    if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
-      isOpen = false;
-    }
-  }
-
-  $effect(() => {
-    if (isOpen) {
-      document.addEventListener("click", handleClickOutside);
-      return () => {
-        document.removeEventListener("click", handleClickOutside);
-      };
-    }
+  onDestroy(() => {
+    if (browser) document.removeEventListener("click", handleClickOutside);
   });
 
-  const selectedOption = $derived(
-    options.find((opt) => opt.value === stringValue)
-  );
-
+  const selectedOption = $derived(options.find((opt) => opt.value === stringValue));
   const displayText = $derived(selectedOption?.label || placeholder);
 </script>
 
@@ -89,22 +88,16 @@
       "flex items-center justify-between gap-2 w-full px-3 py-2 h-9 bg-background border border-input rounded-md text-sm text-foreground transition-colors",
       "hover:bg-muted focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1",
       "disabled:opacity-50 disabled:cursor-not-allowed",
-      "appearance-none",
       className
     )}
     aria-expanded={isOpen}
     aria-haspopup="listbox"
   >
-    <span class="truncate text-left flex-1">
-      {displayText}
-    </span>
+    <span class="truncate text-left flex-1">{displayText}</span>
     <Icon
       iconName="icon/chevron-down"
       size={16}
-      class={cn(
-        "text-muted-foreground transition-transform flex-shrink-0",
-        isOpen ? "rotate-180" : ""
-      )}
+      class={cn("text-muted-foreground transition-transform shrink-0", isOpen ? "rotate-180" : "")}
     />
   </button>
 
@@ -120,8 +113,7 @@
           aria-selected={stringValue === option.value}
           disabled={option.disabled}
           class={cn(
-            "w-full text-left px-4 py-2 text-sm transition-colors",
-            "hover:bg-muted",
+            "w-full text-left px-4 py-2 text-sm transition-colors hover:bg-muted",
             stringValue === option.value ? "bg-muted font-medium" : "",
             option.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           )}
