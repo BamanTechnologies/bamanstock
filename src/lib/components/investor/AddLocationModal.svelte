@@ -93,7 +93,7 @@
     tabindex="-1"
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full max-w-md"
+      class="bg-card rounded-lg shadow-xl w-full max-w-md"
       onclick={(e) => e.stopPropagation()}
       role="document"
     >

@@ -81,10 +81,10 @@
 
   // Payments tab data
   const paymentsKpiCards = [
-    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBg: "#f0fdf4", iconColor: "#16a34a", borderColor: "border-green-500"  },
-    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBg: "#eff6ff", iconColor: "#3b82f6", borderColor: "border-blue-500"   },
-    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBg: "#fff7ed", iconColor: "#f97316", borderColor: "border-orange-500" },
-    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBg: "#fef2f2", iconColor: "#ef4444", borderColor: "border-red-500"    },
+    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBgClass: "bg-green-50  dark:bg-green-900/40",  iconColor: "#16a34a", borderColor: "border-green-500"  },
+    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBgClass: "bg-blue-50   dark:bg-blue-900/40",   iconColor: "#3b82f6", borderColor: "border-blue-500"   },
+    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316", borderColor: "border-orange-500" },
+    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50    dark:bg-red-900/40",    iconColor: "#ef4444", borderColor: "border-red-500"    },
   ];
 
   // Mock payments report data
@@ -258,7 +258,7 @@
         const isPaid = row.status === "Paid";
         return `
           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            isPaid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+            isPaid ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
           }">
             <span class="w-1.5 h-1.5 rounded-full ${
               isPaid ? "bg-green-600" : "bg-red-600"
@@ -313,8 +313,8 @@
       changeType: "positive",
       changeLabel: "From Last Month",
       icon: "icon/package",
-      iconColor: "bg-green-100",
-      textColor: "text-green-600",
+      iconColor: "bg-green-100 dark:bg-green-900/40",
+      textColor: "text-green-600 dark:text-green-400",
       borderColor: "border-l-green-500",
     },
     {
@@ -324,8 +324,8 @@
       changeType: "positive",
       changeLabel: "From Last Month",
       icon: "icon/shopping-bag",
-      iconColor: "bg-blue-100",
-      textColor: "text-blue-600",
+      iconColor: "bg-blue-100 dark:bg-blue-900/40",
+      textColor: "text-blue-600 dark:text-blue-400",
       borderColor: "border-l-blue-500",
     },
     {
@@ -335,8 +335,8 @@
       changeType: "positive",
       changeLabel: "From Last Month",
       icon: "icon/refresh-cw",
-      iconColor: "bg-pink-100",
-      textColor: "text-pink-600",
+      iconColor: "bg-pink-100 dark:bg-pink-900/40",
+      textColor: "text-pink-600 dark:text-pink-400",
       borderColor: "border-l-pink-500",
     },
   ];
@@ -541,9 +541,9 @@
 
   // Low Stock tab data
   const lowStockKpiCards = [
-    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100", textColor: "text-green-600", borderColor: "border-l-green-500" },
-    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100",  textColor: "text-blue-600",  borderColor: "border-l-blue-500"  },
-    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100",  textColor: "text-pink-600",  borderColor: "border-l-pink-500"  },
+    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100 dark:bg-green-900/40", textColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
+    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100 dark:bg-blue-900/40",  textColor: "text-blue-600 dark:text-blue-400",  borderColor: "border-l-blue-500"  },
+    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100 dark:bg-pink-900/40",  textColor: "text-pink-600 dark:text-pink-400",  borderColor: "border-l-pink-500"  },
   ];
 
   // Mock low stock data
@@ -1546,7 +1546,7 @@
             label={kpi.label}
             value={kpi.value}
             icon={kpi.icon}
-            iconBg={kpi.iconBg}
+            iconBgClass={kpi.iconBgClass}
             iconColor={kpi.iconColor}
             borderColor={kpi.borderColor}
           />

@@ -31,7 +31,7 @@
       change: "-19% vs Last Month",
       changeType: "negative",
       icon: "icon/bar-chart",
-      iconColor: "bg-green-100",
+      iconColor: "bg-green-100 dark:bg-green-900/40",
     },
     {
       label: "Total Stock Value",
@@ -39,7 +39,7 @@
       change: "+35% vs Last Month",
       changeType: "positive",
       icon: "icon/trending-up",
-      iconColor: "bg-blue-100",
+      iconColor: "bg-blue-100 dark:bg-blue-900/40",
     },
     {
       label: "Active Merchants",
@@ -47,7 +47,7 @@
       change: "+41% vs Last Month",
       changeType: "positive",
       icon: "icon/building",
-      iconColor: "bg-purple-100",
+      iconColor: "bg-purple-100 dark:bg-purple-900/40",
     },
     {
       label: "Low Stock Items",
@@ -55,7 +55,7 @@
       change: "-20% vs Last Month",
       changeType: "negative",
       icon: "icon/box",
-      iconColor: "bg-orange-100",
+      iconColor: "bg-orange-100 dark:bg-orange-900/40",
     },
   ];
 

@@ -179,20 +179,20 @@
   }
 </script>
 
-<div class="min-h-screen background: #F8F8F8">
+<div class="min-h-screen bg-background">
   <Header />
 
   <main class="container mx-auto px-5 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
       <h1
-        class="flex-none"
-        style="width: 507px; max-width: 100%; height: 38px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 29px; line-height: 38px; color: #212B36; flex: none; order: 0; flex-grow: 0;"
+        class="flex-none text-foreground"
+        style="width: 507px; max-width: 100%; height: 38px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 29px; line-height: 38px; flex: none; order: 0; flex-grow: 0;"
       >
         Find & Work With Trusted Merchants
       </h1>
       <p
-        class="flex-none mt-2"
-        style="width: 528px; max-width: 100%; height: 18px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; color: #7E7E7E; flex: none; order: 1; flex-grow: 0;"
+        class="flex-none mt-2 text-muted-foreground"
+        style="width: 528px; max-width: 100%; height: 18px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; flex: none; order: 1; flex-grow: 0;"
       >
         Browse registered merchants or invite new ones to manage stock and sales
         together.

@@ -155,7 +155,7 @@
     tabindex="-1"
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      class="bg-card rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
       onclick={(e) => e.stopPropagation()}
     >
       <div class="flex items-center justify-between p-6 border-b border-border">

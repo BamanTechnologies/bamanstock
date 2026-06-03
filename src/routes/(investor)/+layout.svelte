@@ -18,10 +18,17 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { page } from "$app/stores";
+  import { themeStore } from "$lib/stores/theme.svelte.js";
 
   let { children } = $props();
 
   let showProfileDropdown = $state(false);
+
+  $effect(() => { themeStore.init(); });
+
+  function toggleTheme() {
+    themeStore.set(themeStore.current === 'Dark' ? 'Light' : 'Dark');
+  }
 
   const pageTitle = $derived.by(() => {
     const path = $page.url.pathname;
@@ -126,6 +133,18 @@
           <div class="flex items-center gap-4">
             <Icon iconName="icon/bell"     size={20} class="text-muted-foreground cursor-pointer hover:text-foreground" />
             <Icon iconName="icon/settings" size={20} class="text-muted-foreground cursor-pointer hover:text-foreground" />
+            <button
+              type="button"
+              onclick={toggleTheme}
+              aria-label="Toggle theme"
+              class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            >
+              {#if themeStore.current === 'Dark'}
+                <Icon iconName="icon/sun" size={18} />
+              {:else}
+                <Icon iconName="icon/moon" size={18} />
+              {/if}
+            </button>
 
             <div class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-base cursor-pointer overflow-hidden">
               🇬🇧

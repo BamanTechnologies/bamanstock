@@ -12,8 +12,8 @@
 </script>
 
 <div
-  class="relative flex-none"
-  style="box-sizing: border-box; width: 311.52px; height: 225.21px; background: #FFFFFF; border: 1.22619px solid #E0E0E0; border-radius: 9.80952px; flex-grow: 0; align-self: stretch;"
+  class="relative flex-none bg-card border border-border"
+  style="box-sizing: border-box; width: 311.52px; height: 225.21px; border-radius: 9.80952px; flex-grow: 0; align-self: stretch;"
 >
   <div
     class="flex flex-col items-center flex-none"
@@ -36,15 +36,15 @@
       style="padding: 0px; gap: 4px; width: 267px; height: 44px; flex-grow: 0; align-self: stretch;"
     >
       <div
-        class="flex-none"
-        style="width: 188px; height: 24px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 19px; line-height: 24px; color: #212B36; flex-grow: 0;"
+        class="flex-none text-foreground"
+        style="width: 188px; height: 24px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 19px; line-height: 24px; flex-grow: 0;"
       >
         Invite New Merchant
       </div>
 
       <div
-        class="flex-none"
-        style="width: 267px; height: 16px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 12px; line-height: 16px; color: #7E7E7E; flex: none; order: 1; flex-grow: 0;"
+        class="flex-none text-muted-foreground"
+        style="width: 267px; height: 16px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 12px; line-height: 16px; flex: none; order: 1; flex-grow: 0;"
       >
         Know a merchant who isn't on Baman Stock yet?
       </div>
