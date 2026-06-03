@@ -5,18 +5,17 @@
     label: string;
     value: string;
     icon: string;
-    iconBg: string;
+    iconBgClass: string;
     iconColor: string;
     borderColor: string;
   }
 
-  let { label, value, icon, iconBg, iconColor, borderColor }: Props = $props();
+  let { label, value, icon, iconBgClass, iconColor, borderColor }: Props = $props();
 </script>
 
 <div class="bg-card border-2 {borderColor} rounded-2xl p-6 flex items-center gap-5">
   <div
-    style="background-color: {iconBg};"
-    class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
+    class="{iconBgClass} w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
   >
     <Icon iconName={icon as any} size={32} color={iconColor} />
   </div>

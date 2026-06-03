@@ -111,7 +111,7 @@
     tabindex="-1"
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full max-w-md"
+      class="bg-card rounded-lg shadow-xl w-full max-w-md"
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
@@ -170,7 +170,7 @@
             </div>
             {#if locationDropdownOpen && filteredLocations.length > 0}
               <div
-                class="absolute z-10 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+                class="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto"
                 role="listbox"
               >
                 {#each filteredLocations as location}

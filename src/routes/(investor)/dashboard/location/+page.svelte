@@ -81,7 +81,7 @@
       label: "Low Stock Items",
       render: (row: (typeof locations)[0]) => {
         return `
-          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700">
             ${row.lowStockItems}
           </span>
         `;
@@ -212,13 +212,14 @@
 <div class="flex-1 p-6 space-y-6">
   <!-- Header with Add Location Button -->
   <div class="flex items-center justify-end">
-    <Button
-      class="bg-primary-blue text-info-foreground hover:opacity-90"
+    <button
+      type="button"
       onclick={handleAddLocation}
+      class="inline-flex items-center gap-2 px-4 py-2 bg-info text-info-foreground text-sm font-medium rounded-md hover:bg-info/80 active:scale-95 transition-all duration-150"
     >
-      <Icon iconName="icon/plus" size={16} class="mr-2" />
+      <Icon iconName="icon/plus" size={16} />
       Add Location
-    </Button>
+    </button>
   </div>
 
   <!-- Empty State or Table Section -->

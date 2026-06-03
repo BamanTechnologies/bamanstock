@@ -3,8 +3,9 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import ToggleSwitch from "$lib/components/investor/ToggleSwitch.svelte";
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
+  import { themeStore } from "$lib/stores/theme.svelte.js";
 
-  let theme = $state<"Light" | "Dark" | "System">("Light");
+  const theme = $derived(themeStore.current);
   let language = $state("English");
   let notificationsEnabled = $state(true);
   let twoFactorEnabled = $state(true);
@@ -61,7 +62,7 @@
         >
           <button
             type="button"
-            onclick={() => (theme = "Light")}
+            onclick={() => themeStore.set("Light")}
             class="px-4 py-2 text-sm rounded-md transition-colors {theme ===
             'Light'
               ? 'bg-info text-info-foreground'
@@ -71,7 +72,7 @@
           </button>
           <button
             type="button"
-            onclick={() => (theme = "Dark")}
+            onclick={() => themeStore.set("Dark")}
             class="px-4 py-2 text-sm rounded-md transition-colors {theme ===
             'Dark'
               ? 'bg-info text-info-foreground'
@@ -81,7 +82,7 @@
           </button>
           <button
             type="button"
-            onclick={() => (theme = "System")}
+            onclick={() => themeStore.set("System")}
             class="px-4 py-2 text-sm rounded-md transition-colors {theme ===
             'System'
               ? 'bg-info text-info-foreground'

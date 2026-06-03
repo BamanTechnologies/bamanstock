@@ -13,19 +13,19 @@
       label: "Total Merchants",
       value: "20",
       icon: "icon/user",
-      color: "bg-green-100",
+      color: "bg-green-100 dark:bg-green-900/40",
     },
     {
       label: "Active Merchants",
       value: "13",
       icon: "icon/users",
-      color: "bg-blue-100",
+      color: "bg-blue-100 dark:bg-blue-900/40",
     },
     {
       label: "Merchant per Location",
       value: "4",
       icon: "icon/building",
-      color: "bg-purple-100",
+      color: "bg-purple-100 dark:bg-purple-900/40",
     },
   ];
 
@@ -55,13 +55,13 @@
   function getStatusClass(status: string) {
     switch (status) {
       case "Active":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700";
       case "Invited":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600";
       case "Declined":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600";
     }
   }
 

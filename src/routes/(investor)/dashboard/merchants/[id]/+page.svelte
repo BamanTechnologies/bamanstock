@@ -31,7 +31,7 @@
       change: "-19% vs Last Month",
       changeType: "negative",
       icon: "icon/bar-chart" as const,
-      iconColor: "bg-green-100",
+      iconColor: "bg-green-100 dark:bg-green-900/40",
     },
     {
       label: "Total Transaction",
@@ -39,7 +39,7 @@
       change: "+35% vs Last Month",
       changeType: "positive",
       icon: "icon/trending-up" as const,
-      iconColor: "bg-blue-100",
+      iconColor: "bg-blue-100 dark:bg-blue-900/40",
     },
     {
       label: "Products Assigned",
@@ -47,7 +47,7 @@
       change: "+41% vs Last Month",
       changeType: "positive",
       icon: "icon/package" as const,
-      iconColor: "bg-orange-100",
+      iconColor: "bg-orange-100 dark:bg-orange-900/40",
     },
     {
       label: "Current Stock Value",
@@ -55,7 +55,7 @@
       change: "-20% vs Last Month",
       changeType: "negative",
       icon: "icon/trending-up" as const,
-      iconColor: "bg-purple-100",
+      iconColor: "bg-purple-100 dark:bg-purple-900/40",
     },
   ];
 
@@ -194,8 +194,8 @@
         "1,200 units of stock were assigned to the merchant account.",
       timestamp: "Jul 12, 2024, 10:30 AM",
       icon: "icon/box",
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600",
+      iconBg: "bg-blue-100 dark:bg-blue-900/40",
+      iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       id: 2,
@@ -203,8 +203,8 @@
       description: "50 units sold to investor John Doe.",
       timestamp: "Jul 11, 2024, 02:45 PM",
       icon: "icon/tag",
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600",
+      iconBg: "bg-green-100 dark:bg-green-900/40",
+      iconColor: "text-green-600 dark:text-green-400",
     },
     {
       id: 3,
@@ -212,8 +212,8 @@
       description: "Payment of $1,500.00 generated. Status: Completed.",
       timestamp: "Jul 10, 2024, 09:00 AM",
       icon: "icon/dollar-sign",
-      iconBg: "bg-purple-100",
-      iconColor: "text-purple-600",
+      iconBg: "bg-purple-100 dark:bg-purple-900/40",
+      iconColor: "text-purple-600 dark:text-purple-400",
     },
     {
       id: 4,
@@ -221,8 +221,8 @@
       description: "Contact information was updated by admin.",
       timestamp: "Jul 09, 2024, 05:15 PM",
       icon: "icon/edit",
-      iconBg: "bg-orange-100",
-      iconColor: "text-orange-600",
+      iconBg: "bg-orange-100 dark:bg-orange-900/40",
+      iconColor: "text-orange-600 dark:text-orange-400",
     },
     {
       id: 5,
@@ -230,8 +230,8 @@
       description: "Merchant location was reassigned to 'Downtown Branch'.",
       timestamp: "Jul 08, 2024, 11:20 AM",
       icon: "icon/map-pin",
-      iconBg: "bg-cyan-100",
-      iconColor: "text-cyan-600",
+      iconBg: "bg-cyan-100 dark:bg-cyan-900/40",
+      iconColor: "text-cyan-600 dark:text-cyan-400",
     },
   ];
 
@@ -277,7 +277,7 @@
               >{merchant.location}</span
             >
             <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-green-100 text-green-800 border-green-200"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700"
             >
               <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
               {merchant.status}
@@ -412,7 +412,7 @@
           <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-muted-foreground">Total Stock Value</span>
             <div
-              class="bg-purple-100 w-10 h-10 rounded-lg flex items-center justify-center"
+              class="bg-purple-100 dark:bg-purple-900/40 w-10 h-10 rounded-lg flex items-center justify-center"
             >
               <Icon
                 iconName="icon/line-chart"
@@ -429,7 +429,7 @@
             <span class="text-sm text-muted-foreground">Unique Stock Items</span
             >
             <div
-              class="bg-orange-100 w-10 h-10 rounded-lg flex items-center justify-center"
+              class="bg-orange-100 dark:bg-orange-900/40 w-10 h-10 rounded-lg flex items-center justify-center"
             >
               <Icon iconName="icon/box" size={20} class="text-orange-600" />
             </div>
