@@ -831,7 +831,7 @@
     <div class="space-y-6">
       <!-- Header with Invite Merchant Button -->
       <div class="flex items-center justify-end">
-        <Button class="bg-info text-info-foreground hover:bg-info/90">
+        <Button class="bg-[var(--primary-blue)] text-white hover:opacity-90">
           <Icon iconName="icon/plus" size={16} class="mr-2" />
           Invite Merchant
         </Button>

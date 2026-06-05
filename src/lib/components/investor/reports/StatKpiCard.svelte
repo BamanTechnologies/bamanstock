@@ -25,26 +25,15 @@
 </script>
 
 <div class="bg-card border border-border rounded-lg p-5">
-  <div class="flex items-center justify-between mb-3">
+  <div class="flex items-center gap-2 mb-3">
     {#if icon}
-      <div class="flex items-center gap-2">
-        <div
-          class="{iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-        >
-          <Icon iconName={icon as any} size={18} class={textColor} />
-        </div>
-        <span class="text-sm text-muted-foreground">{label}</span>
+      <div
+        class="{iconColor} w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+      >
+        <Icon iconName={icon as any} size={18} class={textColor} />
       </div>
-    {:else}
-      <span class="text-sm text-muted-foreground">{label}</span>
     {/if}
-    <button
-      type="button"
-      class="p-1 hover:bg-muted rounded transition-colors"
-      aria-label="More options"
-    >
-      <Icon iconName="icon/more-vertical" size={18} class="text-muted-foreground" />
-    </button>
+    <span class="text-sm text-muted-foreground">{label}</span>
   </div>
   <p class="text-2xl font-bold {valueColor} mb-3">{value}</p>
   <div class="flex items-center gap-3">

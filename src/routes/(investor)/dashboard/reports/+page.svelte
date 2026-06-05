@@ -1063,9 +1063,22 @@
     },
   ]);
 
+  let salesLocationFilter = $state("");
+  let salesMerchantFilter = $state("");
+  let salesCategoryFilter = $state("");
+  let salesProductFilter = $state("");
+  const filteredSalesData = $derived(
+    salesReportData.filter((row) => {
+      if (salesLocationFilter && row.location.toLowerCase().replace(/\s+/g, "-") !== salesLocationFilter) return false;
+      if (salesMerchantFilter && row.assignedMerchant.toLowerCase().replace(/\s+/g, "-") !== salesMerchantFilter) return false;
+      if (salesCategoryFilter && row.category.toLowerCase() !== salesCategoryFilter) return false;
+      if (salesProductFilter && !row.productName.toLowerCase().includes(salesProductFilter)) return false;
+      return true;
+    })
+  );
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(salesReportData.length / rowsPerPage));
+  const totalPages = $derived(Math.ceil(filteredSalesData.length / rowsPerPage));
 
   // Table columns
   const salesColumns = [
@@ -1231,10 +1244,10 @@
         id="date-range"
         bind:dateRange
         filters={[
-          { id: "location-filter", label: "Location", options: filters[0].options },
-          { id: "merchant-filter", label: "Merchant", options: filters[1].options },
-          { id: "category-filter", label: "Category", options: filters[2].options },
-          { id: "products-filter", label: "Products", options: filters[3].options },
+          { id: "location-filter", label: "Location", options: filters[0].options, value: salesLocationFilter, onchange: (v) => { salesLocationFilter = v; currentPage = 1; } },
+          { id: "merchant-filter", label: "Merchant", options: filters[1].options, value: salesMerchantFilter, onchange: (v) => { salesMerchantFilter = v; currentPage = 1; } },
+          { id: "category-filter", label: "Category", options: filters[2].options, value: salesCategoryFilter, onchange: (v) => { salesCategoryFilter = v; currentPage = 1; } },
+          { id: "products-filter", label: "Products", options: filters[3].options, value: salesProductFilter, onchange: (v) => { salesProductFilter = v; currentPage = 1; } },
         ]}
       />
 
@@ -1279,7 +1292,7 @@
         </div>
 
         {#if true}
-          {@const paginatedData = salesReportData.slice(
+          {@const paginatedData = filteredSalesData.slice(
             (currentPage - 1) * rowsPerPage,
             currentPage * rowsPerPage,
           )}

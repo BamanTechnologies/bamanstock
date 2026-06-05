@@ -161,7 +161,7 @@
           <span class="text-sm font-medium text-foreground">Password</span>
         </div>
         <Button
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
           onclick={handleChangePassword}
         >
           Change Password
@@ -217,8 +217,7 @@
           <span class="text-sm font-medium text-foreground">Export Data</span>
         </div>
         <Button
-          variant="outline"
-          class="bg-info/20 text-info hover:bg-info/30"
+          class="bg-(--primary-blue) text-white hover:opacity-90"
           onclick={handleExportData}
         >
           Download My Data
@@ -242,7 +241,7 @@
           >
         </div>
         <Button
-          class="bg-red-600/10 text-red-600 hover:bg-red-700"
+          class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800"
           onclick={handleDeleteAccount}
         >
           Delete Account
@@ -275,8 +274,7 @@
           >
         </div>
         <Button
-          variant="outline"
-          class="bg-info/20 text-info hover:bg-info/30"
+          class="bg-(--primary-blue) text-white hover:opacity-90"
           onclick={handleOpenHelpCenter}
         >
           Open help center
@@ -300,8 +298,7 @@
           >
         </div>
         <Button
-          variant="outline"
-          class="bg-info/20 text-info hover:bg-info/30"
+          class="bg-(--primary-blue) text-white hover:opacity-90"
           onclick={handleContactSupport}
         >
           Send message

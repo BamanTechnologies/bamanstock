@@ -289,7 +289,7 @@
   <!-- Header with Add Stock Button -->
   <div class="flex items-center justify-end">
     <Button
-      class="bg-info text-info-foreground hover:bg-info/90"
+      class="bg-[var(--primary-blue)] text-white hover:opacity-90"
       onclick={handleAddStock}
     >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
@@ -313,25 +313,8 @@
   searchPlaceholder="Search by stock name..."
   {filters}
   actions={[
-    {
-      icon: "icon/edit",
-      // If the component uses 'label' for tooltips or aria-labels, keep it.
-      // If it renders it as text next to the icon, try removing it or 
-      // check the DataTable's internal props.
-      label: "Edit", 
-      onClick: handleEdit,
-    },
-    {
-      icon: "icon/refresh-cw",
-      label: "Transfer",
-      onClick: handleTransfer,
-    },
-    {
-      icon: "icon/trash",
-      label: "Delete",
-      onClick: handleDelete,
-      variant: "destructive",
-    },
+    { icon: "icon/edit",  label: "Edit",   onClick: handleEdit },
+    { icon: "icon/trash", label: "Delete", onClick: handleDelete, variant: "destructive" },
   ]}
   />
   {/if}

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { goto } from "$app/navigation";
@@ -215,7 +214,8 @@
     <button
       type="button"
       onclick={handleAddLocation}
-      class="inline-flex items-center gap-2 px-4 py-2 bg-info text-info-foreground text-sm font-medium rounded-md hover:bg-info/80 active:scale-95 transition-all duration-150"
+      class="inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all"
+      style="background-color: #4DA0E6;"
     >
       <Icon iconName="icon/plus" size={16} />
       Add Location
@@ -232,25 +232,14 @@
       onAction={handleAddLocation}
     />
   {:else}
-    <!-- Search input -->
-    <div class="relative w-72">
-      <input type="text" placeholder="Search locations..." bind:value={searchQuery}
-        class="w-full rounded-full border border-border pl-10 pr-4 py-2 text-sm bg-background" />
-      <Icon iconName="icon/search" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-    </div>
-
     <DataTable
       {columns}
       data={filteredLocations}
       searchable={true}
       searchPlaceholder="Search"
       {filters}
+      onRowClick={handleView}
       actions={[
-        {
-          icon: "icon/eye",
-          label: "View",
-          onClick: handleView,
-        },
         {
           icon: "icon/edit",
           label: "Edit",

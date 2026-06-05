@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Icon from "$lib/components/ui/Icon/index.js";
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
 
   interface FilterOption {
@@ -17,51 +16,60 @@
 
   interface Props {
     id: string;
-    dateRange: string;
+    dateRange?: string;
     filters: Filter[];
   }
 
-  let { id, dateRange = $bindable(), filters }: Props = $props();
+  let { id, dateRange = $bindable(""), filters }: Props = $props();
 
-  // Map filter count → responsive grid columns (date input + N filters)
+  const today = new Date();
+  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+
+  function toInputDate(d: Date) {
+    return d.toISOString().slice(0, 10);
+  }
+
+  let startDate = $state(toInputDate(sixMonthsAgo));
+  let endDate = $state(toInputDate(today));
+
   const colsClass: Record<number, string> = {
-    1: "sm:grid-cols-2",
-    2: "sm:grid-cols-3",
-    3: "sm:grid-cols-2 lg:grid-cols-4",
-    4: "sm:grid-cols-2 lg:grid-cols-5",
+    1: "sm:grid-cols-[auto_1fr_1fr_1fr]",
+    2: "sm:grid-cols-[auto_1fr_1fr_1fr_1fr]",
+    3: "sm:grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]",
+    4: "sm:grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr]",
   };
   const gridCols = $derived(colsClass[filters.length] ?? "sm:grid-cols-3");
 </script>
 
-<div class="bg-card border border-border rounded-lg p-6">
-  <div class="grid grid-cols-1 {gridCols} gap-4">
-    <!-- Date Range -->
-    <div>
-      <label for={id} class="text-sm font-medium text-foreground mb-2 block">
-        Choose Date
-      </label>
-      <div class="relative">
-        <Icon
-          iconName="icon/calendar"
-          size={16}
-          class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-        />
-        <input
-          {id}
-          type="text"
-          bind:value={dateRange}
-          readonly
-          class="w-full h-9 pl-10 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1 cursor-pointer"
-        />
-      </div>
+<div class="bg-card border border-border rounded-lg p-4">
+  <div class="flex flex-wrap items-end gap-4">
+    <!-- Date From -->
+    <div class="min-w-36">
+      <label class="text-xs font-medium text-muted-foreground mb-1 block">From</label>
+      <input
+        type="date"
+        bind:value={startDate}
+        class="w-full h-9 px-3 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none focus:border-info"
+      />
+    </div>
+
+    <!-- Date To -->
+    <div class="min-w-36">
+      <label class="text-xs font-medium text-muted-foreground mb-1 block">To</label>
+      <input
+        type="date"
+        bind:value={endDate}
+        min={startDate}
+        class="w-full h-9 px-3 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none focus:border-info"
+      />
     </div>
 
     <!-- Dynamic filter dropdowns -->
     {#each filters as filter}
-      <div>
+      <div class="min-w-32">
+        <label class="text-xs font-medium text-muted-foreground mb-1 block">{filter.label}</label>
         <Dropdown
           id={filter.id}
-          label={filter.label}
           options={filter.options}
           value={filter.value ?? ""}
           onchange={filter.onchange}

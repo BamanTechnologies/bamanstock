@@ -213,8 +213,8 @@
         <button
           type="button"
           onclick={handleInvite}
-          class="flex flex-row justify-center items-center flex-none bg-info sm:ml-auto"
-          style="padding: 7px 20px; gap: 4px; width: 148px; height: 38px; border-radius: 5px; flex-grow: 0;"
+          class="flex flex-row justify-center items-center flex-none sm:ml-auto"
+          style="padding: 7px 20px; gap: 4px; width: 148px; height: 38px; border-radius: 5px; flex-grow: 0; background: var(--primary-blue);"
         >
           <Icon iconName="icon/plus" size={13} class="text-white flex-none" />
           <span
