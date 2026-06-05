@@ -15,6 +15,7 @@
     SidebarTrigger,
   } from "$lib/components/ui/sidebar/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
+
   import { page } from "$app/stores";
   import { themeStore } from "$lib/stores/theme.svelte.js";
 
@@ -67,12 +68,12 @@
   <div class="flex min-h-screen w-full">
     {#if !isInvestorPage}
       <Sidebar>
-        <SidebarHeader>
-          <a href="/" class="flex items-center gap-2 px-4 py-2 hover:opacity-90 transition-opacity">
+        <SidebarHeader class="h-20 overflow-hidden">
+          <a href="/" class="h-full flex items-center gap-3 px-3 hover:opacity-90 transition-opacity">
             <div class="w-10 h-10 rounded-xl bg-info flex items-center justify-center shrink-0">
               <Icon iconName="icon/trending-up" size={20} class="text-info-foreground" />
             </div>
-            <span class="text-xl font-bold text-info">BAMANSTOCK</span>
+            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="h-25 w-auto object-contain" />
           </a>
         </SidebarHeader>
 
