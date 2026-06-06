@@ -202,9 +202,6 @@
   let paymentsDateRange = $state("01-Jan-2025 - 12-Dec-2025");
   let paymentsPage = $state(1);
   let paymentsRowsPerPage = $state(10);
-  const paymentsTotalPages = $derived(
-    Math.ceil(paymentsReportData.length / paymentsRowsPerPage),
-  );
 
   // Payments table columns
   const paymentsColumns = [
@@ -270,30 +267,20 @@
     },
   ];
 
-  const paymentsFilters = [
-    {
-      key: "location",
-      label: "Location",
-      options: [
-        { value: "", label: "All" },
-        { value: "branch-1", label: "Branch #1" },
-        { value: "branch-2", label: "Branch #2" },
-        { value: "santa-clara", label: "Santa Clara Area #1" },
-      ],
-    },
-    {
-      key: "products",
-      label: "Products",
-      options: [
-        { value: "", label: "All" },
-        { value: "electronics", label: "Electronics" },
-        { value: "computers", label: "Computers" },
-        { value: "shoe", label: "Shoe" },
-        { value: "furniture", label: "Furniture" },
-        { value: "accessories", label: "Accessories" },
-      ],
-    },
-  ];
+  let paymentsStatusFilter = $state("");
+  let paymentsMerchantFilter = $state("");
+
+  const filteredPaymentsData = $derived(
+    paymentsReportData.filter((row) => {
+      const matchesStatus = !paymentsStatusFilter || row.status.toLowerCase() === paymentsStatusFilter;
+      const matchesMerchant = !paymentsMerchantFilter || row.merchant.toLowerCase().includes(paymentsMerchantFilter);
+      return matchesStatus && matchesMerchant;
+    })
+  );
+
+  const paymentsTotalPages = $derived(Math.ceil(filteredPaymentsData.length / paymentsRowsPerPage));
+
+  $effect(() => { paymentsStatusFilter; paymentsMerchantFilter; paymentsPage = 1; });
 
   function handlePaymentsPageChange(page: number) {
     paymentsPage = page;
@@ -457,9 +444,6 @@
   let stockMovementSearchQuery = $state("");
   let stockMovementPage = $state(1);
   let stockMovementRowsPerPage = $state(10);
-  const stockMovementTotalPages = $derived(
-    Math.ceil(stockMovementData.length / stockMovementRowsPerPage),
-  );
 
   // Stock Movement table columns
   const stockMovementColumns = [
@@ -495,30 +479,29 @@
     },
   ];
 
-  const stockMovementFilters = [
-    {
-      key: "location",
-      label: "Location",
-      options: [
-        { value: "", label: "All" },
-        { value: "branch-1", label: "Branch #1" },
-        { value: "branch-2", label: "Branch #2" },
-        { value: "santa-clara", label: "Santa Clara Area #1" },
-      ],
-    },
-    {
-      key: "products",
-      label: "Products",
-      options: [
-        { value: "", label: "All" },
-        { value: "electronics", label: "Electronics" },
-        { value: "computers", label: "Computers" },
-        { value: "shoe", label: "Shoe" },
-        { value: "furniture", label: "Furniture" },
-        { value: "accessories", label: "Accessories" },
-      ],
-    },
-  ];
+  let stockMovementLocationFilter = $state("");
+
+  const filteredStockMovementData = $derived(
+    stockMovementData.filter((row) => {
+      const matchesLocation = !stockMovementLocationFilter ||
+        row.fromWarehouse.toLowerCase().includes(stockMovementLocationFilter.toLowerCase()) ||
+        row.toWarehouse.toLowerCase().includes(stockMovementLocationFilter.toLowerCase());
+      const matchesSearch = !stockMovementSearchQuery ||
+        row.fromWarehouse.toLowerCase().includes(stockMovementSearchQuery.toLowerCase()) ||
+        row.toWarehouse.toLowerCase().includes(stockMovementSearchQuery.toLowerCase()) ||
+        row.referenceNumber.toLowerCase().includes(stockMovementSearchQuery.toLowerCase());
+      return matchesLocation && matchesSearch;
+    })
+  );
+
+  const stockMovementTotalPages = $derived(Math.ceil(filteredStockMovementData.length / stockMovementRowsPerPage));
+
+  $effect(() => { stockMovementLocationFilter; stockMovementSearchQuery; stockMovementPage = 1; });
+
+  const stockMovementWarehouseOptions = $derived([
+    { value: "", label: "All" },
+    ...[...new Set(stockMovementData.flatMap((r) => [r.fromWarehouse, r.toWarehouse]))].map((w) => ({ value: w.toLowerCase(), label: w })),
+  ]);
 
   function handleStockMovementPageChange(page: number) {
     stockMovementPage = page;
@@ -863,9 +846,19 @@
 
   let revenueBreakdownPage = $state(1);
   let revenueBreakdownRowsPerPage = $state(10);
-  const revenueBreakdownTotalPages = $derived(
-    Math.ceil(revenueBreakdownData.length / revenueBreakdownRowsPerPage),
+  let revenueCategoryFilter = $state("");
+
+  const filteredRevenueBreakdownData = $derived(
+    revenueBreakdownData.filter((row) =>
+      !revenueCategoryFilter || row.category.toLowerCase() === revenueCategoryFilter
+    )
   );
+
+  const revenueBreakdownTotalPages = $derived(
+    Math.ceil(filteredRevenueBreakdownData.length / revenueBreakdownRowsPerPage),
+  );
+
+  $effect(() => { revenueCategoryFilter; revenueBreakdownPage = 1; });
 
   // Revenue Breakdown table columns
   const revenueBreakdownColumns = [
@@ -1481,8 +1474,14 @@
         id="revenue-date-range"
         bind:dateRange={revenueDateRange}
         filters={[
-          { id: "revenue-location-filter", label: "Location", options: paymentsFilters[0].options },
-          { id: "revenue-products-filter", label: "Products", options: paymentsFilters[1].options },
+          { id: "revenue-category-filter", label: "Category", options: [
+              { value: "", label: "All" },
+              { value: "electronics", label: "Electronics" },
+              { value: "clothing", label: "Clothing" },
+              { value: "home supplies", label: "Home Supplies" },
+              { value: "beauty", label: "Beauty" },
+              { value: "furniture", label: "Furniture" },
+            ], value: revenueCategoryFilter, onchange: (v) => { revenueCategoryFilter = v; } },
         ]}
       />
 
@@ -1529,7 +1528,7 @@
         </div>
 
         {#if true}
-          {@const paginatedRevenueData = revenueBreakdownData.slice(
+          {@const paginatedRevenueData = filteredRevenueBreakdownData.slice(
             (revenueBreakdownPage - 1) * revenueBreakdownRowsPerPage,
             revenueBreakdownPage * revenueBreakdownRowsPerPage,
           )}
@@ -1571,8 +1570,19 @@
         id="payments-date-range"
         bind:dateRange={paymentsDateRange}
         filters={[
-          { id: "payments-location-filter", label: "Location", options: paymentsFilters[0].options },
-          { id: "payments-products-filter", label: "Products", options: paymentsFilters[1].options },
+          { id: "payments-status-filter", label: "Status", options: [
+              { value: "", label: "All" },
+              { value: "paid", label: "Paid" },
+              { value: "unpaid", label: "Unpaid" },
+            ], value: paymentsStatusFilter, onchange: (v) => { paymentsStatusFilter = v; } },
+          { id: "payments-merchant-filter", label: "Merchant", options: [
+              { value: "", label: "All" },
+              { value: "carl", label: "Carl Evans" },
+              { value: "minerva", label: "Minerva Rameriz" },
+              { value: "robert", label: "Robert Lamon" },
+              { value: "john", label: "John Smith" },
+              { value: "sarah", label: "Sarah Johnson" },
+            ], value: paymentsMerchantFilter, onchange: (v) => { paymentsMerchantFilter = v; } },
         ]}
       />
 
@@ -1617,7 +1627,7 @@
         </div>
 
         {#if true}
-          {@const paginatedPaymentsData = paymentsReportData.slice(
+          {@const paginatedPaymentsData = filteredPaymentsData.slice(
             (paymentsPage - 1) * paymentsRowsPerPage,
             paymentsPage * paymentsRowsPerPage,
           )}
@@ -1660,8 +1670,7 @@
         id="stock-movement-date-range"
         bind:dateRange={stockMovementDateRange}
         filters={[
-          { id: "stock-movement-location-filter", label: "Location", options: stockMovementFilters[0].options },
-          { id: "stock-movement-products-filter", label: "Products", options: stockMovementFilters[1].options },
+          { id: "stock-movement-location-filter", label: "Warehouse", options: stockMovementWarehouseOptions, value: stockMovementLocationFilter, onchange: (v) => { stockMovementLocationFilter = v; } },
         ]}
       />
 
@@ -1681,7 +1690,7 @@
           />
         </div>
         {#if true}
-          {@const paginatedStockMovementData = stockMovementData.slice(
+          {@const paginatedStockMovementData = filteredStockMovementData.slice(
             (stockMovementPage - 1) * stockMovementRowsPerPage,
             stockMovementPage * stockMovementRowsPerPage,
           )}
