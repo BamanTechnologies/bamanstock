@@ -39,12 +39,12 @@
   <div class="flex min-h-screen w-full bg-background">
     <Sidebar>
       <SidebarHeader>
-        <div class="flex items-center gap-2 px-4 py-2">
-          <div class="w-10 h-10 rounded-xl bg-info flex items-center justify-center">
+        <a href="/" class="flex items-center gap-2 px-4 py-2 hover:opacity-90 transition-opacity">
+          <div class="w-10 h-10 rounded-xl bg-info flex items-center justify-center shrink-0">
             <Icon iconName="icon/trending-up" size={20} class="text-info-foreground" />
           </div>
           <span class="text-xl font-bold text-info">BAMANSTOCK</span>
-        </div>
+        </a>
       </SidebarHeader>
 
       <SidebarContent>

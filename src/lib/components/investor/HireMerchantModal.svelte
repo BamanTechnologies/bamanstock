@@ -295,7 +295,7 @@
         <Button variant="outline" onclick={handleClose}>Cancel</Button>
         <Button
           variant="default"
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
           onclick={handleSendInvitation}
         >
           Send Invitation

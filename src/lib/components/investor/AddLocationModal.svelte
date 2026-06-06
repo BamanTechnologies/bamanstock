@@ -203,7 +203,7 @@
         </Button>
         <Button
           onclick={handleSubmit}
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
         >
           {isEditMode ? "Update Location" : "Create Location"}
         </Button>

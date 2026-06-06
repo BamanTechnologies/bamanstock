@@ -221,7 +221,7 @@
         </Button>
         <Button
           onclick={handleConfirm}
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
         >
           Confirm Change
         </Button>

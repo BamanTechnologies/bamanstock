@@ -70,28 +70,25 @@
   }
 </script>
 
-<div
-  class="flex flex-row items-center justify-between flex-none"
-  style="padding: 15px 0px; gap: 4px; width: 100%; max-width: 1356px; height: 58px; border-radius: 0px 0px 5px 5px; flex-grow: 0;"
->
-  <div class="flex items-center" style="gap: 4px;">
-    <span class="text-sm text-muted-foreground">Row Per Page</span>
+<div class="flex items-center justify-between w-full py-3">
+  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+    <span>Row Per Page</span>
     <select
       bind:value={rowsPerPage}
       onchange={(e) => handleRowsPerPageChange(Number(e.currentTarget.value))}
-      class="px-3 py-1.5 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info/50"
+      class="px-2 py-1 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none"
     >
       {#each rowsPerPageOptions as option}
         <option value={option}>{option}</option>
       {/each}
     </select>
-    <span class="text-sm text-muted-foreground">Entries</span>
+    <span>Entries</span>
   </div>
 
-  <div class="flex items-center" style="gap: 4px;">
+  <div class="flex items-center gap-1">
     <button
       type="button"
-      class="p-2 rounded-md border border-input hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       onclick={() => handlePageChange(currentPage - 1)}
       disabled={currentPage === 1}
       aria-label="Previous page"
@@ -103,22 +100,19 @@
       {#if typeof page === "number"}
         <button
           type="button"
-          class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {currentPage ===
-          page
-            ? 'bg-info text-info-foreground'
-            : 'text-foreground hover:bg-muted'}"
+          class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {currentPage === page ? 'bg-info text-info-foreground' : 'text-foreground hover:bg-muted'}"
           onclick={() => handlePageChange(page)}
         >
           {page}
         </button>
       {:else}
-        <span class="px-2 text-muted-foreground">...</span>
+        <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
       {/if}
     {/each}
 
     <button
       type="button"
-      class="p-2 rounded-md border border-input hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       onclick={() => handlePageChange(currentPage + 1)}
       disabled={currentPage === totalPages}
       aria-label="Next page"

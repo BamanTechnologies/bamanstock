@@ -294,7 +294,7 @@
           Edit Location
         </Button>
         <Button
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
           onclick={() => (isAssignStockModalOpen = true)}
         >
           Assign Stock

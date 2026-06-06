@@ -6,7 +6,6 @@
     SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -16,13 +15,14 @@
     SidebarTrigger,
   } from "$lib/components/ui/sidebar/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
-  import { Button } from "$lib/components/ui/button/index.js";
+
   import { page } from "$app/stores";
   import { themeStore } from "$lib/stores/theme.svelte.js";
 
   let { children } = $props();
 
   let showProfileDropdown = $state(false);
+  let showNotifications = $state(false);
 
   $effect(() => { themeStore.init(); });
 
@@ -34,9 +34,9 @@
     const path = $page.url.pathname;
     if (path.includes("/dashboard/merchants/")) return "Merchant Details";
     if (path.startsWith("/dashboard/merchants")) return "Merchants";
-    if (path.includes("/location")) return "Location";
+    if (path.includes("/location")) return "Locations";
     if (path.includes("/stock")) return "Stock";
-    if (path.includes("/report")) return "Report";
+    if (path.includes("/report")) return "Reports";
     if (path.includes("/setting")) return "Settings";
     if (path === "/dashboard") return "Dashboard";
     return "Dashboard";
@@ -68,13 +68,13 @@
   <div class="flex min-h-screen w-full">
     {#if !isInvestorPage}
       <Sidebar>
-        <SidebarHeader>
-          <div class="flex items-center gap-2 px-4 py-2">
-            <div class="w-10 h-10 rounded-xl bg-info flex items-center justify-center">
+        <SidebarHeader class="h-20 overflow-hidden">
+          <a href="/" class="h-full flex items-center gap-3 px-3 hover:opacity-90 transition-opacity">
+            <div class="w-10 h-10 rounded-xl bg-info flex items-center justify-center shrink-0">
               <Icon iconName="icon/trending-up" size={20} class="text-info-foreground" />
             </div>
-            <span class="text-xl font-bold text-info">BAMANSTOCK</span>
-          </div>
+            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="h-25 w-auto object-contain" />
+          </a>
         </SidebarHeader>
 
         <SidebarContent>
@@ -115,24 +115,36 @@
       </Sidebar>
     {/if}
 
-    <SidebarInset class={isInvestorPage ? "w-full" : ""}>
+    <SidebarInset class={isInvestorPage ? "w-full" : "bg-gray-50 dark:bg-background"}>
       {#if !isInvestorPage}
         <header class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6">
-          <SidebarTrigger class="md:hidden" />
-          <div class="relative hidden md:block w-72">
-            <input
-              type="text"
-              placeholder="Search"
-              class="w-full rounded-full border border-border pl-10 pr-4 py-2 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-border"
-            />
-            <Icon iconName="icon/search" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          </div>
+          <SidebarTrigger class="-ml-1" />
+          <h1 class="text-xl font-semibold text-foreground">{pageTitle}</h1>
 
           <div class="flex-1"></div>
 
           <div class="flex items-center gap-4">
-            <Icon iconName="icon/bell"     size={20} class="text-muted-foreground cursor-pointer hover:text-foreground" />
-            <Icon iconName="icon/settings" size={20} class="text-muted-foreground cursor-pointer hover:text-foreground" />
+            <!-- Notifications -->
+            <div class="relative">
+              <button
+                type="button"
+                onclick={() => (showNotifications = !showNotifications)}
+                class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <Icon iconName="icon/bell" size={20} />
+              </button>
+              {#if showNotifications}
+                <div class="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div class="px-4 py-3 border-b border-border">
+                    <p class="text-sm font-semibold text-foreground">Notifications</p>
+                  </div>
+                  <div class="px-4 py-8 flex flex-col items-center gap-2 text-center">
+                    <Icon iconName="icon/bell" size={32} class="text-muted-foreground/40" />
+                    <p class="text-sm text-muted-foreground">You don't have any notifications</p>
+                  </div>
+                </div>
+              {/if}
+            </div>
             <button
               type="button"
               onclick={toggleTheme}
@@ -186,7 +198,7 @@
         </header>
       {/if}
 
-      <main class="flex flex-1 flex-col {isInvestorPage ? 'w-full h-screen overflow-auto p-0' : 'gap-4 overflow-auto'}">
+      <main class="flex flex-1 flex-col {isInvestorPage ? 'w-full h-screen overflow-auto p-0' : 'overflow-auto'}">
         {@render children()}
       </main>
     </SidebarInset>

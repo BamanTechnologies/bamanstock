@@ -173,7 +173,7 @@
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-info text-info-foreground hover:bg-info/90" onclick={() => (isInviteModalOpen = true)}>
+    <Button class="bg-[var(--primary-blue)] text-white hover:opacity-90" onclick={() => (isInviteModalOpen = true)}>
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       Invite Merchant
     </Button>
@@ -209,12 +209,8 @@
     searchable={true}
     searchPlaceholder="Search"
     {filters}
+    onRowClick={handleView}
     actions={[
-      {
-        icon: "icon/eye",
-        label: "View",
-        onClick: handleView,
-      },
       {
         icon: "icon/trash",
         label: "Delete",
