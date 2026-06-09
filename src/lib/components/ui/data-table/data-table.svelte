@@ -251,7 +251,8 @@
       </div>
       <div class="flex items-center gap-1">
         <button
-          class="w-8 h-8 flex items-center justify-center rounded-full bg-info/10 text-info transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-info/20"
+          class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+          style="background-color:#4DA0E620; color:#4DA0E6;"
           disabled={pagination.currentPage === 1}
           onclick={() => pagination.onPageChange(pagination.currentPage - 1)}
         >
@@ -260,7 +261,8 @@
         {#each getVisiblePages(pagination.currentPage, pagination.totalPages) as page}
           {#if typeof page === "number"}
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {page === pagination.currentPage ? 'bg-info text-white' : 'text-foreground hover:bg-muted'}"
+              class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {page === pagination.currentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+              style={page === pagination.currentPage ? 'background-color:#4DA0E6;' : ''}
               onclick={() => pagination.onPageChange(page)}
             >
               {page}
@@ -270,7 +272,8 @@
           {/if}
         {/each}
         <button
-          class="w-8 h-8 flex items-center justify-center rounded-full bg-info/10 text-info transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-info/20"
+          class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+          style="background-color:#4DA0E620; color:#4DA0E6;"
           disabled={pagination.currentPage === pagination.totalPages}
           onclick={() => pagination.onPageChange(pagination.currentPage + 1)}
         >
