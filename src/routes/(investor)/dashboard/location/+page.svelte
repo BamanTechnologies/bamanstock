@@ -21,10 +21,14 @@
   ]);
 
   let searchQuery = $state("");
+  let statusFilter = $state("");
+
   const filteredLocations = $derived(
-    searchQuery
-      ? locations.filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()))
-      : locations
+    locations.filter((l) => {
+      if (searchQuery && !l.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (statusFilter && l.status.toLowerCase() !== statusFilter) return false;
+      return true;
+    })
   );
 
   let isDeleteLocationModalOpen = $state(false);
@@ -103,19 +107,10 @@
 
   const filters = [
     {
-      key: "location",
-      label: "Location",
-      options: [
-        { value: "", label: "Locations" },
-        { value: "santa-clara", label: "Santa Clara Area #1" },
-        { value: "other", label: "Other" },
-      ],
-    },
-    {
       key: "status",
       label: "Status",
       options: [
-        { value: "", label: "Status" },
+        { value: "", label: "All Status" },
         { value: "active", label: "Active" },
         { value: "inactive", label: "Inactive" },
       ],
@@ -132,6 +127,16 @@
 
   function handleRowsPerPageChange(rows: number) {
     rowsPerPage = rows;
+    currentPage = 1;
+  }
+
+  function handleSearch(query: string) {
+    searchQuery = query;
+    currentPage = 1;
+  }
+
+  function handleFilterChange(key: string, value: string) {
+    if (key === "status") statusFilter = value;
     currentPage = 1;
   }
 
@@ -238,6 +243,8 @@
       searchable={true}
       searchPlaceholder="Search"
       {filters}
+      onSearch={handleSearch}
+      onFilterChange={handleFilterChange}
       onRowClick={handleView}
       actions={[
         {

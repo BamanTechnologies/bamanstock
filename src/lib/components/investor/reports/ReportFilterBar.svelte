@@ -29,14 +29,14 @@
   const now = new Date();
 
   const periodOptions = [
-    { value: "today",   label: "Today" },
-    { value: "7d",      label: "Last 7 Days" },
-    { value: "30d",     label: "Last 30 Days" },
-    { value: "1m",      label: "This Month" },
-    { value: "3m",      label: "Last 3 Months" },
-    { value: "6m",      label: "Last 6 Months" },
-    { value: "1y",      label: "This Year" },
-    { value: "custom",  label: "Custom" },
+    { value: "today",  label: "Today" },
+    { value: "7d",     label: "Last 7 Days" },
+    { value: "30d",    label: "Last 30 Days" },
+    { value: "1m",     label: "This Month" },
+    { value: "3m",     label: "Last 3 Months" },
+    { value: "6m",     label: "Last 6 Months" },
+    { value: "1y",     label: "This Year" },
+    { value: "custom", label: "Custom" },
   ];
 
   let selectedPeriod = $state("6m");
@@ -44,35 +44,18 @@
   let endDate = $state(toInputDate(now));
 
   function applyPeriod(period: string) {
+    if (period === "custom") return;
     const end = new Date();
     let start = new Date();
-
     switch (period) {
-      case "today":
-        start = new Date(end);
-        break;
-      case "7d":
-        start.setDate(end.getDate() - 7);
-        break;
-      case "30d":
-        start.setDate(end.getDate() - 30);
-        break;
-      case "1m":
-        start = new Date(end.getFullYear(), end.getMonth(), 1);
-        break;
-      case "3m":
-        start = new Date(end.getFullYear(), end.getMonth() - 3, 1);
-        break;
-      case "6m":
-        start = new Date(end.getFullYear(), end.getMonth() - 6, 1);
-        break;
-      case "1y":
-        start = new Date(end.getFullYear(), 0, 1);
-        break;
-      case "custom":
-        return; // keep existing from/to values
+      case "today": start = new Date(end); break;
+      case "7d":    start.setDate(end.getDate() - 7); break;
+      case "30d":   start.setDate(end.getDate() - 30); break;
+      case "1m":    start = new Date(end.getFullYear(), end.getMonth(), 1); break;
+      case "3m":    start = new Date(end.getFullYear(), end.getMonth() - 3, 1); break;
+      case "6m":    start = new Date(end.getFullYear(), end.getMonth() - 6, 1); break;
+      case "1y":    start = new Date(end.getFullYear(), 0, 1); break;
     }
-
     startDate = toInputDate(start);
     endDate = toInputDate(end);
   }
@@ -85,13 +68,15 @@
   function handleDateChange() {
     selectedPeriod = "custom";
   }
+
+  const isCustom = $derived(selectedPeriod === "custom");
 </script>
 
-<div class="bg-card border border-border rounded-lg p-4">
-  <div class="flex flex-wrap items-end gap-4">
+<div class="bg-card border border-border rounded-lg px-4 py-3">
+  <div class="flex items-end gap-3">
 
     <!-- Period quick-select -->
-    <div class="min-w-36">
+    <div class="flex-1 min-w-0">
       <label for="{id}-period" class="text-xs font-medium text-muted-foreground mb-1 block">Period</label>
       <Dropdown
         id="{id}-period"
@@ -99,37 +84,39 @@
         value={selectedPeriod}
         onchange={handlePeriodChange}
         placeholder="Select period"
+        class="h-7 text-xs px-2"
       />
     </div>
 
-    <!-- Date From -->
-    <div class="min-w-36">
-      <label for="{id}-from" class="text-xs font-medium text-muted-foreground mb-1 block">From</label>
-      <input
-        id="{id}-from"
-        type="date"
-        bind:value={startDate}
-        oninput={handleDateChange}
-        class="w-full h-9 px-3 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none focus:border-info"
-      />
-    </div>
+    <!-- From / To — only shown when Custom is selected -->
+    {#if isCustom}
+      <div class="flex-1 min-w-0">
+        <label for="{id}-from" class="text-xs font-medium text-muted-foreground mb-1 block">From</label>
+        <input
+          id="{id}-from"
+          type="date"
+          bind:value={startDate}
+          oninput={handleDateChange}
+          class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+        />
+      </div>
 
-    <!-- Date To -->
-    <div class="min-w-36">
-      <label for="{id}-to" class="text-xs font-medium text-muted-foreground mb-1 block">To</label>
-      <input
-        id="{id}-to"
-        type="date"
-        bind:value={endDate}
-        min={startDate}
-        oninput={handleDateChange}
-        class="w-full h-9 px-3 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none focus:border-info"
-      />
-    </div>
+      <div class="flex-1 min-w-0">
+        <label for="{id}-to" class="text-xs font-medium text-muted-foreground mb-1 block">To</label>
+        <input
+          id="{id}-to"
+          type="date"
+          bind:value={endDate}
+          min={startDate}
+          oninput={handleDateChange}
+          class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+        />
+      </div>
+    {/if}
 
     <!-- Dynamic filter dropdowns -->
     {#each filters as filter}
-      <div class="min-w-32">
+      <div class="flex-1 min-w-0">
         <label for={filter.id} class="text-xs font-medium text-muted-foreground mb-1 block">{filter.label}</label>
         <Dropdown
           id={filter.id}
@@ -137,6 +124,7 @@
           value={filter.value ?? ""}
           onchange={filter.onchange}
           placeholder="All"
+          class="h-7 text-xs px-2"
         />
       </div>
     {/each}

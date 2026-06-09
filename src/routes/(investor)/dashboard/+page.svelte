@@ -1,6 +1,38 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
 
+  let chartPeriod = $state("1Y");
+
+  const periodData: Record<string, { labels: string[]; values: number[]; revenue: string; change: string; changePct: string; positive: boolean; yLabels: string[] }> = {
+    "1D": { labels: ["6am","9am","12pm","3pm","6pm","9pm"], values: [12,38,58,44,62,30], revenue: "$4,280", change: "Today", changePct: "+3.2%", positive: true, yLabels: ["70","60","50","40","30","10"] },
+    "1W": { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], values: [38,54,46,68,55,74,42], revenue: "$28,450", change: "Last 7 Days", changePct: "+8.5%", positive: true, yLabels: ["80k","70k","60k","50k","30k","10k"] },
+    "1M": { labels: ["Wk1","Wk2","Wk3","Wk4"], values: [48,65,52,80], revenue: "$98,200", change: "Last 30 Days", changePct: "+12.1%", positive: true, yLabels: ["100k","80k","60k","40k","20k","10k"] },
+    "3M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [50,62,58,75,85,70], revenue: "$285,600", change: "Last 3 Months", changePct: "+18.7%", positive: true, yLabels: ["300k","250k","200k","150k","100k","50k"] },
+    "6M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [35,52,65,78,92,68], revenue: "$620,800", change: "Last 6 Months", changePct: "+14.3%", positive: true, yLabels: ["600k","500k","400k","300k","200k","100k"] },
+    "1Y": { labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"], values: [45,35,55,80,38,25,38,22,30], revenue: "$1.25M", change: "Last 12 Months", changePct: "+15.2%", positive: true, yLabels: ["60k","50k","40k","30k","20k","10k"] },
+  };
+
+  function toSvgPath(values: number[], w = 860, h = 170, topPad = 18, botPad = 8) {
+    const n = values.length;
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const range = max - min || 1;
+    const pts = values.map((v, i) => ({
+      x: Math.round((i / Math.max(n - 1, 1)) * w),
+      y: Math.round(topPad + ((max - v) / range) * (h - topPad - botPad)),
+    }));
+    let line = `M${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i - 1], c = pts[i];
+      const cpx = (p.x + c.x) / 2;
+      line += ` C${cpx},${p.y} ${cpx},${c.y} ${c.x},${c.y}`;
+    }
+    return { line, fill: `${line} L${pts[pts.length - 1].x},${h} L0,${h} Z`, pts };
+  }
+
+  const activeChart = $derived(periodData[chartPeriod] ?? periodData["1Y"]);
+  const svgChart = $derived(toSvgPath(activeChart.values));
+
   const kpiCards = [
     {
       label: "Total Revenue",
@@ -105,12 +137,16 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-muted-foreground">Revenue Over Time</p>
-          <p class="text-2xl font-bold text-foreground">$1.25M</p>
-          <p class="text-sm text-green-600">Last 12 Months <span class="font-medium">+15.2%</span></p>
+          <p class="text-2xl font-bold text-foreground">{activeChart.revenue}</p>
+          <p class="text-sm {activeChart.positive ? 'text-green-600' : 'text-red-500'}">{activeChart.change} <span class="font-medium">{activeChart.changePct}</span></p>
         </div>
         <div class="flex gap-1.5">
           {#each ["1D", "1W", "1M", "3M", "6M", "1Y"] as period}
-            <button class="px-2.5 py-1 text-xs rounded {period === '1Y' ? 'bg-info text-info-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}">
+            <button
+              type="button"
+              onclick={() => (chartPeriod = period)}
+              class="px-2.5 py-1 text-xs rounded transition-colors {chartPeriod === period ? 'bg-info text-info-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}"
+            >
               {period}
             </button>
           {/each}
@@ -119,12 +155,9 @@
 
       <div class="flex gap-3">
         <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-7 shrink-0 text-right">
-          <span>60k</span>
-          <span>50k</span>
-          <span>40k</span>
-          <span>30k</span>
-          <span>20k</span>
-          <span>10k</span>
+          {#each activeChart.yLabels as label}
+            <span>{label}</span>
+          {/each}
         </div>
 
         <div class="flex-1 relative h-52">
@@ -138,20 +171,14 @@
             {#each [0, 34, 68, 102, 136, 170] as y}
               <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.06" stroke-width="1" />
             {/each}
-            <path
-              d="M0,115 C40,105 80,92 130,98 C180,104 220,84 270,74 C310,66 360,86 405,52 C445,22 490,94 535,86 C575,79 615,94 660,99 C705,104 755,100 810,103 L860,104 L860,170 L0,170 Z"
-              fill="url(#revGrad)"
-            />
-            <path
-              d="M0,115 C40,105 80,92 130,98 C180,104 220,84 270,74 C310,66 360,86 405,52 C445,22 490,94 535,86 C575,79 615,94 660,99 C705,104 755,100 810,103 L860,104"
-              fill="none" stroke="#60a5fa" stroke-width="2"
-            />
-            {#each [[0,115],[130,98],[270,74],[405,52],[535,86],[660,99],[810,103],[860,104]] as [cx,cy]}
-              <circle {cx} {cy} r="4" fill="#60a5fa" />
+            <path d={svgChart.fill} fill="url(#revGrad)" />
+            <path d={svgChart.line} fill="none" stroke="#60a5fa" stroke-width="2" />
+            {#each svgChart.pts as pt}
+              <circle cx={pt.x} cy={pt.y} r="4" fill="#60a5fa" />
             {/each}
           </svg>
           <div class="absolute bottom-0 left-0 right-0 flex justify-between">
-            {#each ["Jan","Feb","Mar","Apr","May","Jun","July","Aug","Sep"] as m}
+            {#each activeChart.labels as m}
               <span class="text-[10px] text-muted-foreground">{m}</span>
             {/each}
           </div>
