@@ -742,30 +742,6 @@
     },
   ];
 
-  const lowStockFilters = [
-    {
-      key: "location",
-      label: "Location",
-      options: [
-        { value: "", label: "All" },
-        { value: "branch-1", label: "Branch #1" },
-        { value: "branch-2", label: "Branch #2" },
-        { value: "santa-clara", label: "Santa Clara Area #1" },
-      ],
-    },
-    {
-      key: "products",
-      label: "Products",
-      options: [
-        { value: "", label: "All" },
-        { value: "electronics", label: "Electronics" },
-        { value: "computers", label: "Computers" },
-        { value: "shoe", label: "Shoe" },
-        { value: "furniture", label: "Furniture" },
-        { value: "accessories", label: "Accessories" },
-      ],
-    },
-  ];
 
   function handleLowStockPageChange(page: number) {
     lowStockPage = page;
@@ -1675,20 +1651,7 @@
       />
 
       <!-- Stock Movement Table -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="relative mb-4">
-          <Icon
-            iconName="icon/search"
-            size={16}
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-          <input
-            type="text"
-            bind:value={stockMovementSearchQuery}
-            placeholder="Search"
-            class="w-full max-w-xs pl-9 pr-4 py-2 border border-input rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
-          />
-        </div>
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
         {#if true}
           {@const paginatedStockMovementData = filteredStockMovementData.slice(
             (stockMovementPage - 1) * stockMovementRowsPerPage,
@@ -1697,7 +1660,9 @@
           <DataTable
             columns={stockMovementColumns}
             data={paginatedStockMovementData}
-            searchable={false}
+            searchable={true}
+            searchPlaceholder="Search"
+            onSearch={(q) => { stockMovementSearchQuery = q; }}
             filters={[]}
             actions={[
               {
@@ -1753,36 +1718,7 @@
       />
 
       <!-- Low Stock Table -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
-          <!-- Search -->
-          <div class="relative">
-            <Icon iconName="icon/search" size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              bind:value={lowStockSearchQuery}
-              placeholder="Search"
-              class="h-9 w-48 pl-9 pr-4 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
-            />
-          </div>
-          <!-- Inline filters -->
-          <div class="flex items-center gap-2">
-            <Dropdown
-              id="ls-table-location"
-              options={lowStockFilters[0].options}
-              bind:value={lowStockLocationFilter}
-              placeholder="Location"
-              class="w-36"
-            />
-            <Dropdown
-              id="ls-table-category"
-              options={lowStockCategoryOptions}
-              bind:value={lowStockCategoryFilter}
-              placeholder="Category"
-              class="w-36"
-            />
-          </div>
-        </div>
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
         {#if true}
           {@const paginatedLowStockData = filteredLowStockData.slice(
             (lowStockPage - 1) * lowStockRowsPerPage,
@@ -1791,7 +1727,9 @@
           <DataTable
             columns={lowStockColumns}
             data={paginatedLowStockData}
-            searchable={false}
+            searchable={true}
+            searchPlaceholder="Search"
+            onSearch={(q) => { lowStockSearchQuery = q; }}
             filters={[]}
             actions={[
               {

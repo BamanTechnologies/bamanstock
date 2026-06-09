@@ -68,12 +68,9 @@
   <div class="flex min-h-screen w-full">
     {#if !isInvestorPage}
       <Sidebar>
-        <SidebarHeader class="h-20 overflow-hidden">
-          <a href="/" class="h-full flex items-center gap-3 px-3 hover:opacity-90 transition-opacity">
-            <div class="w-10 h-10 rounded-xl bg-info flex items-center justify-center shrink-0">
-              <Icon iconName="icon/trending-up" size={20} class="text-info-foreground" />
-            </div>
-            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="h-25 w-auto object-contain" />
+        <SidebarHeader>
+          <a href="/" class="flex items-center px-2 py-1 hover:opacity-90 transition-opacity">
+            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="h-20 w-auto object-contain" />
           </a>
         </SidebarHeader>
 

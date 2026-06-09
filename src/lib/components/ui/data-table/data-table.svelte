@@ -35,6 +35,7 @@
     onSearch?: (query: string) => void;
     onFilterChange?: (filterKey: string, value: string) => void;
     onRowClick?: (row: T) => void;
+    
   }
 
   let {
@@ -112,7 +113,7 @@
   {#if searchable || filters.length > 0}
     <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
       {#if searchable}
-        <div class="flex-1 relative min-w-48">
+        <div class="relative w-72 shrink-0">
           <Icon
             iconName="icon/search"
             size={16}
@@ -121,21 +122,25 @@
           <input
             type="text"
             placeholder={searchPlaceholder}
-            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
             value={searchQuery}
             oninput={(e) => handleSearch(e.currentTarget.value)}
           />
         </div>
       {/if}
-      {#each filters as filter}
-        <div class="min-w-32">
-          <Dropdown
-            options={filter.options}
-            value={filterValues[filter.key] || ""}
-            onchange={(v) => handleFilterChange(filter.key, v)}
-          />
+      {#if filters.length > 0}
+        <div class="flex gap-3 ml-auto">
+          {#each filters as filter}
+            <div class="w-40">
+              <Dropdown
+                options={filter.options}
+                value={filterValues[filter.key] || ""}
+                onchange={(v) => handleFilterChange(filter.key, v)}
+              />
+            </div>
+          {/each}
         </div>
-      {/each}
+      {/if}
     </div>
   {/if}
 
@@ -246,16 +251,16 @@
       </div>
       <div class="flex items-center gap-1">
         <button
-          class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-info/10 text-info transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-info/20"
           disabled={pagination.currentPage === 1}
           onclick={() => pagination.onPageChange(pagination.currentPage - 1)}
         >
-          <Icon iconName="icon/chevron-left" size={16} class="text-foreground" />
+          <Icon iconName="icon/chevron-left" size={16} />
         </button>
         {#each getVisiblePages(pagination.currentPage, pagination.totalPages) as page}
           {#if typeof page === "number"}
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {page === pagination.currentPage ? 'bg-info text-info-foreground' : 'text-foreground hover:bg-muted'}"
+              class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {page === pagination.currentPage ? 'bg-info text-white' : 'text-foreground hover:bg-muted'}"
               onclick={() => pagination.onPageChange(page)}
             >
               {page}
@@ -265,11 +270,11 @@
           {/if}
         {/each}
         <button
-          class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-info/10 text-info transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-info/20"
           disabled={pagination.currentPage === pagination.totalPages}
           onclick={() => pagination.onPageChange(pagination.currentPage + 1)}
         >
-          <Icon iconName="icon/chevron-right" size={16} class="text-foreground" />
+          <Icon iconName="icon/chevron-right" size={16} />
         </button>
       </div>
     </div>

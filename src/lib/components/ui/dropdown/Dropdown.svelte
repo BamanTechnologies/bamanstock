@@ -85,8 +85,8 @@
     {disabled}
     onclick={toggleDropdown}
     class={cn(
-      "flex items-center justify-between gap-2 w-full px-3 py-2 h-9 bg-background border border-input rounded-md text-sm text-foreground transition-colors",
-      "hover:bg-muted focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1",
+      "flex items-center justify-between gap-2 w-full px-3 py-2 h-9 bg-background border border-input rounded text-sm text-foreground transition-colors",
+      "hover:bg-muted focus:outline-none focus:ring-0",
       "disabled:opacity-50 disabled:cursor-not-allowed",
       className
     )}
@@ -103,7 +103,7 @@
 
   {#if isOpen && !disabled}
     <div
-      class="absolute top-full left-0 mt-1 w-full bg-background border border-input rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
+      class="absolute top-full left-0 mt-1 w-full bg-background border border-input rounded shadow-lg z-50 max-h-60 overflow-y-auto"
       role="listbox"
     >
       {#each options as option}

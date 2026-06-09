@@ -161,7 +161,7 @@
           <span class="text-sm font-medium text-foreground">Password</span>
         </div>
         <Button
-          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
+          class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
           onclick={handleChangePassword}
         >
           Change Password
@@ -217,7 +217,7 @@
           <span class="text-sm font-medium text-foreground">Export Data</span>
         </div>
         <Button
-          class="bg-(--primary-blue) text-white hover:opacity-90"
+          class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
           onclick={handleExportData}
         >
           Download My Data
@@ -274,7 +274,7 @@
           >
         </div>
         <Button
-          class="bg-(--primary-blue) text-white hover:opacity-90"
+          class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
           onclick={handleOpenHelpCenter}
         >
           Open help center
@@ -298,7 +298,7 @@
           >
         </div>
         <Button
-          class="bg-(--primary-blue) text-white hover:opacity-90"
+          class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
           onclick={handleContactSupport}
         >
           Send message

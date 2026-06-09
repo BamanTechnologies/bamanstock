@@ -140,9 +140,26 @@
     },
   ];
 
+  let searchQuery = $state("");
+  let locationFilter = $state("");
+  let statusFilter = $state("");
+
+  const filteredMerchants = $derived(
+    merchants.filter((m) => {
+      if (searchQuery && !m.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (locationFilter && m.location !== locationFilter) return false;
+      if (statusFilter && m.status.toLowerCase() !== statusFilter) return false;
+      return true;
+    })
+  );
+
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(merchants.length / rowsPerPage));
+  const totalPages = $derived(Math.ceil(filteredMerchants.length / rowsPerPage));
+
+  const paginatedMerchants = $derived(
+    filteredMerchants.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+  );
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -153,15 +170,24 @@
     currentPage = 1;
   }
 
+  function handleSearch(query: string) {
+    searchQuery = query;
+    currentPage = 1;
+  }
+
+  function handleFilterChange(key: string, value: string) {
+    if (key === "location") locationFilter = value;
+    if (key === "status") statusFilter = value;
+    currentPage = 1;
+  }
+
   function handleView(merchant: (typeof merchants)[0]) {
-    // Navigate to merchant details page
     const merchantId = merchant.name.toLowerCase().replace(/\s+/g, "-");
     goto(`/dashboard/merchants/${merchantId}`);
   }
 
   function handleDelete(merchant: (typeof merchants)[0]) {
     console.log("Delete merchant:", merchant);
-    // Show confirmation and delete
   }
 </script>
 
@@ -173,7 +199,7 @@
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-[var(--primary-blue)] text-white hover:opacity-90" onclick={() => (isInviteModalOpen = true)}>
+    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isInviteModalOpen = true)}>
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       Invite Merchant
     </Button>
@@ -205,10 +231,12 @@
   <!-- Table Section -->
   <DataTable
     {columns}
-    data={merchants}
+    data={paginatedMerchants}
     searchable={true}
     searchPlaceholder="Search"
     {filters}
+    onSearch={handleSearch}
+    onFilterChange={handleFilterChange}
     onRowClick={handleView}
     actions={[
       {

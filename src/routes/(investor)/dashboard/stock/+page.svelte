@@ -38,7 +38,7 @@
 
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(stockItems.length / rowsPerPage));
+  const totalPages = $derived(Math.ceil(filteredStockItems.length / rowsPerPage));
 
   let isRemoveStockModalOpen = $state(false);
   let stockItemToRemove = $state<(typeof stockItems)[0] | undefined>(undefined);
@@ -289,7 +289,7 @@
   <!-- Header with Add Stock Button -->
   <div class="flex items-center justify-end">
     <Button
-      class="bg-[var(--primary-blue)] text-white hover:opacity-90"
+      class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
       onclick={handleAddStock}
     >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
@@ -312,10 +312,19 @@
   searchable={true}
   searchPlaceholder="Search by stock name..."
   {filters}
+  onSearch={handleSearch}
+  onFilterChange={handleFilterChange}
   actions={[
     { icon: "icon/edit",  label: "Edit",   onClick: handleEdit },
     { icon: "icon/trash", label: "Delete", onClick: handleDelete, variant: "destructive" },
   ]}
+  pagination={{
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    onPageChange: handlePageChange,
+    onRowsPerPageChange: handleRowsPerPageChange,
+  }}
   />
   {/if}
 
