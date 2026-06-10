@@ -7,13 +7,12 @@
     icon: string;
     iconBgClass: string;
     iconColor: string;
-    borderColor: string;
   }
 
-  let { label, value, icon, iconBgClass, iconColor, borderColor }: Props = $props();
+  let { label, value, icon, iconBgClass, iconColor }: Props = $props();
 </script>
 
-<div class="bg-card border-2 {borderColor} rounded-2xl p-6 flex items-center gap-5">
+<div class="bg-card border border-border rounded-2xl p-6 flex items-center gap-5">
   <div
     class="{iconBgClass} w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
   >

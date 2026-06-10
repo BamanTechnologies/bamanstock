@@ -28,6 +28,21 @@
     { id: 18, name: "Bookshelf 5-Tier",     category: "Furniture",   assignedMerchant: "Kwame Asante",    unitPrice: "$1,200",  qty: 14,  status: "Low",      icon: "icon/package" },
     { id: 19, name: "Adidas Hoodie",        category: "Cloth",       assignedMerchant: "Priya Sharma",    unitPrice: "$280",    qty: 420, status: "Adequate", icon: "icon/package" },
     { id: 20, name: "Sony WH-1000XM5",      category: "Electronics", assignedMerchant: "Thomas Green",    unitPrice: "$3,100",  qty: 7,   status: "Low",      icon: "icon/package" },
+    { id: 21, name: "Desk Lamp LED",        category: "Furniture",   assignedMerchant: "Amara Obi",       unitPrice: "$180",    qty: 95,  status: "Adequate", icon: "icon/package" },
+    { id: 22, name: "Polo T-Shirt Pack",    category: "Cloth",       assignedMerchant: "Priya Sharma",    unitPrice: "$95",     qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 23, name: "Dell Monitor 27\"",    category: "Electronics", assignedMerchant: "Kwame Asante",    unitPrice: "$8,200",  qty: 45,  status: "Adequate", icon: "icon/package" },
+    { id: 24, name: "Ergonomic Mouse",      category: "Electronics", assignedMerchant: "Fatima Hassan",   unitPrice: "$620",    qty: 6,   status: "Low",      icon: "icon/package" },
+    { id: 25, name: "Denim Jeans Slim",     category: "Cloth",       assignedMerchant: "Lucas Ferreira",  unitPrice: "$240",    qty: 310, status: "Adequate", icon: "icon/package" },
+    { id: 26, name: "Standing Desk",        category: "Furniture",   assignedMerchant: "Daniel Park",     unitPrice: "$5,800",  qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 27, name: "Google Nest Hub",      category: "Electronics", assignedMerchant: "Beth Noah",       unitPrice: "$1,400",  qty: 11,  status: "Low",      icon: "icon/package" },
+    { id: 28, name: "Leather Belt",         category: "Accessories", assignedMerchant: "Nina Patel",      unitPrice: "$120",    qty: 480, status: "Adequate", icon: "icon/package" },
+    { id: 29, name: "Office Chair Mesh",    category: "Furniture",   assignedMerchant: "Marcus Davis",    unitPrice: "$4,500",  qty: 28,  status: "Adequate", icon: "icon/package" },
+    { id: 30, name: "Xbox Controller",      category: "Electronics", assignedMerchant: "James Morgan",    unitPrice: "$2,300",  qty: 4,   status: "Low",      icon: "icon/package" },
+    { id: 31, name: "Yoga Mat Premium",     category: "Accessories", assignedMerchant: "Olivia Chen",     unitPrice: "$350",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 32, name: "MacBook Air M2",       category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$14,800", qty: 130, status: "Adequate", icon: "icon/package" },
+    { id: 33, name: "Puffer Jacket",        category: "Cloth",       assignedMerchant: "Stan Gaunter",    unitPrice: "$480",    qty: 8,   status: "Low",      icon: "icon/package" },
+    { id: 34, name: "Portable Charger",     category: "Electronics", assignedMerchant: "Sarah Johnson",   unitPrice: "$450",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 35, name: "Wicker Storage Basket",category: "Accessories", assignedMerchant: "Carlos Curran",   unitPrice: "$220",    qty: 670, status: "Adequate", icon: "icon/package" },
   ]);
 
   let searchQuery = $state("");

@@ -111,9 +111,8 @@
           bind:value={language}
           options={[
             { value: "English", label: "English" },
-            { value: "Spanish", label: "Spanish" },
-            { value: "French", label: "French" },
-            { value: "German", label: "German" },
+            { value: "Amharic", label: "Amharic" },
+            { value: "Oromiffa", label: "Oromiffa" },
           ]}
           class="min-w-[150px]"
         />

@@ -50,6 +50,20 @@
     { name: "Amara Obi",        revenue: "$7,480",   transactions: "39",  location: "Branch #3", status: "Active" },
     { name: "Lena Müller",      revenue: "$6,340",   transactions: "33",  location: "Branch #1", status: "Declined" },
     { name: "Ravi Kumar",       revenue: "$5,200",   transactions: "27",  location: "Branch #2", status: "Active" },
+    { name: "Aisha Mwangi",     revenue: "$4,800",   transactions: "24",  location: "Branch #3", status: "Active" },
+    { name: "Diego Herrera",    revenue: "$4,350",   transactions: "22",  location: "Branch #4", status: "Invited" },
+    { name: "Yuki Tanaka",      revenue: "$3,920",   transactions: "19",  location: "Branch #5", status: "Active" },
+    { name: "Chloe Dupont",     revenue: "$3,540",   transactions: "17",  location: "Branch #1", status: "Active" },
+    { name: "Omar Farouk",      revenue: "$3,100",   transactions: "15",  location: "Branch #2", status: "Declined" },
+    { name: "Ingrid Larsen",    revenue: "$2,780",   transactions: "13",  location: "Branch #3", status: "Active" },
+    { name: "Tunde Adeyemi",    revenue: "$2,460",   transactions: "11",  location: "Branch #4", status: "Active" },
+    { name: "Mei-Lin Zhang",    revenue: "$2,150",   transactions: "9",   location: "Branch #5", status: "Invited" },
+    { name: "Pedro Alves",      revenue: "$1,840",   transactions: "8",   location: "Branch #1", status: "Active" },
+    { name: "Nadia Petrov",     revenue: "$1,620",   transactions: "7",   location: "Branch #2", status: "Active" },
+    { name: "Kofi Mensah",      revenue: "$1,390",   transactions: "6",   location: "Branch #3", status: "Declined" },
+    { name: "Hana Yoshida",     revenue: "$1,170",   transactions: "5",   location: "Branch #4", status: "Active" },
+    { name: "Arjun Bose",       revenue: "$950",     transactions: "4",   location: "Branch #5", status: "Invited" },
+    { name: "Lila Andersen",    revenue: "$730",     transactions: "3",   location: "Branch #1", status: "Active" },
   ];
 
   function getStatusClass(status: string) {

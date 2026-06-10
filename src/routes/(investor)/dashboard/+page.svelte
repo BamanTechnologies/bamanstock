@@ -68,13 +68,50 @@
     },
   ];
 
-  const topMerchants = [
-    { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "247+ Sales", revenue: "$8965" },
-    { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "160+ Sales", revenue: "$8024.05" },
-    { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "89+ Sales",  revenue: "$6245.80" },
-    { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-amber-500",  avatar: "",                                               branch: "Branch 9",  sales: "78+ Sales",  revenue: "$3490.48" },
-    { name: "Beth Noah",      initials: "BN", avatarBg: "bg-rose-500",   avatar: "",                                               branch: "Branch 7",  sales: "46+ Sales",  revenue: "$1590.78" },
-  ];
+  const topMerchantsByPeriod: Record<string, Array<{ name: string; initials: string; avatarBg: string; avatar: string; branch: string; sales: string; revenue: string }>> = {
+    "Today": [
+      { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "12+ Sales", revenue: "$420.00" },
+      { name: "Beth Noah",      initials: "BN", avatarBg: "bg-rose-500",   avatar: "",                                               branch: "Branch 7",  sales: "9+ Sales",  revenue: "$318.50" },
+      { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "7+ Sales",  revenue: "$280.00" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "5+ Sales",  revenue: "$195.40" },
+      { name: "Emma Collins",   initials: "EC", avatarBg: "bg-purple-500", avatar: "",                                               branch: "Branch 2",  sales: "4+ Sales",  revenue: "$148.00" },
+    ],
+    "Last 7 Days": [
+      { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "247+ Sales", revenue: "$8,965.00" },
+      { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "160+ Sales", revenue: "$8,024.05" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "89+ Sales",  revenue: "$6,245.80" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-amber-500",  avatar: "",                                               branch: "Branch 9",  sales: "78+ Sales",  revenue: "$3,490.48" },
+      { name: "Beth Noah",      initials: "BN", avatarBg: "bg-rose-500",   avatar: "",                                               branch: "Branch 7",  sales: "46+ Sales",  revenue: "$1,590.78" },
+    ],
+    "Last 30 Days": [
+      { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "620+ Sales", revenue: "$31,204.20" },
+      { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "940+ Sales", revenue: "$34,086.00" },
+      { name: "Emma Collins",   initials: "EC", avatarBg: "bg-purple-500", avatar: "",                                               branch: "Branch 2",  sales: "510+ Sales", revenue: "$20,146.50" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "340+ Sales", revenue: "$23,816.80" },
+      { name: "James Morgan",   initials: "JM", avatarBg: "bg-blue-500",   avatar: "",                                               branch: "Branch 5",  sales: "280+ Sales", revenue: "$13,304.00" },
+    ],
+    "3 Months": [
+      { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "2800+ Sales", revenue: "$102,258.00" },
+      { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "1860+ Sales", revenue: "$93,612.60" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "1020+ Sales", revenue: "$71,474.40" },
+      { name: "Emma Collins",   initials: "EC", avatarBg: "bg-purple-500", avatar: "",                                               branch: "Branch 2",  sales: "890+ Sales",  revenue: "$60,439.50" },
+      { name: "Beth Noah",      initials: "BN", avatarBg: "bg-rose-500",   avatar: "",                                               branch: "Branch 7",  sales: "560+ Sales",  revenue: "$19,090.56" },
+    ],
+    "6 Months": [
+      { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "3720+ Sales", revenue: "$187,225.20" },
+      { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "5600+ Sales", revenue: "$204,516.00" },
+      { name: "Emma Collins",   initials: "EC", avatarBg: "bg-purple-500", avatar: "",                                               branch: "Branch 2",  sales: "3060+ Sales", revenue: "$120,879.00" },
+      { name: "James Morgan",   initials: "JM", avatarBg: "bg-blue-500",   avatar: "",                                               branch: "Branch 5",  sales: "2240+ Sales", revenue: "$106,408.00" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "2040+ Sales", revenue: "$142,948.80" },
+    ],
+    "Year": [
+      { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "11200+ Sales", revenue: "$409,032.00" },
+      { name: "Stan Gaunter",   initials: "SG", avatarBg: "bg-teal-500",   avatar: "/Yohannes Abayneh.png",                         branch: "Branch 32", sales: "7440+ Sales",  revenue: "$374,450.40" },
+      { name: "Emma Collins",   initials: "EC", avatarBg: "bg-purple-500", avatar: "",                                               branch: "Branch 2",  sales: "6120+ Sales",  revenue: "$241,758.00" },
+      { name: "Carlos Curran",  initials: "CC", avatarBg: "bg-orange-500", avatar: "",                                               branch: "Branch 6",  sales: "4080+ Sales",  revenue: "$285,897.60" },
+      { name: "James Morgan",   initials: "JM", avatarBg: "bg-blue-500",   avatar: "",                                               branch: "Branch 5",  sales: "4480+ Sales",  revenue: "$212,816.00" },
+    ],
+  };
 
   const stockDistribution = [
     { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", percent: "60%", value: "698 Sales" },
@@ -98,6 +135,62 @@
   let stockPeriod = $state("Weekly");
   let showStockDropdown = $state(false);
   const periodOptions = ["Daily", "Weekly", "Monthly", "Yearly"];
+
+  let merchantsPeriod = $state("Today");
+  let showMerchantsDropdown = $state(false);
+  const merchantsPeriodOptions = ["Today", "Last 7 Days", "Last 30 Days", "3 Months", "6 Months", "Year"];
+
+  const activeTopMerchants = $derived(topMerchantsByPeriod[merchantsPeriod] ?? topMerchantsByPeriod["Last 7 Days"]);
+
+  const CIRC = 351.9;
+
+  const stockDistributionByPeriod: Record<string, { label: string; color: string; dotColor: string; stroke: string; percent: number; value: string }[]> = {
+    "Daily":   [
+      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 55, value: "125 Sales" },
+      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 28, value: "63 Sales"  },
+      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 17, value: "38 Sales"  },
+    ],
+    "Weekly":  [
+      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 58, value: "870 Sales"  },
+      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 26, value: "390 Sales"  },
+      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: "240 Sales"  },
+    ],
+    "Monthly": [
+      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 60, value: "698 Sales"  },
+      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 24, value: "545 Sales"  },
+      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: "456 Sales"  },
+    ],
+    "Yearly":  [
+      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 62, value: "7,450 Sales" },
+      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 22, value: "2,640 Sales" },
+      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: "1,920 Sales" },
+    ],
+  };
+
+  const categoryStatsByPeriod: Record<string, { categories: number; products: number }> = {
+    "Daily":   { categories: 89, products: 226  },
+    "Weekly":  { categories: 89, products: 415  },
+    "Monthly": { categories: 89, products: 613  },
+    "Yearly":  { categories: 89, products: 7350 },
+  };
+
+  const activeStockDist  = $derived(stockDistributionByPeriod[stockPeriod] ?? stockDistributionByPeriod["Monthly"]);
+  const activeCategoryStats = $derived(categoryStatsByPeriod[stockPeriod] ?? categoryStatsByPeriod["Monthly"]);
+
+  const donutSegments = $derived.by(() => {
+    let cum = 0;
+    return activeStockDist.map(item => {
+      const dash = (item.percent / 100) * CIRC;
+      const startAngle = -90 + (cum / 100) * 360;
+      const midAngle   = startAngle + (item.percent / 100) * 180;
+      const rad        = midAngle * Math.PI / 180;
+      const lx = Math.round(80 + 70 * Math.cos(rad));
+      const ly = Math.round(80 + 70 * Math.sin(rad));
+      const seg = { ...item, dashArray: `${dash.toFixed(1)} ${CIRC}`, dashOffset: -(cum / 100) * CIRC, lx, ly };
+      cum += item.percent;
+      return seg;
+    });
+  });
 </script>
 
 <div class="flex-1 p-6 space-y-6">
@@ -192,14 +285,32 @@
           <Icon iconName="icon/users" size={15} class="text-orange-400" />
           Top Merchants
         </h3>
-        <button class="text-xs text-muted-foreground border border-border rounded px-2 py-1 flex items-center gap-1">
-          <Icon iconName="icon/calendar" size={12} />
-          Today
-        </button>
+        <div class="relative">
+          <button
+            type="button"
+            onclick={() => (showMerchantsDropdown = !showMerchantsDropdown)}
+            class="text-xs text-muted-foreground border border-border rounded px-2 py-1 flex items-center gap-1"
+          >
+            <Icon iconName="icon/calendar" size={12} />
+            {merchantsPeriod}
+            <Icon iconName="icon/chevron-down" size={11} />
+          </button>
+          {#if showMerchantsDropdown}
+            <div class="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-md z-20 overflow-hidden min-w-36">
+              {#each merchantsPeriodOptions as opt}
+                <button
+                  type="button"
+                  onclick={() => { merchantsPeriod = opt; showMerchantsDropdown = false; }}
+                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt === merchantsPeriod ? 'text-info font-semibold' : 'text-foreground'}"
+                >{opt}</button>
+              {/each}
+            </div>
+          {/if}
+        </div>
       </div>
 
       <div class="space-y-4">
-        {#each topMerchants as merchant}
+        {#each activeTopMerchants as merchant}
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               {#if merchant.avatar}
@@ -237,7 +348,7 @@
     <div class="bg-card border border-border rounded-lg p-6 h-full">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-sm font-semibold text-foreground">Merchant</h3>
-        <button class="text-xs text-info hover:underline">View All</button>
+        <a href="/dashboard/merchants" class="text-xs text-info hover:underline">View All</a>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -320,27 +431,22 @@
 
         <div class="shrink-0">
           <svg viewBox="0 0 160 160" class="w-36 h-36">
-            <circle cx="80" cy="80" r="56" fill="none" stroke="#22c55e" stroke-width="28"
-              stroke-dasharray="56.3 351.9" stroke-dashoffset="0"
-              transform="rotate(-90 80 80)" />
-            <circle cx="80" cy="80" r="56" fill="none" stroke="#facc15" stroke-width="28"
-              stroke-dasharray="84.5 351.9" stroke-dashoffset="-56.3"
-              transform="rotate(-90 80 80)" />
-            <circle cx="80" cy="80" r="56" fill="none" stroke="#3b82f6" stroke-width="28"
-              stroke-dasharray="211.1 351.9" stroke-dashoffset="-140.8"
-              transform="rotate(-90 80 80)" />
+            {#each donutSegments as seg}
+              <circle cx="80" cy="80" r="56" fill="none" stroke={seg.stroke} stroke-width="28"
+                stroke-dasharray={seg.dashArray}
+                stroke-dashoffset={seg.dashOffset}
+                transform="rotate(-90 80 80)" />
+            {/each}
             <circle cx="80" cy="80" r="42" class="fill-card" />
-            <circle cx="107" cy="31" r="13" fill="white" stroke="#e5e7eb" stroke-width="1" />
-            <text x="107" y="35" font-size="8.5" fill="#374151" text-anchor="middle" font-weight="600">16%</text>
-            <circle cx="130" cy="91" r="13" fill="white" stroke="#e5e7eb" stroke-width="1" />
-            <text x="130" y="95" font-size="8.5" fill="#374151" text-anchor="middle" font-weight="600">24%</text>
-            <circle cx="35" cy="113" r="13" fill="white" stroke="#e5e7eb" stroke-width="1" />
-            <text x="35" y="117" font-size="8.5" fill="#374151" text-anchor="middle" font-weight="600">60%</text>
+            {#each donutSegments as seg}
+              <circle cx={seg.lx} cy={seg.ly} r="13" fill="white" stroke="#e5e7eb" stroke-width="1" />
+              <text x={seg.lx} y={seg.ly + 4} font-size="8.5" fill="#374151" text-anchor="middle" font-weight="600">{seg.percent}%</text>
+            {/each}
           </svg>
         </div>
 
         <div class="flex flex-col gap-4 flex-1">
-          {#each stockDistribution as item}
+          {#each activeStockDist as item}
             <div class="flex items-start gap-2">
               <span class="w-1.5 h-9 {item.color} rounded-full shrink-0 mt-0.5"></span>
               <div>
@@ -353,8 +459,6 @@
 
       </div>
 
-  
-
       <div class="mt-auto space-y-3">
         <h3 class="text-sm font-semibold text-foreground">Category Statistics</h3>
         <div class="border border-border rounded-lg divide-y divide-border">
@@ -363,14 +467,14 @@
               <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
               <span class="text-muted-foreground">Total Number Of Categories</span>
             </div>
-            <span class="font-bold text-foreground">89</span>
+            <span class="font-bold text-foreground">{activeCategoryStats.categories}</span>
           </div>
           <div class="flex items-center justify-between px-4 py-3 text-sm">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
               <span class="text-muted-foreground">Total Number Of Products</span>
             </div>
-            <span class="font-bold text-foreground">613</span>
+            <span class="font-bold text-foreground">{activeCategoryStats.products.toLocaleString()}</span>
           </div>
         </div>
       </div>
