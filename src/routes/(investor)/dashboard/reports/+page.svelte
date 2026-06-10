@@ -49,154 +49,110 @@
   let chartTimeframe = $state("1Y");
   const timeframeOptions = ["1D", "1W", "1M", "3M", "6M", "1Y"];
 
-  const revenueByCategory = [
-    {
-      category: "Electronics",
-      items: "500+ items",
-      revenue: "$48,901.35 Revenue",
+  const revenueChartData: Record<string, { labels: string[]; revenue: number[]; profit: number[]; yLabels: string[] }> = {
+    "1D": { labels: ["6am","9am","12pm","3pm","6pm","9pm"], revenue: [10,28,48,38,55,25], profit: [4,11,20,15,22,10], yLabels: ["$60k","$50k","$40k","$30k","$20k","$10k"] },
+    "1W": { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], revenue: [32,45,38,58,50,62,40], profit: [12,18,15,24,20,25,16], yLabels: ["$60k","$50k","$40k","$30k","$20k","$10k"] },
+    "1M": { labels: ["Wk1","Wk2","Wk3","Wk4"], revenue: [42,58,48,70], profit: [16,23,19,28], yLabels: ["$60k","$50k","$40k","$30k","$20k","$10k"] },
+    "3M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], revenue: [38,52,44,65,72,58], profit: [14,20,17,26,29,23], yLabels: ["$60k","$50k","$40k","$30k","$20k","$10k"] },
+    "6M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], revenue: [28,42,55,72,85,62], profit: [10,16,22,29,34,25], yLabels: ["$60k","$50k","$40k","$30k","$20k","$10k"] },
+    "1Y": { labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], revenue: [18,25,38,65,45,28,38,32,28,35,42,48], profit: [6,9,14,24,17,10,14,12,10,13,16,18], yLabels: ["$60k","$50k","$40k","$30k","$20k","$10k"] },
+  };
+
+  function toReportPath(values: number[], w = 860, h = 200, topPad = 18, botPad = 8) {
+    const n = values.length;
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const range = max - min || 1;
+    const pts = values.map((v, i) => ({
+      x: Math.round((i / Math.max(n - 1, 1)) * w),
+      y: Math.round(topPad + ((max - v) / range) * (h - topPad - botPad)),
+    }));
+    let line = `M${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i - 1], c = pts[i];
+      const cpx = (p.x + c.x) / 2;
+      line += ` C${cpx},${p.y} ${cpx},${c.y} ${c.x},${c.y}`;
+    }
+    return { line, fill: `${line} L${pts[pts.length - 1].x},${h} L0,${h} Z`, pts };
+  }
+
+  const activeRevenueChart = $derived(revenueChartData[chartTimeframe] ?? revenueChartData["1Y"]);
+  const svgRevenue = $derived(toReportPath(activeRevenueChart.revenue));
+  const svgProfit  = $derived(toReportPath(activeRevenueChart.profit));
+
+  const CAT_CIRC = 351.9;
+  const catColors = ["#3b82f6", "#ec4899", "#f59e0b", "#22c55e", "#a855f7"];
+  const catBgColors = ["bg-blue-500", "bg-pink-500", "bg-amber-500", "bg-green-500", "bg-purple-500"];
+
+  const revenueByCategoryByPeriod: Record<string, { total: string; categories: Array<{ category: string; items: string; revenue: string; pct: number }> }> = {
+    "this-week": {
+      total: "$40.6M",
+      categories: [
+        { category: "Electronics",   items: "500+ items",   revenue: "$48,901.35 Revenue",    pct: 35 },
+        { category: "Clothing",      items: "500+ items",   revenue: "$109,820.50 Revenue",   pct: 25 },
+        { category: "Home Supplies", items: "190+ items",   revenue: "$548,900.12 Revenue",   pct: 22 },
+        { category: "Beauty",        items: "350+ items",   revenue: "$36,700.50 Revenue",    pct: 10 },
+        { category: "Groceries",     items: "1200+ items",  revenue: "$8,965 Revenue",        pct: 8  },
+      ],
     },
-    {
-      category: "Clothing",
-      items: "500+ items",
-      revenue: "$109,820.50 Revenue",
+    "this-month": {
+      total: "$162M",
+      categories: [
+        { category: "Electronics",   items: "2000+ items",  revenue: "$195,605.40 Revenue",   pct: 30 },
+        { category: "Clothing",      items: "1800+ items",  revenue: "$439,282.00 Revenue",   pct: 28 },
+        { category: "Home Supplies", items: "750+ items",   revenue: "$2,195,600.48 Revenue", pct: 20 },
+        { category: "Beauty",        items: "1400+ items",  revenue: "$146,802.00 Revenue",   pct: 14 },
+        { category: "Groceries",     items: "4800+ items",  revenue: "$35,860.00 Revenue",    pct: 8  },
+      ],
     },
-    {
-      category: "Home Supplies",
-      items: "190+ items",
-      revenue: "$548,900.12 Revenue",
+    "this-year": {
+      total: "$1.95B",
+      categories: [
+        { category: "Electronics",   items: "24000+ items", revenue: "$2,347,265 Revenue",    pct: 32 },
+        { category: "Clothing",      items: "21600+ items", revenue: "$5,271,384 Revenue",    pct: 26 },
+        { category: "Home Supplies", items: "9000+ items",  revenue: "$26,347,206 Revenue",   pct: 24 },
+        { category: "Beauty",        items: "16800+ items", revenue: "$1,761,624 Revenue",    pct: 12 },
+        { category: "Groceries",     items: "57600+ items", revenue: "$430,521 Revenue",      pct: 6  },
+      ],
     },
-    {
-      category: "Beauty",
-      items: "350+ items",
-      revenue: "$36,700.50 Revenue",
-    },
-    {
-      category: "Groceries",
-      items: "1200+ items",
-      revenue: "$8965 Revenue",
-    },
-  ];
+  };
+
+  const activeRevenueByCat = $derived(revenueByCategoryByPeriod[revenueByCategoryPeriod] ?? revenueByCategoryByPeriod["this-week"]);
+
+  const revenueCatSegments = $derived.by(() => {
+    let offset = 0;
+    return activeRevenueByCat.categories.map((cat, i) => {
+      const dash = (cat.pct / 100) * CAT_CIRC;
+      const seg = { dash, offset: -offset, color: catColors[i] };
+      offset += dash;
+      return seg;
+    });
+  });
 
   let revenueDateRange = $state("01-Jan-2025 - 12-Dec-2025");
 
   // Payments tab data
   const paymentsKpiCards = [
-    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBgClass: "bg-green-50  dark:bg-green-900/40",  iconColor: "#16a34a", borderColor: "border-green-500"  },
-    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBgClass: "bg-blue-50   dark:bg-blue-900/40",   iconColor: "#3b82f6", borderColor: "border-blue-500"   },
-    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316", borderColor: "border-orange-500" },
-    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50    dark:bg-red-900/40",    iconColor: "#ef4444", borderColor: "border-red-500"    },
+    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBgClass: "bg-green-50  dark:bg-green-900/40",  iconColor: "#16a34a" },
+    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBgClass: "bg-blue-50   dark:bg-blue-900/40",   iconColor: "#3b82f6" },
+    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316" },
+    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50    dark:bg-red-900/40",    iconColor: "#ef4444" },
   ];
 
   // Mock payments report data
   let paymentsReportData = $state([
-    {
-      id: "INV001",
-      merchant: "Carl Evans",
-      dueDate: "24 Dec 2024",
-      amount: "$500",
-      paid: "$500",
-      amountDue: "$500",
-      status: "Paid",
-    },
-    {
-      id: "INV002",
-      merchant: "Minerva Rameriz",
-      dueDate: "10 Dec 2024",
-      amount: "$1500",
-      paid: "$1500",
-      amountDue: "$1500",
-      status: "Paid",
-    },
-    {
-      id: "INV003",
-      merchant: "Robert Lamon",
-      dueDate: "27 Nov 2024",
-      amount: "$600",
-      paid: "$600",
-      amountDue: "$600",
-      status: "Paid",
-    },
-    {
-      id: "INV004",
-      merchant: "Patricia Lewis",
-      dueDate: "18 Nov 2024",
-      amount: "$1000",
-      paid: "$1000",
-      amountDue: "$1000",
-      status: "Paid",
-    },
-    {
-      id: "INV005",
-      merchant: "Mark Joslyn",
-      dueDate: "06 Nov 2024",
-      amount: "$1200",
-      paid: "$1200",
-      amountDue: "$1200",
-      status: "Paid",
-    },
-    {
-      id: "INV006",
-      merchant: "Marsha Betts",
-      dueDate: "25 Oct 2024",
-      amount: "$800",
-      paid: "$800",
-      amountDue: "$800",
-      status: "Paid",
-    },
-    {
-      id: "INV007",
-      merchant: "Daniel Jude",
-      dueDate: "14 Oct 2024",
-      amount: "$2000",
-      paid: "$2000",
-      amountDue: "$2000",
-      status: "Paid",
-    },
-    {
-      id: "INV008",
-      merchant: "Emma Bates",
-      dueDate: "03 Oct 2024",
-      amount: "$100",
-      paid: "$100",
-      amountDue: "$100",
-      status: "Paid",
-    },
-    {
-      id: "INV009",
-      merchant: "Richard Fralick",
-      dueDate: "20 Sep 2024",
-      amount: "$300",
-      paid: "$300",
-      amountDue: "$300",
-      status: "Paid",
-    },
-    {
-      id: "INV010",
-      merchant: "Michelle Robison",
-      dueDate: "10 Sep 2024",
-      amount: "$5000",
-      paid: "$0",
-      amountDue: "$5000",
-      status: "Unpaid",
-    },
-    {
-      id: "INV011",
-      merchant: "John Smith",
-      dueDate: "05 Jan 2025",
-      amount: "$750",
-      paid: "$750",
-      amountDue: "$750",
-      status: "Paid",
-    },
-    {
-      id: "INV012",
-      merchant: "Sarah Johnson",
-      dueDate: "15 Jan 2025",
-      amount: "$1200",
-      paid: "$0",
-      amountDue: "$1200",
-      status: "Unpaid",
-    },
+    { id: "INV001", merchant: "Carl Evans",       dueDate: "24 Dec 2024", amount: "$500",  paid: "$500",  amountDue: "$500",  status: "Paid",   branch: "Branch #1" },
+    { id: "INV002", merchant: "Minerva Rameriz",  dueDate: "10 Dec 2024", amount: "$1500", paid: "$1500", amountDue: "$1500", status: "Paid",   branch: "Branch #2" },
+    { id: "INV003", merchant: "Robert Lamon",     dueDate: "27 Nov 2024", amount: "$600",  paid: "$600",  amountDue: "$600",  status: "Paid",   branch: "Branch #3" },
+    { id: "INV004", merchant: "Patricia Lewis",   dueDate: "18 Nov 2024", amount: "$1000", paid: "$1000", amountDue: "$1000", status: "Paid",   branch: "Branch #1" },
+    { id: "INV005", merchant: "Mark Joslyn",      dueDate: "06 Nov 2024", amount: "$1200", paid: "$1200", amountDue: "$1200", status: "Paid",   branch: "Branch #4" },
+    { id: "INV006", merchant: "Marsha Betts",     dueDate: "25 Oct 2024", amount: "$800",  paid: "$800",  amountDue: "$800",  status: "Paid",   branch: "Branch #2" },
+    { id: "INV007", merchant: "Daniel Jude",      dueDate: "14 Oct 2024", amount: "$2000", paid: "$2000", amountDue: "$2000", status: "Paid",   branch: "Branch #5" },
+    { id: "INV008", merchant: "Emma Bates",       dueDate: "03 Oct 2024", amount: "$100",  paid: "$100",  amountDue: "$100",  status: "Paid",   branch: "Branch #3" },
+    { id: "INV009", merchant: "Richard Fralick",  dueDate: "20 Sep 2024", amount: "$300",  paid: "$300",  amountDue: "$300",  status: "Paid",   branch: "Branch #1" },
+    { id: "INV010", merchant: "Michelle Robison", dueDate: "10 Sep 2024", amount: "$5000", paid: "$0",    amountDue: "$5000", status: "Unpaid", branch: "Branch #2" },
+    { id: "INV011", merchant: "John Smith",    dueDate: "05 Jan 2025", amount: "$750",  paid: "$750", amountDue: "$750",  status: "Paid",   branch: "Branch #4" },
+    { id: "INV012", merchant: "Sarah Johnson", dueDate: "15 Jan 2025", amount: "$1200", paid: "$0",   amountDue: "$1200", status: "Unpaid", branch: "Branch #3" },
   ]);
 
   let paymentsDateRange = $state("01-Jan-2025 - 12-Dec-2025");
@@ -269,18 +225,20 @@
 
   let paymentsStatusFilter = $state("");
   let paymentsMerchantFilter = $state("");
+  let paymentsBranchFilter = $state("");
 
   const filteredPaymentsData = $derived(
     paymentsReportData.filter((row) => {
       const matchesStatus = !paymentsStatusFilter || row.status.toLowerCase() === paymentsStatusFilter;
       const matchesMerchant = !paymentsMerchantFilter || row.merchant.toLowerCase().includes(paymentsMerchantFilter);
-      return matchesStatus && matchesMerchant;
+      const matchesBranch = !paymentsBranchFilter || (row as any).branch === paymentsBranchFilter;
+      return matchesStatus && matchesMerchant && matchesBranch;
     })
   );
 
   const paymentsTotalPages = $derived(Math.ceil(filteredPaymentsData.length / paymentsRowsPerPage));
 
-  $effect(() => { paymentsStatusFilter; paymentsMerchantFilter; paymentsPage = 1; });
+  $effect(() => { paymentsStatusFilter; paymentsMerchantFilter; paymentsBranchFilter; paymentsPage = 1; });
 
   function handlePaymentsPageChange(page: number) {
     paymentsPage = page;
@@ -823,6 +781,7 @@
   let revenueBreakdownPage = $state(1);
   let revenueBreakdownRowsPerPage = $state(10);
   let revenueCategoryFilter = $state("");
+  let revenueByCategoryPeriod = $state("this-week");
 
   const filteredRevenueBreakdownData = $derived(
     revenueBreakdownData.filter((row) =>
@@ -1332,12 +1291,9 @@
           <div class="flex gap-3">
             <!-- Y-axis labels -->
             <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-10 shrink-0 text-right">
-              <span>$60k</span>
-              <span>$50k</span>
-              <span>$40k</span>
-              <span>$30k</span>
-              <span>$20k</span>
-              <span>$10k</span>
+              {#each activeRevenueChart.yLabels as lbl}
+                <span>{lbl}</span>
+              {/each}
             </div>
             <div class="flex-1 relative h-64">
               <svg viewBox="0 0 860 200" class="w-full h-full" preserveAspectRatio="none">
@@ -1351,28 +1307,22 @@
                     <stop offset="100%" stop-color="#ec4899" stop-opacity="0.01" />
                   </linearGradient>
                 </defs>
-                <!-- Grid lines -->
                 {#each [0, 40, 80, 120, 160, 200] as y}
                   <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.07" stroke-width="1" />
                 {/each}
-                <!-- Revenue area + line -->
-                <path d="M0,160 C60,145 120,125 200,130 C280,135 340,100 430,65 C510,32 580,110 660,100 C730,92 800,108 860,112 L860,200 L0,200 Z" fill="url(#revGradReport)" />
-                <path d="M0,160 C60,145 120,125 200,130 C280,135 340,100 430,65 C510,32 580,110 660,100 C730,92 800,108 860,112" fill="none" stroke="#3b82f6" stroke-width="2.5" />
-                <!-- Profit area + line -->
-                <path d="M0,180 C60,172 120,165 200,162 C280,158 340,148 430,138 C510,128 580,145 660,140 C730,136 800,142 860,144 L860,200 L0,200 Z" fill="url(#profitGrad)" />
-                <path d="M0,180 C60,172 120,165 200,162 C280,158 340,148 430,138 C510,128 580,145 660,140 C730,136 800,142 860,144" fill="none" stroke="#ec4899" stroke-width="2.5" />
-                <!-- Revenue dots -->
-                {#each [[0,160],[200,130],[430,65],[660,100],[860,112]] as [cx,cy]}
-                  <circle {cx} {cy} r="4" fill="#3b82f6" />
+                <path d={svgRevenue.fill} fill="url(#revGradReport)" />
+                <path d={svgRevenue.line} fill="none" stroke="#3b82f6" stroke-width="2.5" />
+                <path d={svgProfit.fill}  fill="url(#profitGrad)" />
+                <path d={svgProfit.line}  fill="none" stroke="#ec4899" stroke-width="2.5" />
+                {#each svgRevenue.pts as pt}
+                  <circle cx={pt.x} cy={pt.y} r="4" fill="#3b82f6" />
                 {/each}
-                <!-- Profit dots -->
-                {#each [[0,180],[200,162],[430,138],[660,140],[860,144]] as [cx,cy]}
-                  <circle {cx} {cy} r="4" fill="#ec4899" />
+                {#each svgProfit.pts as pt}
+                  <circle cx={pt.x} cy={pt.y} r="4" fill="#ec4899" />
                 {/each}
               </svg>
-              <!-- X-axis labels -->
               <div class="absolute bottom-0 left-0 right-0 flex justify-between">
-                {#each ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as m}
+                {#each activeRevenueChart.labels as m}
                   <span class="text-[10px] text-muted-foreground">{m}</span>
                 {/each}
               </div>
@@ -1381,7 +1331,7 @@
         </div>
 
         <!-- Revenue by Category -->
-        <div class="bg-card border border-border rounded-lg p-6">
+        <div class="bg-card border border-border rounded-lg px-8 py-6">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-foreground">
               Revenue by Category
@@ -1392,7 +1342,7 @@
                 { value: "this-month", label: "This Month" },
                 { value: "this-year", label: "This Year" },
               ]}
-              value="this-week"
+              bind:value={revenueByCategoryPeriod}
               class="min-w-30"
             />
           </div>
@@ -1400,39 +1350,22 @@
           <!-- Donut chart for category distribution -->
           <div class="flex justify-center mb-4">
             <svg viewBox="0 0 160 160" class="w-36 h-36">
-              <defs>
-                <linearGradient id="elecGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#3b82f6" /><stop offset="100%" stop-color="#6366f1" />
-                </linearGradient>
-              </defs>
-              <!-- Electronics 35% -->
-              <circle cx="80" cy="80" r="56" fill="none" stroke="url(#elecGrad)" stroke-width="26"
-                stroke-dasharray="123.2 351.9" stroke-dashoffset="0" transform="rotate(-90 80 80)" />
-              <!-- Clothing 25% -->
-              <circle cx="80" cy="80" r="56" fill="none" stroke="#ec4899" stroke-width="26"
-                stroke-dasharray="87.9 351.9" stroke-dashoffset="-123.2" transform="rotate(-90 80 80)" />
-              <!-- Home Supplies 22% -->
-              <circle cx="80" cy="80" r="56" fill="none" stroke="#f59e0b" stroke-width="26"
-                stroke-dasharray="77.4 351.9" stroke-dashoffset="-211.1" transform="rotate(-90 80 80)" />
-              <!-- Beauty 10% -->
-              <circle cx="80" cy="80" r="56" fill="none" stroke="#22c55e" stroke-width="26"
-                stroke-dasharray="35.2 351.9" stroke-dashoffset="-288.5" transform="rotate(-90 80 80)" />
-              <!-- Groceries 8% -->
-              <circle cx="80" cy="80" r="56" fill="none" stroke="#a855f7" stroke-width="26"
-                stroke-dasharray="28.2 351.9" stroke-dashoffset="-323.7" transform="rotate(-90 80 80)" />
+              {#each revenueCatSegments as seg}
+                <circle cx="80" cy="80" r="56" fill="none" stroke={seg.color} stroke-width="26"
+                  stroke-dasharray="{seg.dash.toFixed(1)} {CAT_CIRC}" stroke-dashoffset={seg.offset.toFixed(1)} transform="rotate(-90 80 80)" />
+              {/each}
               <circle cx="80" cy="80" r="43" class="fill-card" />
-              <text x="80" y="76" font-size="11" fill="currentColor" text-anchor="middle" font-weight="700">$40.6M</text>
+              <text x="80" y="76" font-size="11" fill="currentColor" text-anchor="middle" font-weight="700">{activeRevenueByCat.total}</text>
               <text x="80" y="90" font-size="8" fill="#6b7280" text-anchor="middle">Total</text>
             </svg>
           </div>
 
           <!-- Legend + list -->
           <div class="space-y-3">
-            {#each revenueByCategory as item, i}
-              {@const colors = ["bg-blue-500","bg-pink-500","bg-amber-500","bg-green-500","bg-purple-500"]}
+            {#each activeRevenueByCat.categories as item, i}
               <div class="flex items-center justify-between pb-3 border-b border-border last:border-0">
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full {colors[i]} shrink-0"></span>
+                  <span class="w-2.5 h-2.5 rounded-full {catBgColors[i]} shrink-0"></span>
                   <div>
                     <p class="text-sm font-medium text-foreground">{item.category}</p>
                     <p class="text-xs text-muted-foreground">{item.items}</p>
@@ -1536,7 +1469,6 @@
             icon={kpi.icon}
             iconBgClass={kpi.iconBgClass}
             iconColor={kpi.iconColor}
-            borderColor={kpi.borderColor}
           />
         {/each}
       </div>
@@ -1559,6 +1491,14 @@
               { value: "john", label: "John Smith" },
               { value: "sarah", label: "Sarah Johnson" },
             ], value: paymentsMerchantFilter, onchange: (v) => { paymentsMerchantFilter = v; } },
+          { id: "payments-branch-filter", label: "Branch", options: [
+              { value: "", label: "All Branches" },
+              { value: "Branch #1", label: "Branch #1" },
+              { value: "Branch #2", label: "Branch #2" },
+              { value: "Branch #3", label: "Branch #3" },
+              { value: "Branch #4", label: "Branch #4" },
+              { value: "Branch #5", label: "Branch #5" },
+            ], value: paymentsBranchFilter, onchange: (v) => { paymentsBranchFilter = v; } },
         ]}
       />
 

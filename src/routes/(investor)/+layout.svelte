@@ -23,6 +23,16 @@
 
   let showProfileDropdown = $state(false);
   let showNotifications = $state(false);
+  let showLanguageDropdown = $state(false);
+  let selectedLanguage = $state("English");
+
+  const languageOptions = [
+    { value: "English",  label: "English",  abbr: "ENG" },
+    { value: "Amharic",  label: "Amharic",  abbr: "AMH" },
+    { value: "Oromiffa", label: "Oromiffa", abbr: "ORO" },
+  ];
+
+  const langAbbr = $derived(languageOptions.find(l => l.value === selectedLanguage)?.abbr ?? "ENG");
 
   $effect(() => { themeStore.init(); });
 
@@ -70,7 +80,7 @@
       <Sidebar>
         <SidebarHeader>
           <a href="/" class="flex items-center px-2 py-1 hover:opacity-90 transition-opacity">
-            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="h-20 w-auto object-contain" />
+            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="w-auto object-contain" style="height: 90px;" />
           </a>
         </SidebarHeader>
 
@@ -155,8 +165,27 @@
               {/if}
             </button>
 
-            <div class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-base cursor-pointer overflow-hidden">
-              🇬🇧
+            <div class="relative">
+              <button
+                type="button"
+                onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; showNotifications = false; }}
+                class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-[10px] font-semibold cursor-pointer bg-background hover:bg-muted transition-colors text-foreground"
+              >
+                {langAbbr}
+              </button>
+              {#if showLanguageDropdown}
+                <div class="absolute right-0 top-full mt-2 w-36 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  {#each languageOptions as opt}
+                    <button
+                      type="button"
+                      class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-muted {selectedLanguage === opt.value ? 'text-[#4DA0E6] font-medium' : 'text-foreground'}"
+                      onclick={() => { selectedLanguage = opt.value; showLanguageDropdown = false; }}
+                    >
+                      {opt.label}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
             </div>
 
             <div class="relative">

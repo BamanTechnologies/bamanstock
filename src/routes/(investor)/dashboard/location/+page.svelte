@@ -219,7 +219,7 @@
     <button
       type="button"
       onclick={handleAddLocation}
-      class="inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all"
+      class="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold rounded-lg hover:bg-[#3d8fd4] active:scale-95 transition-all"
       style="background-color: #4DA0E6;"
     >
       <Icon iconName="icon/plus" size={16} />
