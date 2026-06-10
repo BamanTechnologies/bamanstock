@@ -18,6 +18,21 @@
     { id: 8,  name: "Hilltop Store #8",      totalStockValue: "$24,780",  merchants: "5",  lowStockItems: "1",  status: "Active"   },
     { id: 9,  name: "Harbor Point #9",       totalStockValue: "$21,340",  merchants: "4",  lowStockItems: "0",  status: "Inactive" },
     { id: 10, name: "Midtown Market #10",    totalStockValue: "$19,800",  merchants: "3",  lowStockItems: "6",  status: "Active"   },
+    { id: 11, name: "Southgate Storage #11",totalStockValue: "$17,500",  merchants: "3",  lowStockItems: "2",  status: "Active"   },
+    { id: 12, name: "Uptown Centre #12",    totalStockValue: "$15,900",  merchants: "2",  lowStockItems: "0",  status: "Inactive" },
+    { id: 13, name: "Metro Depot #13",      totalStockValue: "$14,200",  merchants: "4",  lowStockItems: "7",  status: "Active"   },
+    { id: 14, name: "Greenview Hub #14",    totalStockValue: "$12,600",  merchants: "3",  lowStockItems: "1",  status: "Active"   },
+    { id: 15, name: "Bayfront Point #15",   totalStockValue: "$11,300",  merchants: "2",  lowStockItems: "4",  status: "Active"   },
+    { id: 16, name: "Valley Store #16",     totalStockValue: "$9,800",   merchants: "2",  lowStockItems: "0",  status: "Inactive" },
+    { id: 17, name: "Pinecrest Depot #17",  totalStockValue: "$8,750",   merchants: "1",  lowStockItems: "3",  status: "Active"   },
+    { id: 18, name: "Cedarwood Hub #18",    totalStockValue: "$7,400",   merchants: "2",  lowStockItems: "0",  status: "Active"   },
+    { id: 19, name: "Sunrise Warehouse #19",totalStockValue: "$6,200",   merchants: "1",  lowStockItems: "5",  status: "Active"   },
+    { id: 20, name: "Oakdale Branch #20",   totalStockValue: "$5,100",   merchants: "1",  lowStockItems: "0",  status: "Inactive" },
+    { id: 21, name: "Ironwood Center #21",  totalStockValue: "$4,300",   merchants: "2",  lowStockItems: "1",  status: "Active"   },
+    { id: 22, name: "Maple Leaf Hub #22",   totalStockValue: "$3,600",   merchants: "1",  lowStockItems: "2",  status: "Active"   },
+    { id: 23, name: "Clearwater Depot #23", totalStockValue: "$2,900",   merchants: "1",  lowStockItems: "0",  status: "Active"   },
+    { id: 24, name: "Stonegate Branch #24", totalStockValue: "$2,200",   merchants: "1",  lowStockItems: "4",  status: "Inactive" },
+    { id: 25, name: "Crestview Point #25",  totalStockValue: "$1,600",   merchants: "1",  lowStockItems: "0",  status: "Active"   },
   ]);
 
   let searchQuery = $state("");
@@ -120,6 +135,7 @@
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
   const totalPages = $derived(Math.ceil(filteredLocations.length / rowsPerPage));
+  const paginatedLocations = $derived(filteredLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -239,7 +255,7 @@
   {:else}
     <DataTable
       {columns}
-      data={filteredLocations}
+      data={paginatedLocations}
       searchable={true}
       searchPlaceholder="Search"
       {filters}
