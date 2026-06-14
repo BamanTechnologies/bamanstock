@@ -5,6 +5,7 @@
   import DeleteLocationModal from "$lib/components/investor/DeleteLocationModal.svelte";
   import AddLocationModal from "$lib/components/investor/AddLocationModal.svelte";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
+  import { _ } from "svelte-i18n";
 
   // Mock location data - replace with real data later
   let locations = $state([
@@ -78,25 +79,13 @@
     }
   }
 
-  // Table configuration
-  const columns = [
-    {
-      key: "name",
-      label: "Location Name",
-      sortable: true,
-    },
-    {
-      key: "totalStockValue",
-      label: "Total Stock Value",
-      sortable: true,
-    },
-    {
-      key: "merchants",
-      label: "Merchants",
-    },
+  const columns = $derived([
+    { key: "name",            label: $_('navLocation'), sortable: true },
+    { key: "totalStockValue", label: "Total Stock Value", sortable: true },
+    { key: "merchants",       label: $_('navMerchants') },
     {
       key: "lowStockItems",
-      label: "Low Stock Items",
+      label: $_('tabLowStock'),
       render: (row: (typeof locations)[0]) => {
         return `
           <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700">
@@ -107,30 +96,33 @@
     },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       sortable: true,
       render: (row: (typeof locations)[0]) => {
+        const label = row.status === "Active"   ? $_('statusActive')
+                    : row.status === "Inactive" ? $_('inactive')
+                    : row.status;
         return `
           <span class="inline-flex items-center gap-1.5 ${getStatusClass(row.status)}">
             <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
-            ${row.status}
+            ${label}
           </span>
         `;
       },
     },
-  ];
+  ]);
 
-  const filters = [
+  const filters = $derived([
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       options: [
-        { value: "", label: "All Status" },
-        { value: "active", label: "Active" },
-        { value: "inactive", label: "Inactive" },
+        { value: "",         label: $_('allStatus') },
+        { value: "active",   label: $_('statusActive') },
+        { value: "inactive", label: $_('inactive') },
       ],
     },
-  ];
+  ]);
 
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
@@ -239,7 +231,7 @@
       style="background-color: #4DA0E6;"
     >
       <Icon iconName="icon/plus" size={16} />
-      Add Location
+      {$_('addLocation')}
     </button>
   </div>
 
@@ -257,7 +249,7 @@
       {columns}
       data={paginatedLocations}
       searchable={true}
-      searchPlaceholder="Search"
+      searchPlaceholder={$_('search')}
       {filters}
       onSearch={handleSearch}
       onFilterChange={handleFilterChange}
@@ -265,12 +257,12 @@
       actions={[
         {
           icon: "icon/edit",
-          label: "Edit",
+          label: $_('edit'),
           onClick: handleEdit,
         },
         {
           icon: "icon/trash",
-          label: "Delete",
+          label: $_('delete'),
           onClick: handleDelete,
           variant: "destructive",
         },

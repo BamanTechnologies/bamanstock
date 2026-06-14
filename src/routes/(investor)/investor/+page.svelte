@@ -9,6 +9,7 @@
     HireMerchantModal,
   } from "$lib/components/investor/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { _ } from "svelte-i18n";
 
   let searchQuery = $state("");
   let locationFilter = $state("");
@@ -18,21 +19,21 @@
     undefined
   );
 
-  const locationOptions = [
-    { value: "", label: "All Locations" },
-    { value: "addis-ababa", label: "Addis Ababa" },
-    { value: "dire-dawa", label: "Dire Dawa" },
-    { value: "hawassa", label: "Hawassa" },
-    { value: "bahir-dar", label: "Bahir Dar" },
-    { value: "mekelle", label: "Mekelle" },
-  ];
+  const locationOptions = $derived([
+    { value: "", label: $_('allLocations') },
+    { value: "addis-ababa", label: $_('locAddisAbaba') },
+    { value: "dire-dawa", label: $_('locDireDawa') },
+    { value: "hawassa", label: $_('locHawassa') },
+    { value: "bahir-dar", label: $_('locBahirDar') },
+    { value: "mekelle", label: $_('locMekelle') },
+  ]);
 
-  const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "active", label: "Active" },
-    { value: "declined", label: "Declined" },
-    { value: "invited", label: "Invited" },
-  ];
+  const statusOptions = $derived([
+    { value: "", label: $_('allStatus') },
+    { value: "active", label: $_('statusActive') },
+    { value: "declined", label: $_('statusDeclined') },
+    { value: "invited", label: $_('statusInvited') },
+  ]);
 
   // ── Mock Data (replace with real API later)
   const mockMerchants = [
@@ -188,14 +189,13 @@
         class="flex-none text-foreground"
         style="width: 507px; max-width: 100%; height: 38px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 29px; line-height: 38px; flex: none; order: 0; flex-grow: 0;"
       >
-        Find & Work With Trusted Merchants
+        {$_('pageTitle')}
       </h1>
       <p
         class="flex-none mt-2 text-muted-foreground"
-        style="width: 528px; max-width: 100%; height: 18px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; flex: none; order: 1; flex-grow: 0;"
+        style="width: 528px; max-width: 100%; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; flex: none; order: 1; flex-grow: 0;"
       >
-        Browse registered merchants or invite new ones to manage stock and sales
-        together.
+        {$_('pageSubtitle')}
       </p>
     </div>
 
@@ -206,7 +206,7 @@
         <div class="w-full sm:flex-1" style="max-width: 484px;">
           <SearchBar
             bind:value={searchQuery}
-            placeholder="Search merchants by name, location, or business type"
+            placeholder={$_('searchPlaceholder')}
           />
         </div>
 
@@ -219,21 +219,21 @@
           <Icon iconName="icon/plus" size={13} class="text-white flex-none" />
           <span
             class="flex-none text-center"
-            style="font-family: 'Nunito Sans', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF; width: 91px; height: 20px;"
+            style="font-family: 'Nunito Sans', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF;"
           >
-            Invite Merchant
+            {$_('inviteMerchant')}
           </span>
         </button>
       </div>
 
       <div class="flex flex-wrap gap-3">
         <FilterDropdown
-          label="Location"
+          label={$_('filterLocation')}
           options={locationOptions}
           bind:value={locationFilter}
         />
         <FilterDropdown
-          label="Status"
+          label={$_('filterStatus')}
           options={statusOptions}
           bind:value={statusFilter}
         />

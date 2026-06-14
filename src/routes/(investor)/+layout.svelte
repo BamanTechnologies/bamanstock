@@ -18,21 +18,20 @@
 
   import { page } from "$app/stores";
   import { themeStore } from "$lib/stores/theme.svelte.js";
+  import { _, locale } from "svelte-i18n";
+  import { setLocale, localeAbbr } from "$lib/i18n/index.js";
 
   let { children } = $props();
 
   let showProfileDropdown = $state(false);
   let showNotifications = $state(false);
   let showLanguageDropdown = $state(false);
-  let selectedLanguage = $state("English");
 
-  const languageOptions = [
-    { value: "English",  label: "English",  abbr: "ENG" },
-    { value: "Amharic",  label: "Amharic",  abbr: "AMH" },
-    { value: "Oromiffa", label: "Oromiffa", abbr: "ORO" },
+  const langOptions = [
+    { value: "en", label: "English",      abbr: "ENG" },
+    { value: "am", label: "አማርኛ",         abbr: "AMH" },
+    { value: "om", label: "Afaan Oromoo",  abbr: "ORO" },
   ];
-
-  const langAbbr = $derived(languageOptions.find(l => l.value === selectedLanguage)?.abbr ?? "ENG");
 
   $effect(() => { themeStore.init(); });
 
@@ -42,26 +41,25 @@
 
   const pageTitle = $derived.by(() => {
     const path = $page.url.pathname;
-    if (path.includes("/dashboard/merchants/")) return "Merchant Details";
-    if (path.startsWith("/dashboard/merchants")) return "Merchants";
-    if (path.includes("/location")) return "Locations";
-    if (path.includes("/stock")) return "Stock";
-    if (path.includes("/report")) return "Reports";
-    if (path.includes("/setting")) return "Settings";
-    if (path === "/dashboard") return "Dashboard";
-    return "Dashboard";
+    if (path.includes("/dashboard/merchants/")) return $_('pageMerchantDetails');
+    if (path.startsWith("/dashboard/merchants")) return $_('pageMerchants');
+    if (path.includes("/location")) return $_('pageLocations');
+    if (path.includes("/stock")) return $_('pageStock');
+    if (path.includes("/report")) return $_('pageReports');
+    if (path.includes("/setting")) return $_('pageSettings');
+    return $_('pageDashboard');
   });
 
   const isInvestorPage = $derived($page.url.pathname.startsWith("/investor"));
 
-  const navigation = [
-    { title: "Dashboard", icon: "icon/layout-grid", href: "/dashboard" },
-    { title: "Merchants", icon: "icon/users",        href: "/dashboard/merchants" },
-    { title: "Location",  icon: "icon/map-pin",      href: "/dashboard/location" },
-    { title: "Stock",     icon: "icon/box",           href: "/dashboard/stock" },
-    { title: "Report",    icon: "icon/bar-chart",     href: "/dashboard/reports" },
-    { title: "Settings",  icon: "icon/settings",      href: "/dashboard/setting" },
-  ];
+  const navigation = $derived([
+    { title: $_('navDashboard'), icon: "icon/layout-grid", href: "/dashboard" },
+    { title: $_('navMerchants'), icon: "icon/users",        href: "/dashboard/merchants" },
+    { title: $_('navLocation'),  icon: "icon/map-pin",      href: "/dashboard/location" },
+    { title: $_('navStock'),     icon: "icon/box",           href: "/dashboard/stock" },
+    { title: $_('navReport'),    icon: "icon/bar-chart",     href: "/dashboard/reports" },
+    { title: $_('navSettings'),  icon: "icon/settings",      href: "/dashboard/setting" },
+  ]);
 </script>
 
 <svelte:head>
@@ -113,7 +111,7 @@
               <a href="/" class="block">
                 <SidebarMenuButton class="text-red-500 hover:text-red-600 hover:cursor-pointer">
                   <Icon iconName="icon/log-out" size={20} class="text-red-500" />
-                  <span>Logout</span>
+                  <span>{$_('logout')}</span>
                 </SidebarMenuButton>
               </a>
             </SidebarMenuItem>
@@ -143,11 +141,11 @@
               {#if showNotifications}
                 <div class="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                   <div class="px-4 py-3 border-b border-border">
-                    <p class="text-sm font-semibold text-foreground">Notifications</p>
+                    <p class="text-sm font-semibold text-foreground">{$_('notificationsTitle')}</p>
                   </div>
                   <div class="px-4 py-8 flex flex-col items-center gap-2 text-center">
                     <Icon iconName="icon/bell" size={32} class="text-muted-foreground/40" />
-                    <p class="text-sm text-muted-foreground">You don't have any notifications</p>
+                    <p class="text-sm text-muted-foreground">{$_('noNotificationsMsg')}</p>
                   </div>
                 </div>
               {/if}
@@ -171,17 +169,17 @@
                 onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; showNotifications = false; }}
                 class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-[10px] font-semibold cursor-pointer bg-background hover:bg-muted transition-colors text-foreground"
               >
-                {langAbbr}
+                {localeAbbr($locale)}
               </button>
               {#if showLanguageDropdown}
-                <div class="absolute right-0 top-full mt-2 w-36 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
-                  {#each languageOptions as opt}
+                <div class="absolute right-0 top-full mt-2 w-40 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  {#each langOptions as opt}
                     <button
                       type="button"
-                      class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-muted {selectedLanguage === opt.value ? 'text-[#4DA0E6] font-medium' : 'text-foreground'}"
-                      onclick={() => { selectedLanguage = opt.value; showLanguageDropdown = false; }}
+                      class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-muted {$locale === opt.value ? 'text-[#4DA0E6] font-medium' : 'text-foreground'}"
+                      onclick={() => { setLocale(opt.value); showLanguageDropdown = false; }}
                     >
-                      {opt.label}
+                      <span class="text-xs font-mono text-muted-foreground mr-2">{opt.abbr}</span>{opt.label}
                     </button>
                   {/each}
                 </div>
@@ -202,20 +200,20 @@
                     <div>
                       <p class="text-sm font-semibold text-foreground">Yohannes Abayneh</p>
                       <a href="/dashboard/profile" class="text-xs text-info hover:underline" onclick={() => (showProfileDropdown = false)}>
-                        View Profile →
+                        {$_('viewProfile')}
                       </a>
                     </div>
                   </div>
                   <a href="/dashboard/setting" class="flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors" onclick={() => (showProfileDropdown = false)}>
                     <span class="flex items-center gap-2">
                       <Icon iconName="icon/settings" size={16} class="text-muted-foreground" />
-                      Change theme
+                      {$_('changeTheme')}
                     </span>
                     <Icon iconName="icon/chevron-right" size={14} class="text-muted-foreground" />
                   </a>
                   <a href="/" class="flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors">
                     <Icon iconName="icon/log-out" size={16} />
-                    Log out
+                    {$_('logout')}
                   </a>
                 </div>
               {/if}

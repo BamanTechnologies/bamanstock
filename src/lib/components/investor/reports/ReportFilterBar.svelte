@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
+  import { _ } from "svelte-i18n";
 
   interface FilterOption {
     value: string;
@@ -28,16 +29,16 @@
 
   const now = new Date();
 
-  const periodOptions = [
-    { value: "today",  label: "Today" },
-    { value: "7d",     label: "Last 7 Days" },
-    { value: "30d",    label: "Last 30 Days" },
-    { value: "1m",     label: "This Month" },
-    { value: "3m",     label: "Last 3 Months" },
-    { value: "6m",     label: "Last 6 Months" },
-    { value: "1y",     label: "This Year" },
-    { value: "custom", label: "Custom" },
-  ];
+  const periodOptions = $derived([
+    { value: "today",  label: $_('today') },
+    { value: "7d",     label: $_('last7Days') },
+    { value: "30d",    label: $_('last30Days') },
+    { value: "1m",     label: $_('thisMonth') },
+    { value: "3m",     label: $_('last3Months') },
+    { value: "6m",     label: $_('last6Months') },
+    { value: "1y",     label: $_('thisYear') },
+    { value: "custom", label: $_('custom') },
+  ]);
 
   let selectedPeriod = $state("6m");
   let startDate = $state(toInputDate(new Date(now.getFullYear(), now.getMonth() - 6, 1)));
@@ -77,13 +78,13 @@
 
     <!-- Period quick-select -->
     <div class="flex-1 min-w-0">
-      <label for="{id}-period" class="text-xs font-medium text-muted-foreground mb-1 block">Period</label>
+      <label for="{id}-period" class="text-xs font-medium text-muted-foreground mb-1 block">{$_('period')}</label>
       <Dropdown
         id="{id}-period"
         options={periodOptions}
         value={selectedPeriod}
         onchange={handlePeriodChange}
-        placeholder="Select period"
+        placeholder={$_('selectPeriod')}
         class="h-7 text-xs px-2"
       />
     </div>
@@ -91,7 +92,7 @@
     <!-- From / To — only shown when Custom is selected -->
     {#if isCustom}
       <div class="flex-1 min-w-0">
-        <label for="{id}-from" class="text-xs font-medium text-muted-foreground mb-1 block">From</label>
+        <label for="{id}-from" class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterFrom')}</label>
         <input
           id="{id}-from"
           type="date"
@@ -102,7 +103,7 @@
       </div>
 
       <div class="flex-1 min-w-0">
-        <label for="{id}-to" class="text-xs font-medium text-muted-foreground mb-1 block">To</label>
+        <label for="{id}-to" class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterTo')}</label>
         <input
           id="{id}-to"
           type="date"
@@ -123,7 +124,7 @@
           options={filter.options}
           value={filter.value ?? ""}
           onchange={filter.onchange}
-          placeholder="All"
+          placeholder={$_('filterAll')}
           class="h-7 text-xs px-2"
         />
       </div>

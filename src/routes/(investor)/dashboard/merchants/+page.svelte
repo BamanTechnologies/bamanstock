@@ -4,30 +4,15 @@
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { goto } from "$app/navigation";
   import InviteMerchantModal from "$lib/components/investor/InviteMerchantModal.svelte";
+  import { _ } from "svelte-i18n";
 
   let isInviteModalOpen = $state(false);
 
-  // Mock data - replace with real data later
-  const summaryCards = [
-    {
-      label: "Total Merchants",
-      value: "20",
-      icon: "icon/user",
-      color: "bg-green-100 dark:bg-green-900/40",
-    },
-    {
-      label: "Active Merchants",
-      value: "13",
-      icon: "icon/users",
-      color: "bg-blue-100 dark:bg-blue-900/40",
-    },
-    {
-      label: "Merchant per Location",
-      value: "4",
-      icon: "icon/building",
-      color: "bg-purple-100 dark:bg-purple-900/40",
-    },
-  ];
+  const summaryCards = $derived([
+    { label: $_('totalMerchants'),      value: "20", icon: "icon/user",     color: "bg-green-100 dark:bg-green-900/40" },
+    { label: $_('activeMerchants'),     value: "13", icon: "icon/users",    color: "bg-blue-100 dark:bg-blue-900/40"  },
+    { label: $_('merchantsPerLocation'), value: "4",  icon: "icon/building", color: "bg-purple-100 dark:bg-purple-900/40" },
+  ]);
 
   const merchants = [
     { name: "Richard Wilson",   revenue: "$156,900", transactions: "785", location: "Branch #1", status: "Active" },
@@ -92,11 +77,10 @@
     }
   }
 
-  // Table configuration
-  const columns = [
+  const columns = $derived([
     {
       key: "name",
-      label: "Merchant",
+      label: $_('merchant'),
       sortable: true,
       render: (row: (typeof merchants)[0]) => {
         return `
@@ -111,30 +95,34 @@
         `;
       },
     },
-    { key: "revenue", label: "Revenue", sortable: true },
-    { key: "transactions", label: "Transactions" },
-    { key: "location", label: "Location" },
+    { key: "revenue",      label: $_('revenue'),       sortable: true },
+    { key: "transactions", label: $_('transactions') },
+    { key: "location",     label: $_('navLocation') },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       sortable: true,
       render: (row: (typeof merchants)[0]) => {
+        const label = row.status === "Active"   ? $_('statusActive')
+                    : row.status === "Invited"  ? $_('statusInvited')
+                    : row.status === "Declined" ? $_('statusDeclined')
+                    : row.status;
         return `
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(row.status)}">
             <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
-            ${row.status}
+            ${label}
           </span>
         `;
       },
     },
-  ];
+  ]);
 
-  const filters = [
+  const filters = $derived([
     {
       key: "location",
-      label: "Location",
+      label: $_('navLocation'),
       options: [
-        { value: "", label: "All Locations" },
+        { value: "", label: $_('allLocations') },
         { value: "Branch #1", label: "Branch #1" },
         { value: "Branch #2", label: "Branch #2" },
         { value: "Branch #3", label: "Branch #3" },
@@ -144,15 +132,15 @@
     },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       options: [
-        { value: "", label: "All Status" },
-        { value: "active", label: "Active" },
-        { value: "invited", label: "Invited" },
-        { value: "declined", label: "Declined" },
+        { value: "",         label: $_('allStatus') },
+        { value: "active",   label: $_('statusActive') },
+        { value: "invited",  label: $_('statusInvited') },
+        { value: "declined", label: $_('statusDeclined') },
       ],
     },
-  ];
+  ]);
 
   let searchQuery = $state("");
   let locationFilter = $state("");
@@ -215,7 +203,7 @@
     />
     <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isInviteModalOpen = true)}>
       <Icon iconName="icon/plus" size={16} class="mr-2" />
-      Invite Merchant
+      {$_('inviteMerchant')}
     </Button>
   </div>
 
@@ -247,7 +235,7 @@
     {columns}
     data={paginatedMerchants}
     searchable={true}
-    searchPlaceholder="Search"
+    searchPlaceholder={$_('search')}
     {filters}
     onSearch={handleSearch}
     onFilterChange={handleFilterChange}
@@ -255,7 +243,7 @@
     actions={[
       {
         icon: "icon/trash",
-        label: "Delete",
+        label: $_('delete'),
         onClick: handleDelete,
         variant: "destructive",
       },

@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { _ } from "svelte-i18n";
 
   interface MerchantCardProps {
     name: string;
@@ -21,23 +22,23 @@
 
   const PRIMARY_BLUE = "var(--primary-blue)";
 
-  const statusConfig = {
+  const statusConfig = $derived({
     active: {
-      label: "Active",
+      label: $_('statusActive'),
       bgClass: "bg-green-100 dark:bg-green-900/40",
       textClass: "text-green-700 dark:text-green-300",
     },
     declined: {
-      label: "Declined",
+      label: $_('statusDeclined'),
       bgClass: "bg-red-100 dark:bg-red-900/40",
       textClass: "text-red-700 dark:text-red-300",
     },
     invited: {
-      label: "Invited",
+      label: $_('statusInvited'),
       bgClass: "bg-blue-100 dark:bg-blue-900/40",
       textClass: "text-blue-700 dark:text-blue-300",
     },
-  } as const;
+  });
 </script>
 
 <div
@@ -91,7 +92,7 @@
             class="flex-none"
             style="width: 125px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; color: {PRIMARY_BLUE}; display: flex; align-items: center; flex-grow: 0;"
           >
-            {productsSold}+ Product Sold
+            {productsSold}+ {$_('productSold')}
           </div>
         </div>
       </div>
@@ -140,9 +141,9 @@
     >
       <span
         class="flex-none text-center"
-        style="width: 32px; height: 23px; font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: #FFFFFF; text-align: center; flex-grow: 0;"
+        style="height: 23px; font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: #FFFFFF; text-align: center; flex-grow: 0;"
       >
-        Hire
+        {$_('hire')}
       </span>
     </button>
   </div>
