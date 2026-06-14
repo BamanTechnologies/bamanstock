@@ -7,8 +7,15 @@
   import IconKpiCard from "$lib/components/investor/reports/IconKpiCard.svelte";
   import StatKpiCard from "$lib/components/investor/reports/StatKpiCard.svelte";
   import ReportFilterBar from "$lib/components/investor/reports/ReportFilterBar.svelte";
+  import { _ } from "svelte-i18n";
 
-  const tabs = ["Sales", "Revenue & Profit", "Payments", "Stock Movement", "Low Stock"];
+  const tabs = $derived([
+    { key: "Sales",             label: $_('tabSales') },
+    { key: "Revenue & Profit",  label: $_('tabRevenueProfit') },
+    { key: "Payments",          label: $_('tabPayments') },
+    { key: "Stock Movement",    label: $_('tabStockMovement') },
+    { key: "Low Stock",         label: $_('tabLowStock') },
+  ]);
 
   let activeTab = $state($page.url.searchParams.get("tab") ?? "Sales");
   $effect(() => {
@@ -16,35 +23,17 @@
     if (tab !== null) activeTab = tab;
   });
 
-  function switchTab(tab: string) {
-    activeTab = tab;
-    goto(`?tab=${encodeURIComponent(tab)}`, { replaceState: true, noScroll: true });
+  function switchTab(key: string) {
+    activeTab = key;
+    goto(`?tab=${encodeURIComponent(key)}`, { replaceState: true, noScroll: true });
   }
 
   // Revenue & Profit tab data
-  const revenueKpiCards = [
-    {
-      label: "Total Revenue",
-      value: "$40,565,000",
-      change: "25.5",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-    {
-      label: "Growth Profit",
-      value: "$795,902.50",
-      change: "12.2",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-    {
-      label: "Growth Margin %",
-      value: "4558",
-      change: "16.3",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-  ];
+  const revenueKpiCards = $derived([
+    { label: $_('totalRevenue'), value: "$40,565,000", change: "25.5", changeType: "positive", changeLabel: $_('fromLastMonth') },
+    { label: $_('growthProfit'), value: "$795,902.50", change: "12.2", changeType: "positive", changeLabel: $_('fromLastMonth') },
+    { label: $_('growthMargin'), value: "4558", change: "16.3", changeType: "positive", changeLabel: $_('fromLastMonth') },
+  ]);
 
   let chartTimeframe = $state("1Y");
   const timeframeOptions = ["1D", "1W", "1M", "3M", "6M", "1Y"];
@@ -132,12 +121,12 @@
   let revenueDateRange = $state("01-Jan-2025 - 12-Dec-2025");
 
   // Payments tab data
-  const paymentsKpiCards = [
-    { label: "Total Amount", value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBgClass: "bg-green-50  dark:bg-green-900/40",  iconColor: "#16a34a" },
-    { label: "Total Paid",   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBgClass: "bg-blue-50   dark:bg-blue-900/40",   iconColor: "#3b82f6" },
-    { label: "Total Unpaid", value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316" },
-    { label: "Overdue",      value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50    dark:bg-red-900/40",    iconColor: "#ef4444" },
-  ];
+  const paymentsKpiCards = $derived([
+    { label: $_('totalAmount'), value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBgClass: "bg-green-50  dark:bg-green-900/40",  iconColor: "#16a34a" },
+    { label: $_('totalPaid'),   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBgClass: "bg-blue-50   dark:bg-blue-900/40",   iconColor: "#3b82f6" },
+    { label: $_('totalUnpaid'), value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316" },
+    { label: $_('overdue'),     value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50    dark:bg-red-900/40",    iconColor: "#ef4444" },
+  ]);
 
   // Mock payments report data
   let paymentsReportData = $state([
@@ -178,15 +167,15 @@
   let paymentsRowsPerPage = $state(10);
 
   // Payments table columns
-  const paymentsColumns = [
+  const paymentsColumns = $derived([
     {
       key: "id",
-      label: "Invoice ID",
+      label: $_('invoiceId'),
       sortable: true,
     },
     {
       key: "merchant",
-      label: "Merchant",
+      label: $_('merchant'),
       sortable: true,
       render: (row: (typeof paymentsReportData)[0]) => {
         return `
@@ -203,27 +192,27 @@
     },
     {
       key: "dueDate",
-      label: "Due Date",
+      label: $_('dueDate'),
       sortable: true,
     },
     {
       key: "amount",
-      label: "Amount",
+      label: $_('amount'),
       sortable: true,
     },
     {
       key: "paid",
-      label: "Paid",
+      label: $_('paid'),
       sortable: true,
     },
     {
       key: "amountDue",
-      label: "Amount Due",
+      label: $_('amountDue'),
       sortable: true,
     },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       sortable: true,
       render: (row: (typeof paymentsReportData)[0]) => {
         const isPaid = row.status === "Paid";
@@ -239,7 +228,7 @@
         `;
       },
     },
-  ];
+  ]);
 
   let paymentsStatusFilter = $state("");
   let paymentsMerchantFilter = $state("");
@@ -268,41 +257,11 @@
   }
 
   // Stock Movement tab data
-  const stockMovementKpiCards = [
-    {
-      label: "Total Stock In",
-      value: "1340 Units",
-      change: "25.5",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/package",
-      iconColor: "bg-green-100 dark:bg-green-900/40",
-      textColor: "text-green-600 dark:text-green-400",
-      borderColor: "border-l-green-500",
-    },
-    {
-      label: "Total Stock Out",
-      value: "895 Units",
-      change: "12.2",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/shopping-bag",
-      iconColor: "bg-blue-100 dark:bg-blue-900/40",
-      textColor: "text-blue-600 dark:text-blue-400",
-      borderColor: "border-l-blue-500",
-    },
-    {
-      label: "Number of Transfers",
-      value: "87",
-      change: "16.3",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-      icon: "icon/refresh-cw",
-      iconColor: "bg-pink-100 dark:bg-pink-900/40",
-      textColor: "text-pink-600 dark:text-pink-400",
-      borderColor: "border-l-pink-500",
-    },
-  ];
+  const stockMovementKpiCards = $derived([
+    { label: $_('totalStockIn'),  value: "1340 Units", change: "25.5", changeType: "positive", changeLabel: $_('fromLastMonth'), icon: "icon/package",     iconColor: "bg-green-100 dark:bg-green-900/40", textColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
+    { label: $_('totalStockOut'), value: "895 Units",  change: "12.2", changeType: "positive", changeLabel: $_('fromLastMonth'), icon: "icon/shopping-bag", iconColor: "bg-blue-100 dark:bg-blue-900/40",   textColor: "text-blue-600 dark:text-blue-400",   borderColor: "border-l-blue-500"  },
+    { label: $_('numTransfers'),  value: "87",         change: "16.3", changeType: "positive", changeLabel: $_('fromLastMonth'), icon: "icon/refresh-cw",  iconColor: "bg-pink-100 dark:bg-pink-900/40",   textColor: "text-pink-600 dark:text-pink-400",   borderColor: "border-l-pink-500"  },
+  ]);
 
   // Mock stock movement data
   let stockMovementData = $state([
@@ -427,38 +386,14 @@
   let stockMovementRowsPerPage = $state(10);
 
   // Stock Movement table columns
-  const stockMovementColumns = [
-    {
-      key: "fromWarehouse",
-      label: "From Warehouse",
-      sortable: true,
-    },
-    {
-      key: "toWarehouse",
-      label: "To Warehouse",
-      sortable: true,
-    },
-    {
-      key: "numberOfProducts",
-      label: "No of Products",
-      sortable: true,
-    },
-    {
-      key: "quantityTransferred",
-      label: "Quantity Transferred",
-      sortable: true,
-    },
-    {
-      key: "referenceNumber",
-      label: "Reference Number",
-      sortable: true,
-    },
-    {
-      key: "date",
-      label: "Date",
-      sortable: true,
-    },
-  ];
+  const stockMovementColumns = $derived([
+    { key: "fromWarehouse",      label: $_('fromWarehouse'),      sortable: true },
+    { key: "toWarehouse",        label: $_('toWarehouse'),        sortable: true },
+    { key: "numberOfProducts",   label: $_('noOfProducts'),       sortable: true },
+    { key: "quantityTransferred",label: $_('quantityTransferred'),sortable: true },
+    { key: "referenceNumber",    label: $_('referenceNumber'),    sortable: true },
+    { key: "date",               label: $_('date'),               sortable: true },
+  ]);
 
   let stockMovementLocationFilter = $state("");
 
@@ -480,7 +415,7 @@
   $effect(() => { stockMovementLocationFilter; stockMovementSearchQuery; stockMovementPage = 1; });
 
   const stockMovementWarehouseOptions = $derived([
-    { value: "", label: "All" },
+    { value: "", label: $_('filterAll') },
     ...[...new Set(stockMovementData.flatMap((r) => [r.fromWarehouse, r.toWarehouse]))].map((w) => ({ value: w.toLowerCase(), label: w })),
   ]);
 
@@ -504,11 +439,11 @@
   }
 
   // Low Stock tab data
-  const lowStockKpiCards = [
-    { label: "Total Low Stock Items", value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: "From Last Month", icon: "icon/alert-triangle" as any, iconColor: "bg-green-100 dark:bg-green-900/40", textColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
-    { label: "Critical Stock Items",  value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: "From Last Month", icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100 dark:bg-blue-900/40",  textColor: "text-blue-600 dark:text-blue-400",  borderColor: "border-l-blue-500"  },
-    { label: "Value at Risk",         value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: "From Last Month", icon: "icon/eye"            as any, iconColor: "bg-pink-100 dark:bg-pink-900/40",  textColor: "text-pink-600 dark:text-pink-400",  borderColor: "border-l-pink-500"  },
-  ];
+  const lowStockKpiCards = $derived([
+    { label: $_('totalLowStockItems'), value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: $_('fromLastMonth'), icon: "icon/alert-triangle" as any, iconColor: "bg-green-100 dark:bg-green-900/40", textColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
+    { label: $_('criticalStockItems'), value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: $_('fromLastMonth'), icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100 dark:bg-blue-900/40",  textColor: "text-blue-600 dark:text-blue-400",  borderColor: "border-l-blue-500"  },
+    { label: $_('valueAtRisk'),        value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: $_('fromLastMonth'), icon: "icon/eye"            as any, iconColor: "bg-pink-100 dark:bg-pink-900/40",  textColor: "text-pink-600 dark:text-pink-400",  borderColor: "border-l-pink-500"  },
+  ]);
 
   // Mock low stock data
   let lowStockData = $state([
@@ -639,20 +574,20 @@
   let lowStockLocationFilter = $state("");
   let lowStockCategoryFilter = $state("");
 
-  const lowStockCategoryOptions = [
-    { value: "", label: "All" },
+  const lowStockCategoryOptions = $derived([
+    { value: "", label: $_('filterAll') },
     { value: "computers", label: "Computers" },
-    { value: "electronics", label: "Electronics" },
+    { value: "electronics", label: $_('electronics') },
     { value: "shoe", label: "Shoe" },
-    { value: "furniture", label: "Furniture" },
-    { value: "bags", label: "Bags" },
-    { value: "phone", label: "Phone" },
-  ];
+    { value: "furniture", label: $_('furniture') },
+    { value: "bags", label: $_('bags') },
+    { value: "phone", label: $_('phone') },
+  ]);
   let lowStockPage = $state(1);
   let lowStockRowsPerPage = $state(10);
 
   const lowStockLocationOptions = $derived([
-    { value: "", label: "All" },
+    { value: "", label: $_('filterAll') },
     ...[...new Set(lowStockData.map((r) => r.location))].map((loc) => ({ value: loc, label: loc })),
   ]);
 
@@ -680,19 +615,19 @@
   });
 
   // Low Stock table columns
-  const lowStockColumns = [
+  const lowStockColumns = $derived([
     {
       key: "sku",
-      label: "SKU",
+      label: $_('sku'),
       sortable: true,
     },
     {
       key: "location",
-      label: "Location",
+      label: $_('navLocation'),
     },
     {
       key: "productName",
-      label: "Product Name",
+      label: $_('productName'),
       sortable: true,
       render: (row: (typeof lowStockData)[0]) => {
         return `
@@ -709,19 +644,19 @@
     },
     {
       key: "category",
-      label: "Category",
+      label: $_('category'),
     },
     {
       key: "qty",
-      label: "Qty",
+      label: $_('qty'),
       sortable: true,
     },
     {
       key: "qtyAlert",
-      label: "Qty Alert",
+      label: $_('qtyAlert'),
       sortable: true,
     },
-  ];
+  ]);
 
 
   function handleLowStockPageChange(page: number) {
@@ -819,30 +754,14 @@
   $effect(() => { revenueCategoryFilter; revenueBreakdownPage = 1; });
 
   // Revenue Breakdown table columns
-  const revenueBreakdownColumns = [
-    {
-      key: "category",
-      label: "Category",
-      sortable: true,
-    },
-    {
-      key: "totalRevenue",
-      label: "Total Revenue",
-      sortable: true,
-    },
-    {
-      key: "percentOfTotal",
-      label: "% of Total",
-      sortable: true,
-    },
-    {
-      key: "numberOfProducts",
-      label: "Number of Products",
-      sortable: true,
-    },
+  const revenueBreakdownColumns = $derived([
+    { key: "category",              label: $_('category'),              sortable: true },
+    { key: "totalRevenue",          label: $_('totalRevenue'),          sortable: true },
+    { key: "percentOfTotal",        label: $_('percentOfTotal'),        sortable: true },
+    { key: "numberOfProducts",      label: $_('numberOfProducts'),      sortable: true },
     {
       key: "highestSellingProduct",
-      label: "Highest-Selling Product",
+      label: $_('highestSellingProduct'),
       sortable: true,
       render: (row: (typeof revenueBreakdownData)[0]) => {
         return `
@@ -857,7 +776,7 @@
         `;
       },
     },
-  ];
+  ]);
 
   function handleRevenueBreakdownPageChange(page: number) {
     revenueBreakdownPage = page;
@@ -869,36 +788,12 @@
   }
 
   // KPI Cards for Sales tab
-  const salesKpiCards = [
-    {
-      label: "Total Sales",
-      value: "$40,565,000",
-      change: "25.5",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-    {
-      label: "Total Orders",
-      value: "8690",
-      change: "12.2",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-    {
-      label: "Total Transaction",
-      value: "4558",
-      change: "16.3",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-    {
-      label: "Units Sold",
-      value: "865",
-      change: "12.2",
-      changeType: "positive",
-      changeLabel: "From Last Month",
-    },
-  ];
+  const salesKpiCards = $derived([
+    { label: $_('totalSales'),       value: "$40,565,000", change: "25.5", changeType: "positive", changeLabel: $_('fromLastMonth') },
+    { label: $_('totalOrders'),      value: "8690",        change: "12.2", changeType: "positive", changeLabel: $_('fromLastMonth') },
+    { label: $_('totalTransaction'), value: "4558",        change: "16.3", changeType: "positive", changeLabel: $_('fromLastMonth') },
+    { label: $_('unitsSold'),        value: "865",         change: "12.2", changeType: "positive", changeLabel: $_('fromLastMonth') },
+  ]);
 
   // Mock sales report data
   let salesReportData = $state([
@@ -1032,10 +927,10 @@
   const totalPages = $derived(Math.ceil(filteredSalesData.length / rowsPerPage));
 
   // Table columns
-  const salesColumns = [
+  const salesColumns = $derived([
     {
       key: "productName",
-      label: "Product Name",
+      label: $_('productName'),
       sortable: true,
       render: (row: (typeof salesReportData)[0]) => {
         return `
@@ -1052,11 +947,11 @@
     },
     {
       key: "category",
-      label: "Category",
+      label: $_('category'),
     },
     {
       key: "assignedMerchant",
-      label: "Assigned Merchant",
+      label: $_('assignedMerchant'),
       sortable: true,
       render: (row: (typeof salesReportData)[0]) => {
         return `
@@ -1073,31 +968,31 @@
     },
     {
       key: "location",
-      label: "Location",
+      label: $_('navLocation'),
     },
     {
       key: "salesValue",
-      label: "Sales Value",
+      label: $_('salesValue'),
       sortable: true,
     },
     {
       key: "soldQty",
-      label: "Sold Qty",
+      label: $_('soldQty'),
       sortable: true,
     },
     {
       key: "instockQty",
-      label: "Instock Qty",
+      label: $_('instockQty'),
       sortable: true,
     },
-  ];
+  ]);
 
-  const filters = [
+  const filters = $derived([
     {
       key: "location",
-      label: "Location",
+      label: $_('navLocation'),
       options: [
-        { value: "", label: "All" },
+        { value: "", label: $_('filterAll') },
         { value: "branch-1", label: "Branch #1" },
         { value: "branch-2", label: "Branch #2" },
         { value: "santa-clara", label: "Santa Clara Area #1" },
@@ -1105,36 +1000,36 @@
     },
     {
       key: "merchant",
-      label: "Merchant",
+      label: $_('merchant'),
       options: [
-        { value: "", label: "All" },
+        { value: "", label: $_('filterAll') },
         { value: "richard-wilson", label: "Richard Wilson" },
         { value: "other", label: "Other" },
       ],
     },
     {
       key: "category",
-      label: "Category",
+      label: $_('category'),
       options: [
-        { value: "", label: "All" },
-        { value: "electronics", label: "Electronics" },
+        { value: "", label: $_('filterAll') },
+        { value: "electronics", label: $_('electronics') },
         { value: "computers", label: "Computers" },
         { value: "shoe", label: "Shoe" },
-        { value: "furniture", label: "Furniture" },
+        { value: "furniture", label: $_('furniture') },
         { value: "accessories", label: "Accessories" },
       ],
     },
     {
       key: "products",
-      label: "Products",
+      label: $_('products'),
       options: [
-        { value: "", label: "All" },
+        { value: "", label: $_('filterAll') },
         { value: "lenovo", label: "Lenovo IdeaPad 3" },
         { value: "beats", label: "Beats Pro" },
         { value: "nike", label: "Nike Jordan" },
       ],
     },
-  ];
+  ]);
 
   let dateRange = $state("Jan 2025 - Jun 2025");
 
@@ -1169,12 +1064,12 @@
     <div class="flex gap-6">
       {#each tabs as tab}
         <button
-          onclick={() => switchTab(tab)}
-          class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab
+          onclick={() => switchTab(tab.key)}
+          class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab.key
             ? 'border-info text-info font-medium'
             : 'border-transparent text-muted-foreground hover:text-foreground'}"
         >
-          {tab}
+          {tab.label}
         </button>
       {/each}
     </div>
@@ -1195,17 +1090,17 @@
         id="date-range"
         bind:dateRange
         filters={[
-          { id: "location-filter", label: "Location", options: filters[0].options, value: salesLocationFilter, onchange: (v) => { salesLocationFilter = v; currentPage = 1; } },
-          { id: "merchant-filter", label: "Merchant", options: filters[1].options, value: salesMerchantFilter, onchange: (v) => { salesMerchantFilter = v; currentPage = 1; } },
-          { id: "category-filter", label: "Category", options: filters[2].options, value: salesCategoryFilter, onchange: (v) => { salesCategoryFilter = v; currentPage = 1; } },
-          { id: "products-filter", label: "Products", options: filters[3].options, value: salesProductFilter, onchange: (v) => { salesProductFilter = v; currentPage = 1; } },
+          { id: "location-filter", label: $_('navLocation'), options: filters[0].options, value: salesLocationFilter, onchange: (v) => { salesLocationFilter = v; currentPage = 1; } },
+          { id: "merchant-filter", label: $_('merchant'), options: filters[1].options, value: salesMerchantFilter, onchange: (v) => { salesMerchantFilter = v; currentPage = 1; } },
+          { id: "category-filter", label: $_('category'), options: filters[2].options, value: salesCategoryFilter, onchange: (v) => { salesCategoryFilter = v; currentPage = 1; } },
+          { id: "products-filter", label: $_('products'), options: filters[3].options, value: salesProductFilter, onchange: (v) => { salesProductFilter = v; currentPage = 1; } },
         ]}
       />
 
       <!-- Sales Report Table -->
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-foreground">Sales Report</h3>
+          <h3 class="text-lg font-semibold text-foreground">{$_('salesReport')}</h3>
           <div class="flex items-center gap-3">
             <button
               type="button"
@@ -1279,7 +1174,7 @@
         <div class="bg-card border border-border rounded-lg p-6">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-foreground">
-              Revenue vs Profit Over Time
+              {$_('revenueVsProfit')}
             </h3>
             <!-- Timeframe Selector -->
             <div class="flex gap-2">
@@ -1302,11 +1197,11 @@
           <div class="flex items-center gap-4 mb-4">
             <div class="flex items-center gap-2">
               <div class="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span class="text-sm text-foreground">Revenue</span>
+              <span class="text-sm text-foreground">{$_('revenue')}</span>
             </div>
             <div class="flex items-center gap-2">
               <div class="w-3 h-3 rounded-full bg-pink-500"></div>
-              <span class="text-sm text-foreground">Profit</span>
+              <span class="text-sm text-foreground">{$_('profit')}</span>
             </div>
           </div>
 
@@ -1357,13 +1252,13 @@
         <div class="bg-card border border-border rounded-lg px-8 py-6">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-foreground">
-              Revenue by Category
+              {$_('revenueByCategoryLabel')}
             </h3>
             <Dropdown
               options={[
-                { value: "this-week", label: "This Week" },
-                { value: "this-month", label: "This Month" },
-                { value: "this-year", label: "This Year" },
+                { value: "this-week",  label: $_('last7Days') },
+                { value: "this-month", label: $_('last30Days') },
+                { value: "this-year",  label: $_('last12Months') },
               ]}
               bind:value={revenueByCategoryPeriod}
               class="min-w-30"
@@ -1379,7 +1274,7 @@
               {/each}
               <circle cx="80" cy="80" r="43" class="fill-card" />
               <text x="80" y="76" font-size="11" fill="currentColor" text-anchor="middle" font-weight="700">{activeRevenueByCat.total}</text>
-              <text x="80" y="90" font-size="8" fill="#6b7280" text-anchor="middle">Total</text>
+              <text x="80" y="90" font-size="8" fill="#6b7280" text-anchor="middle">{$_('totalLabel')}</text>
             </svg>
           </div>
 
@@ -1406,8 +1301,8 @@
         id="revenue-date-range"
         bind:dateRange={revenueDateRange}
         filters={[
-          { id: "revenue-category-filter", label: "Category", options: [
-              { value: "", label: "All" },
+          { id: "revenue-category-filter", label: $_('category'), options: [
+              { value: "", label: $_('filterAll') },
               { value: "electronics", label: "Electronics" },
               { value: "clothing", label: "Clothing" },
               { value: "home supplies", label: "Home Supplies" },
@@ -1421,7 +1316,7 @@
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-lg font-semibold text-foreground">
-            Revenue Breakdown
+            {$_('revenueBreakdown')}
           </h3>
           <div class="flex items-center gap-3">
             <button
@@ -1501,21 +1396,21 @@
         id="payments-date-range"
         bind:dateRange={paymentsDateRange}
         filters={[
-          { id: "payments-status-filter", label: "Status", options: [
-              { value: "", label: "All" },
-              { value: "paid", label: "Paid" },
-              { value: "unpaid", label: "Unpaid" },
+          { id: "payments-status-filter", label: $_('filterStatus'), options: [
+              { value: "",       label: $_('filterAll') },
+              { value: "paid",   label: $_('paid') },
+              { value: "unpaid", label: $_('unpaid') },
             ], value: paymentsStatusFilter, onchange: (v) => { paymentsStatusFilter = v; } },
-          { id: "payments-merchant-filter", label: "Merchant", options: [
-              { value: "", label: "All" },
+          { id: "payments-merchant-filter", label: $_('merchant'), options: [
+              { value: "", label: $_('filterAll') },
               { value: "carl", label: "Carl Evans" },
               { value: "minerva", label: "Minerva Rameriz" },
               { value: "robert", label: "Robert Lamon" },
               { value: "john", label: "John Smith" },
               { value: "sarah", label: "Sarah Johnson" },
             ], value: paymentsMerchantFilter, onchange: (v) => { paymentsMerchantFilter = v; } },
-          { id: "payments-branch-filter", label: "Branch", options: [
-              { value: "", label: "All Branches" },
+          { id: "payments-branch-filter", label: $_('filterBranch'), options: [
+              { value: "", label: $_('filterAll') },
               { value: "Branch #1", label: "Branch #1" },
               { value: "Branch #2", label: "Branch #2" },
               { value: "Branch #3", label: "Branch #3" },
@@ -1528,7 +1423,7 @@
       <!-- Payment Report Table -->
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-foreground">Payment Report</h3>
+          <h3 class="text-lg font-semibold text-foreground">{$_('paymentReport')}</h3>
           <div class="flex items-center gap-3">
             <button
               type="button"
@@ -1609,7 +1504,7 @@
         id="stock-movement-date-range"
         bind:dateRange={stockMovementDateRange}
         filters={[
-          { id: "stock-movement-location-filter", label: "Warehouse", options: stockMovementWarehouseOptions, value: stockMovementLocationFilter, onchange: (v) => { stockMovementLocationFilter = v; } },
+          { id: "stock-movement-location-filter", label: $_('warehouse'), options: stockMovementWarehouseOptions, value: stockMovementLocationFilter, onchange: (v) => { stockMovementLocationFilter = v; } },
         ]}
       />
 
@@ -1624,18 +1519,18 @@
             columns={stockMovementColumns}
             data={paginatedStockMovementData}
             searchable={true}
-            searchPlaceholder="Search"
+            searchPlaceholder={$_('search')}
             onSearch={(q) => { stockMovementSearchQuery = q; }}
             filters={[]}
             actions={[
               {
                 icon: "icon/edit",
-                label: "Edit",
+                label: $_('edit'),
                 onClick: handleEditStockMovement,
               },
               {
                 icon: "icon/trash",
-                label: "Delete",
+                label: $_('delete'),
                 onClick: handleDeleteStockMovement,
                 variant: "destructive",
               },
@@ -1675,8 +1570,8 @@
         id="low-stock-date-range"
         bind:dateRange={lowStockDateRange}
         filters={[
-          { id: "low-stock-location-filter", label: "Location", options: lowStockLocationOptions, value: lowStockLocationFilter, onchange: (v) => (lowStockLocationFilter = v) },
-          { id: "low-stock-products-filter", label: "Products", options: lowStockCategoryOptions, value: lowStockCategoryFilter, onchange: (v) => (lowStockCategoryFilter = v) },
+          { id: "low-stock-location-filter", label: $_('navLocation'), options: lowStockLocationOptions, value: lowStockLocationFilter, onchange: (v) => (lowStockLocationFilter = v) },
+          { id: "low-stock-products-filter", label: $_('products'), options: lowStockCategoryOptions, value: lowStockCategoryFilter, onchange: (v) => (lowStockCategoryFilter = v) },
         ]}
       />
 
@@ -1691,18 +1586,18 @@
             columns={lowStockColumns}
             data={paginatedLowStockData}
             searchable={true}
-            searchPlaceholder="Search"
+            searchPlaceholder={$_('search')}
             onSearch={(q) => { lowStockSearchQuery = q; }}
             filters={[]}
             actions={[
               {
                 icon: "icon/edit",
-                label: "Edit",
+                label: $_('edit'),
                 onClick: handleEditLowStock,
               },
               {
                 icon: "icon/trash",
-                label: "Delete",
+                label: $_('delete'),
                 onClick: handleDeleteLowStock,
                 variant: "destructive",
               },

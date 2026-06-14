@@ -5,6 +5,7 @@
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
   import RemoveStockItemModal from "$lib/components/investor/RemoveStockItemModal.svelte";
   import AddProductModal from "$lib/components/investor/AddProductModal.svelte";
+  import { _ } from "svelte-i18n";
 
   // Mock stock data - replace with real data later
   let stockItems = $state([
@@ -112,11 +113,10 @@
     )
   );
 
-  // Table configuration
-  const columns = [
+  const columns = $derived([
     {
       key: "name",
-      label: "Stock Item",
+      label: $_('navStock'),
       sortable: true,
       render: (row: (typeof stockItems)[0]) => {
         return `
@@ -131,14 +131,10 @@
         `;
       },
     },
-    {
-      key: "category",
-      label: "Category",
-      sortable: true,
-    },
+    { key: "category",        label: $_('category'), sortable: true },
     {
       key: "assignedMerchant",
-      label: "Assigned Merchant",
+      label: $_('merchant'),
       sortable: true,
       render: (row: (typeof stockItems)[0]) => {
         return `
@@ -153,77 +149,73 @@
         `;
       },
     },
-    {
-      key: "unitPrice",
-      label: "Unit Price",
-      sortable: true,
-    },
-    {
-      key: "qty",
-      label: "Qty",
-      sortable: true,
-    },
+    { key: "unitPrice", label: "Unit Price", sortable: true },
+    { key: "qty",       label: "Qty",        sortable: true },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       sortable: true,
       render: (row: (typeof stockItems)[0]) => {
+        const label = row.status === "Adequate" ? $_('statusAdequate')
+                    : row.status === "Low"      ? $_('statusLowStock')
+                    : row.status === "Out"      ? $_('allStatus')
+                    : row.status;
         return `
           <span class="inline-flex items-center gap-1.5 ${getStatusClass(row.status)}">
             <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
-            <span class="text-sm">${row.status}</span>
+            <span class="text-sm">${label}</span>
           </span>
         `;
       },
     },
-  ];
+  ]);
 
-  const filters = [
+  const filters = $derived([
     {
       key: "assignedMerchant",
-      label: "Assigned Merchant",
+      label: $_('merchant'),
       options: [
-        { value: "", label: "All Merchants" },
+        { value: "", label: $_('allMerchants') },
         { value: "richard-wilson", label: "Richard Wilson" },
-        { value: "stan-gaunter", label: "Stan Gaunter" },
-        { value: "carlos-curran", label: "Carlos Curran" },
-        { value: "beth-noah", label: "Beth Noah" },
-        { value: "james-morgan", label: "James Morgan" },
-        { value: "others", label: "Others" },
+        { value: "stan-gaunter",   label: "Stan Gaunter" },
+        { value: "carlos-curran",  label: "Carlos Curran" },
+        { value: "beth-noah",      label: "Beth Noah" },
+        { value: "james-morgan",   label: "James Morgan" },
+        { value: "others",         label: "Others" },
       ],
     },
     {
       key: "location",
-      label: "Location",
+      label: $_('navLocation'),
       options: [
-        { value: "", label: "All Locations" },
+        { value: "", label: $_('allLocations') },
         { value: "santa-clara", label: "Santa Clara Area #1" },
-        { value: "branch-1", label: "Branch #1" },
-        { value: "branch-2", label: "Branch #2" },
+        { value: "branch-1",    label: "Branch #1" },
+        { value: "branch-2",    label: "Branch #2" },
       ],
     },
     {
       key: "category",
-      label: "Category",
+      label: $_('category'),
       options: [
-        { value: "", label: "All Categories" },
-        { value: "electronics", label: "Electronics" },
-        { value: "cloth", label: "Cloth" },
-        { value: "furniture", label: "Furniture" },
-        { value: "accessories", label: "Accessories" },
+        { value: "",             label: $_('allCategories') },
+        { value: "electronics",  label: $_('electronics') },
+        { value: "cloth",        label: $_('clothing') },
+        { value: "furniture",    label: $_('furniture') },
+        { value: "accessories",  label: "Accessories" },
       ],
     },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       options: [
-        { value: "", label: "All Status" },
-        { value: "adequate", label: "Adequate" },
-        { value: "low", label: "Low" },
-        { value: "out", label: "Out" },
+        { value: "",         label: $_('allStatus') },
+        { value: "adequate", label: $_('statusAdequate') },
+        { value: "low",      label: $_('statusLowStock') },
+        { value: "out",      label: "Out" },
       ],
     },
-  ];
+  ]);
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -308,7 +300,7 @@
       onclick={handleAddStock}
     >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
-      Add Stock
+      {$_('addStock')}
     </Button>
   </div>
 
@@ -325,13 +317,13 @@
   {columns}
   data={paginatedItems}
   searchable={true}
-  searchPlaceholder="Search by stock name..."
+  searchPlaceholder={$_('searchByStockName')}
   {filters}
   onSearch={handleSearch}
   onFilterChange={handleFilterChange}
   actions={[
-    { icon: "icon/edit",  label: "Edit",   onClick: handleEdit },
-    { icon: "icon/trash", label: "Delete", onClick: handleDelete, variant: "destructive" },
+    { icon: "icon/edit",  label: $_('edit'),   onClick: handleEdit },
+    { icon: "icon/trash", label: $_('delete'), onClick: handleDelete, variant: "destructive" },
   ]}
   pagination={{
     currentPage,

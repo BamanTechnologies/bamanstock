@@ -1,16 +1,19 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { _ } from "svelte-i18n";
 
   let chartPeriod = $state("1Y");
 
-  const periodData: Record<string, { labels: string[]; values: number[]; revenue: string; change: string; changePct: string; positive: boolean; yLabels: string[] }> = {
-    "1D": { labels: ["6am","9am","12pm","3pm","6pm","9pm"], values: [12,38,58,44,62,30], revenue: "$4,280", change: "Today", changePct: "+3.2%", positive: true, yLabels: ["70","60","50","40","30","10"] },
-    "1W": { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], values: [38,54,46,68,55,74,42], revenue: "$28,450", change: "Last 7 Days", changePct: "+8.5%", positive: true, yLabels: ["80k","70k","60k","50k","30k","10k"] },
-    "1M": { labels: ["Wk1","Wk2","Wk3","Wk4"], values: [48,65,52,80], revenue: "$98,200", change: "Last 30 Days", changePct: "+12.1%", positive: true, yLabels: ["100k","80k","60k","40k","20k","10k"] },
-    "3M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [50,62,58,75,85,70], revenue: "$285,600", change: "Last 3 Months", changePct: "+18.7%", positive: true, yLabels: ["300k","250k","200k","150k","100k","50k"] },
-    "6M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [35,52,65,78,92,68], revenue: "$620,800", change: "Last 6 Months", changePct: "+14.3%", positive: true, yLabels: ["600k","500k","400k","300k","200k","100k"] },
-    "1Y": { labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"], values: [45,35,55,80,38,25,38,22,30], revenue: "$1.25M", change: "Last 12 Months", changePct: "+15.2%", positive: true, yLabels: ["60k","50k","40k","30k","20k","10k"] },
-  };
+  const periodData = $derived.by(() => {
+    return {
+      "1D": { labels: ["6am","9am","12pm","3pm","6pm","9pm"], values: [12,38,58,44,62,30], revenue: "$4,280", change: $_('today'), changePct: "+3.2%", positive: true, yLabels: ["70","60","50","40","30","10"] },
+      "1W": { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], values: [38,54,46,68,55,74,42], revenue: "$28,450", change: $_('last7Days'), changePct: "+8.5%", positive: true, yLabels: ["80k","70k","60k","50k","30k","10k"] },
+      "1M": { labels: ["Wk1","Wk2","Wk3","Wk4"], values: [48,65,52,80], revenue: "$98,200", change: $_('last30Days'), changePct: "+12.1%", positive: true, yLabels: ["100k","80k","60k","40k","20k","10k"] },
+      "3M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [50,62,58,75,85,70], revenue: "$285,600", change: $_('last3Months'), changePct: "+18.7%", positive: true, yLabels: ["300k","250k","200k","150k","100k","50k"] },
+      "6M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [35,52,65,78,92,68], revenue: "$620,800", change: $_('last6Months'), changePct: "+14.3%", positive: true, yLabels: ["600k","500k","400k","300k","200k","100k"] },
+      "1Y": { labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"], values: [45,35,55,80,38,25,38,22,30], revenue: "$1.25M", change: $_('last12Months'), changePct: "+15.2%", positive: true, yLabels: ["60k","50k","40k","30k","20k","10k"] },
+    };
+  });
 
   function toSvgPath(values: number[], w = 860, h = 170, topPad = 18, botPad = 8) {
     const n = values.length;
@@ -33,40 +36,14 @@
   const activeChart = $derived(periodData[chartPeriod] ?? periodData["1Y"]);
   const svgChart = $derived(toSvgPath(activeChart.values));
 
-  const kpiCards = [
-    {
-      label: "Total Revenue",
-      value: "$48,988.78",
-      change: "-19% vs Last Month",
-      changeType: "negative",
-      icon: "icon/bar-chart" as const,
-      iconColor: "bg-green-100 dark:bg-green-900/40",
-    },
-    {
-      label: "Profit",
-      value: "$8,458,798",
-      change: "+35% vs Last Month",
-      changeType: "positive",
-      icon: "icon/trending-up" as const,
-      iconColor: "bg-blue-100 dark:bg-blue-900/40",
-    },
-    {
-      label: "Total Merchants",
-      value: "521",
-      change: "+41% vs Last Month",
-      changeType: "positive",
-      icon: "icon/users" as const,
-      iconColor: "bg-orange-100 dark:bg-orange-900/40",
-    },
-    {
-      label: "Total Stock",
-      value: "1,284",
-      change: "-20% vs Last Month",
-      changeType: "negative",
-      icon: "icon/box" as const,
-      iconColor: "bg-red-100 dark:bg-red-900/40",
-    },
-  ];
+  const kpiCards = $derived.by(() => {
+    return [
+      { label: $_('totalRevenue'),   value: "$48,988.78", change: `-19% ${$_('vsLastMonth')}`, changeType: "negative", icon: "icon/bar-chart"   as const, iconColor: "bg-green-100 dark:bg-green-900/40" },
+      { label: $_('profit'),         value: "$8,458,798", change: `+35% ${$_('vsLastMonth')}`, changeType: "positive", icon: "icon/trending-up" as const, iconColor: "bg-blue-100 dark:bg-blue-900/40" },
+      { label: $_('totalMerchants'), value: "521",         change: `+41% ${$_('vsLastMonth')}`, changeType: "positive", icon: "icon/users"       as const, iconColor: "bg-orange-100 dark:bg-orange-900/40" },
+      { label: $_('totalStock'),     value: "1,284",       change: `-20% ${$_('vsLastMonth')}`, changeType: "negative", icon: "icon/box"         as const, iconColor: "bg-red-100 dark:bg-red-900/40" },
+    ];
+  });
 
   const topMerchantsByPeriod: Record<string, Array<{ name: string; initials: string; avatarBg: string; avatar: string; branch: string; sales: string; revenue: string }>> = {
     "Today": [
@@ -134,38 +111,52 @@
 
   let stockPeriod = $state("Weekly");
   let showStockDropdown = $state(false);
-  const periodOptions = ["Daily", "Weekly", "Monthly", "Yearly"];
+  const periodOptions = $derived([
+    { key: "Daily",   label: $_('daily') },
+    { key: "Weekly",  label: $_('weekly') },
+    { key: "Monthly", label: $_('monthly') },
+    { key: "Yearly",  label: $_('yearly') },
+  ]);
 
   let merchantsPeriod = $state("Today");
   let showMerchantsDropdown = $state(false);
-  const merchantsPeriodOptions = ["Today", "Last 7 Days", "Last 30 Days", "3 Months", "6 Months", "Year"];
+  const merchantsPeriodOptions = $derived([
+    { key: "Today",       label: $_('today') },
+    { key: "Last 7 Days", label: $_('last7Days') },
+    { key: "Last 30 Days",label: $_('last30Days') },
+    { key: "3 Months",    label: $_('threeMonths') },
+    { key: "6 Months",    label: $_('sixMonths') },
+    { key: "Year",        label: $_('year') },
+  ]);
 
   const activeTopMerchants = $derived(topMerchantsByPeriod[merchantsPeriod] ?? topMerchantsByPeriod["Last 7 Days"]);
 
   const CIRC = 351.9;
 
-  const stockDistributionByPeriod: Record<string, { label: string; color: string; dotColor: string; stroke: string; percent: number; value: string }[]> = {
-    "Daily":   [
-      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 55, value: "125 Sales" },
-      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 28, value: "63 Sales"  },
-      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 17, value: "38 Sales"  },
-    ],
-    "Weekly":  [
-      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 58, value: "870 Sales"  },
-      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 26, value: "390 Sales"  },
-      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: "240 Sales"  },
-    ],
-    "Monthly": [
-      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 60, value: "698 Sales"  },
-      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 24, value: "545 Sales"  },
-      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: "456 Sales"  },
-    ],
-    "Yearly":  [
-      { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 62, value: "7,450 Sales" },
-      { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 22, value: "2,640 Sales" },
-      { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: "1,920 Sales" },
-    ],
-  };
+  const stockDistributionByPeriod = $derived.by(() => {
+    return {
+      "Daily":   [
+        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 55, value: `125 ${$_('sales')}` },
+        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 28, value: `63 ${$_('sales')}`  },
+        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 17, value: `38 ${$_('sales')}`  },
+      ],
+      "Weekly":  [
+        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 58, value: `870 ${$_('sales')}`  },
+        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 26, value: `390 ${$_('sales')}`  },
+        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: `240 ${$_('sales')}`  },
+      ],
+      "Monthly": [
+        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 60, value: `698 ${$_('sales')}`  },
+        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 24, value: `545 ${$_('sales')}`  },
+        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: `456 ${$_('sales')}`  },
+      ],
+      "Yearly":  [
+        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 62, value: `7,450 ${$_('sales')}` },
+        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 22, value: `2,640 ${$_('sales')}` },
+        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: `1,920 ${$_('sales')}` },
+      ],
+    };
+  });
 
   const categoryStatsByPeriod: Record<string, { categories: number; products: number }> = {
     "Daily":   { categories: 89, products: 226  },
@@ -198,7 +189,7 @@
   <!-- ── ROW 1: Welcome + KPI cards ── -->
   <div class="bg-card  p-6 space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-semibold text-foreground">Welcome, Alex</h2>
+      <h2 class="text-2xl font-semibold text-foreground">{$_('welcome')}, Alex</h2>
       <div class="hidden md:flex items-center gap-3">
 
       </div>
@@ -229,7 +220,7 @@
     <div class="bg-card border border-border rounded-lg p-6 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm text-muted-foreground">Revenue Over Time</p>
+          <p class="text-sm text-muted-foreground">{$_('revenueOverTime')}</p>
           <p class="text-2xl font-bold text-foreground">{activeChart.revenue}</p>
           <p class="text-sm {activeChart.positive ? 'text-green-600' : 'text-red-500'}">{activeChart.change} <span class="font-medium">{activeChart.changePct}</span></p>
         </div>
@@ -283,7 +274,7 @@
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
           <Icon iconName="icon/users" size={15} class="text-orange-400" />
-          Top Merchants
+          {$_('topMerchants')}
         </h3>
         <div class="relative">
           <button
@@ -292,7 +283,7 @@
             class="text-xs text-muted-foreground border border-border rounded px-2 py-1 flex items-center gap-1"
           >
             <Icon iconName="icon/calendar" size={12} />
-            {merchantsPeriod}
+            {merchantsPeriodOptions.find(o => o.key === merchantsPeriod)?.label ?? merchantsPeriod}
             <Icon iconName="icon/chevron-down" size={11} />
           </button>
           {#if showMerchantsDropdown}
@@ -300,9 +291,9 @@
               {#each merchantsPeriodOptions as opt}
                 <button
                   type="button"
-                  onclick={() => { merchantsPeriod = opt; showMerchantsDropdown = false; }}
-                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt === merchantsPeriod ? 'text-info font-semibold' : 'text-foreground'}"
-                >{opt}</button>
+                  onclick={() => { merchantsPeriod = opt.key; showMerchantsDropdown = false; }}
+                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt.key === merchantsPeriod ? 'text-info font-semibold' : 'text-foreground'}"
+                >{opt.label}</button>
               {/each}
             </div>
           {/if}
@@ -334,7 +325,7 @@
             </div>
             <div class="text-right">
               <p class="text-sm font-semibold text-foreground">{merchant.revenue}</p>
-              <p class="text-[10px] text-muted-foreground">Revenue</p>
+              <p class="text-[10px] text-muted-foreground">{$_('revenue')}</p>
             </div>
           </div>
         {/each}
@@ -347,19 +338,19 @@
 
     <div class="bg-card border border-border rounded-lg p-6 h-full">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-semibold text-foreground">Merchant</h3>
-        <a href="/dashboard/merchants" class="text-xs text-info hover:underline">View All</a>
+        <h3 class="text-sm font-semibold text-foreground">{$_('merchant')}</h3>
+        <a href="/dashboard/merchants" class="text-xs text-info hover:underline">{$_('viewAll')}</a>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-border">
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Merchant</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{$_('merchant')}</th>
               <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
-                Date <span class="ml-0.5">↑</span>
+                {$_('date')} <span class="ml-0.5">↑</span>
               </th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Period</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Status</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{$_('period')}</th>
+              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{$_('filterStatus')}</th>
               <th class="px-3 py-2 text-right text-xs font-medium text-muted-foreground"></th>
             </tr>
           </thead>
@@ -379,7 +370,7 @@
                 <td class="px-3 py-2.5">
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700">
                     <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    {row.status}
+                    {$_('statusActive')}
                   </span>
                 </td>
                 <td class="px-3 py-2.5 text-right">
@@ -400,7 +391,7 @@
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
           <Icon iconName="icon/bar-chart" size={15} class="text-pink-400" />
-          Stock Distribution
+          {$_('stockDistribution')}
         </h3>
         <div class="relative">
           <button
@@ -408,17 +399,17 @@
             class="text-xs text-muted-foreground border border-border rounded px-2 py-1 flex items-center gap-1"
           >
             <Icon iconName="icon/calendar" size={12} />
-            {stockPeriod}
+            {periodOptions.find(o => o.key === stockPeriod)?.label ?? stockPeriod}
             <Icon iconName="icon/chevron-down" size={11} />
           </button>
           {#if showStockDropdown}
             <div class="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-md z-20 overflow-hidden min-w-22.5">
               {#each periodOptions as opt}
                 <button
-                  onclick={() => { stockPeriod = opt; showStockDropdown = false; }}
-                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt === stockPeriod ? 'text-info font-semibold' : 'text-foreground'}"
+                  onclick={() => { stockPeriod = opt.key; showStockDropdown = false; }}
+                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt.key === stockPeriod ? 'text-info font-semibold' : 'text-foreground'}"
                 >
-                  {opt}
+                  {opt.label}
                 </button>
               {/each}
             </div>
@@ -460,19 +451,19 @@
       </div>
 
       <div class="mt-auto space-y-3">
-        <h3 class="text-sm font-semibold text-foreground">Category Statistics</h3>
+        <h3 class="text-sm font-semibold text-foreground">{$_('categoryStatistics')}</h3>
         <div class="border border-border rounded-lg divide-y divide-border">
           <div class="flex items-center justify-between px-4 py-3 text-sm">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-              <span class="text-muted-foreground">Total Number Of Categories</span>
+              <span class="text-muted-foreground">{$_('totalCategories')}</span>
             </div>
             <span class="font-bold text-foreground">{activeCategoryStats.categories}</span>
           </div>
           <div class="flex items-center justify-between px-4 py-3 text-sm">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-              <span class="text-muted-foreground">Total Number Of Products</span>
+              <span class="text-muted-foreground">{$_('totalProducts')}</span>
             </div>
             <span class="font-bold text-foreground">{activeCategoryStats.products.toLocaleString()}</span>
           </div>
