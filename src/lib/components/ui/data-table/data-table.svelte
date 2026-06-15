@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Input } from "$lib/components/ui/input/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { Dropdown } from "$lib/components/ui/dropdown/index.js";
 
   interface Column<T> {
     key: keyof T | string;
@@ -34,6 +34,8 @@
     };
     onSearch?: (query: string) => void;
     onFilterChange?: (filterKey: string, value: string) => void;
+    onRowClick?: (row: T) => void;
+    
   }
 
   let {
@@ -46,10 +48,13 @@
     pagination,
     onSearch,
     onFilterChange,
+    onRowClick,
   }: Props<any> = $props();
 
   let searchQuery = $state("");
   let filterValues = $state<Record<string, string>>({});
+  let sortKey = $state<string | null>(null);
+  let sortDir = $state<"asc" | "desc">("asc");
 
   function handleSearch(value: string) {
     searchQuery = value;
@@ -60,89 +65,136 @@
     filterValues[key] = value;
     onFilterChange?.(key, value);
   }
+
+  function toggleSort(key: string) {
+    if (sortKey === key) {
+      sortDir = sortDir === "asc" ? "desc" : "asc";
+    } else {
+      sortKey = key;
+      sortDir = "asc";
+    }
+  }
+
+  const sortedData = $derived.by(() => {
+    if (!sortKey) return data;
+    return [...data].sort((a, b) => {
+      const av = a[sortKey as string] ?? "";
+      const bv = b[sortKey as string] ?? "";
+      const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" });
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  });
+
+  function getVisiblePages(currentPage: number, totalPages: number) {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else if (currentPage <= 3) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push("...");
+      pages.push(totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push("...");
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+      pages.push("...");
+      pages.push(totalPages);
+    }
+    return pages;
+  }
 </script>
 
-<div class="bg-card border border-border rounded-lg">
+<div class="bg-card border border-border rounded-lg overflow-hidden">
   <!-- Search and Filters -->
   {#if searchable || filters.length > 0}
-    <div class="p-4 border-b border-border flex items-center gap-4">
+    <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
       {#if searchable}
-        <div class="flex-1 relative">
+        <div class="relative w-72 shrink-0">
           <Icon
             iconName="icon/search"
-            size={18}
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            size={16}
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
           />
-          <Input
+          <input
             type="text"
             placeholder={searchPlaceholder}
-            class="pl-10 w-full"
+            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
             value={searchQuery}
             oninput={(e) => handleSearch(e.currentTarget.value)}
           />
         </div>
       {/if}
-      {#each filters as filter}
-        <select
-          class="px-4 py-2 border border-border rounded-md bg-background text-foreground"
-          value={filterValues[filter.key] || ""}
-          onchange={(e) =>
-            handleFilterChange(filter.key, e.currentTarget.value)}
-        >
-          {#each filter.options as option}
-            <option value={option.value}>{option.label}</option>
+      {#if filters.length > 0}
+        <div class="flex gap-3 ml-auto">
+          {#each filters as filter}
+            <div class="w-40">
+              <Dropdown
+                options={filter.options}
+                value={filterValues[filter.key] || ""}
+                onchange={(v) => handleFilterChange(filter.key, v)}
+              />
+            </div>
           {/each}
-        </select>
-      {/each}
+        </div>
+      {/if}
     </div>
   {/if}
 
   <!-- Table -->
   <div class="overflow-x-auto">
-    <table class="w-full">
-      <thead class="bg-muted/50">
-        <tr>
-          <th class="px-4 py-3 text-left">
+    <table class="w-full text-sm">
+      <thead class="bg-muted/30 border-b border-border">
+        <tr class="text-left text-xs text-muted-foreground uppercase">
+          <th class="px-4 py-3 w-10">
             <input type="checkbox" class="rounded" />
           </th>
           {#each columns as column}
-            <th class="px-4 py-3 text-left text-sm font-medium text-foreground">
-              <div class="flex items-center gap-1">
-                {column.label}
-                {#if column.sortable}
-                  <div class="flex flex-col">
+            <th class="px-4 py-3 font-medium">
+              {#if column.sortable}
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => toggleSort(column.key as string)}
+                >
+                  {column.label}
+                  <span class="flex flex-col ml-0.5">
                     <Icon
                       iconName="icon/chevron-up"
                       size={10}
-                      class="text-muted-foreground -mb-0.5"
+                      class="{sortKey === column.key && sortDir === 'asc' ? 'text-info' : 'text-muted-foreground/50'} -mb-0.5"
                     />
                     <Icon
                       iconName="icon/chevron-down"
                       size={10}
-                      class="text-muted-foreground"
+                      class="{sortKey === column.key && sortDir === 'desc' ? 'text-info' : 'text-muted-foreground/50'}"
                     />
-                  </div>
-                {/if}
-              </div>
+                  </span>
+                </button>
+              {:else}
+                {column.label}
+              {/if}
             </th>
           {/each}
           {#if actions.length > 0}
-            {#each actions as _}
-              <th
-                class="px-4 py-3 text-left text-sm font-medium text-foreground"
-              ></th>
-            {/each}
+            <th class="px-4 py-3 text-right font-medium">Actions</th>
           {/if}
         </tr>
       </thead>
-      <tbody>
-        {#each data as row}
-          <tr class="border-b border-border hover:bg-muted/30">
-            <td class="px-4 py-3">
+      <tbody class="divide-y divide-border">
+        {#each sortedData as row}
+          <tr
+            class="hover:bg-muted/20 transition-colors {onRowClick ? 'cursor-pointer' : ''}"
+            onclick={() => onRowClick?.(row)}
+          >
+            <td class="px-4 py-4" onclick={(e) => e.stopPropagation()}>
               <input type="checkbox" class="rounded" />
             </td>
             {#each columns as column}
-              <td class="px-4 py-3 text-sm text-foreground">
+              <td class="px-4 py-4 text-foreground">
                 {#if column.render}
                   {@const rendered = column.render(row)}
                   {#if typeof rendered === "string"}
@@ -156,24 +208,23 @@
               </td>
             {/each}
             {#if actions.length > 0}
-              {#each actions as action}
-                <td class="px-4 py-3">
-                  <button
-                    onclick={() => action.onClick(row)}
-                    class="inline-flex items-center"
-                    aria-label={action.label}
-                  >
-                    <Icon
-                      iconName={action.icon}
-                      size={18}
-                      class="text-muted-foreground cursor-pointer {action.variant ===
-                      'destructive'
-                        ? 'hover:text-destructive'
-                        : 'hover:text-foreground'}"
-                    />
-                  </button>
-                </td>
-              {/each}
+              <td class="px-4 py-4 text-right" onclick={(e) => e.stopPropagation()}>
+                <div class="flex items-center justify-end gap-1">
+                  {#each actions as action}
+                    <button
+                      onclick={() => action.onClick(row)}
+                      class="p-1.5 rounded hover:bg-muted transition-colors"
+                      aria-label={action.label}
+                    >
+                      <Icon
+                        iconName={action.icon}
+                        size={16}
+                        class="text-muted-foreground {action.variant === 'destructive' ? 'hover:text-destructive' : 'hover:text-foreground'}"
+                      />
+                    </button>
+                  {/each}
+                </div>
+              </td>
             {/if}
           </tr>
         {/each}
@@ -181,50 +232,48 @@
     </table>
   </div>
 
-  <!-- Table Footer / Pagination -->
+  <!-- Pagination -->
   {#if pagination}
-    <div class="p-4 border-t border-border flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-muted-foreground">Row Per Page</span>
+    <div class="px-4 py-3 border-t border-border flex items-center justify-between">
+      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+        <span>Row Per Page</span>
         <select
-          class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+          class="px-2 py-1 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none"
           value={pagination.rowsPerPage}
-          onchange={(e) =>
-            pagination.onRowsPerPageChange(Number(e.currentTarget.value))}
+          onchange={(e) => pagination.onRowsPerPageChange(Number(e.currentTarget.value))}
         >
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
         </select>
-        <span class="text-sm text-muted-foreground">Entries</span>
+        <span>Entries</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1">
         <button
-          class="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+          style="background-color:#4DA0E620; color:#4DA0E6;"
           disabled={pagination.currentPage === 1}
           onclick={() => pagination.onPageChange(pagination.currentPage - 1)}
         >
           <Icon iconName="icon/chevron-left" size={16} />
         </button>
-        {#each Array(pagination.totalPages) as _, i}
-          {@const page = i + 1}
-          {#if page === 1 || page === pagination.totalPages || (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1)}
+        {#each getVisiblePages(pagination.currentPage, pagination.totalPages) as page}
+          {#if typeof page === "number"}
             <button
-              class="px-3 py-1 border border-border rounded hover:bg-muted {page ===
-              pagination.currentPage
-                ? 'bg-info text-info-foreground'
-                : ''}"
+              class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {page === pagination.currentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+              style={page === pagination.currentPage ? 'background-color:#4DA0E6;' : ''}
               onclick={() => pagination.onPageChange(page)}
             >
               {page}
             </button>
-          {:else if page === pagination.currentPage - 2 || page === pagination.currentPage + 2}
-            <span class="px-2 text-muted-foreground">...</span>
+          {:else}
+            <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
           {/if}
         {/each}
         <button
-          class="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+          style="background-color:#4DA0E620; color:#4DA0E6;"
           disabled={pagination.currentPage === pagination.totalPages}
           onclick={() => pagination.onPageChange(pagination.currentPage + 1)}
         >

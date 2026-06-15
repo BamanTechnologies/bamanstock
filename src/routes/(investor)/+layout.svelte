@@ -6,7 +6,6 @@
     SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -16,45 +15,57 @@
     SidebarTrigger,
   } from "$lib/components/ui/sidebar/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
-  import { Button } from "$lib/components/ui/button/index.js";
+
   import { page } from "$app/stores";
+  import { themeStore } from "$lib/stores/theme.svelte.js";
+  import { _, locale } from "svelte-i18n";
+  import { setLocale, localeAbbr } from "$lib/i18n/index.js";
 
   let { children } = $props();
 
-  // Get page title based on current route
+  let showProfileDropdown = $state(false);
+  let showNotifications = $state(false);
+  let showLanguageDropdown = $state(false);
+
+  const langOptions = [
+    { value: "en", label: "English",      abbr: "ENG" },
+    { value: "am", label: "አማርኛ",         abbr: "AMH" },
+    { value: "om", label: "Afaan Oromoo",  abbr: "ORO" },
+  ];
+
+  $effect(() => { themeStore.init(); });
+
+  function toggleTheme() {
+    themeStore.set(themeStore.current === 'Dark' ? 'Light' : 'Dark');
+  }
+
   const pageTitle = $derived.by(() => {
     const path = $page.url.pathname;
-    if (path.includes("/dashboard/merchants/")) return "Merchant Details";
-    if (path.startsWith("/dashboard/merchants")) return "Merchants";
-    if (path.includes("/location")) return "Location";
-    if (path.includes("/stock")) return "Stock";
-    if (path.includes("/reports")) return "Reports";
-    if (path.includes("/setting")) return "Setting";
-    if (path === "/dashboard") return "Dashboard";
-    return "Dashboard";
+    if (path.includes("/dashboard/merchants/")) return $_('pageMerchantDetails');
+    if (path.startsWith("/dashboard/merchants")) return $_('pageMerchants');
+    if (path.includes("/location")) return $_('pageLocations');
+    if (path.includes("/stock")) return $_('pageStock');
+    if (path.includes("/report")) return $_('pageReports');
+    if (path.includes("/setting")) return $_('pageSettings');
+    return $_('pageDashboard');
   });
 
-  // Check if we're on the investor page (should hide sidebar and header)
   const isInvestorPage = $derived($page.url.pathname.startsWith("/investor"));
 
-  const navigation = [
-    { title: "Dashboard", icon: "icon/layout-grid", href: "/dashboard" },
-    { title: "Merchants", icon: "icon/users", href: "/dashboard/merchants" },
-    { title: "Location", icon: "icon/map-pin", href: "/dashboard/location" },
-    { title: "Stock", icon: "icon/box", href: "/dashboard/stock" },
-    { title: "Reports", icon: "icon/bar-chart", href: "/dashboard/reports" },
-    { title: "Setting", icon: "icon/settings", href: "/dashboard/setting" },
-  ];
+  const navigation = $derived([
+    { title: $_('navDashboard'), icon: "icon/layout-grid", href: "/dashboard" },
+    { title: $_('navMerchants'), icon: "icon/users",        href: "/dashboard/merchants" },
+    { title: $_('navLocation'),  icon: "icon/map-pin",      href: "/dashboard/location" },
+    { title: $_('navStock'),     icon: "icon/box",           href: "/dashboard/stock" },
+    { title: $_('navReport'),    icon: "icon/bar-chart",     href: "/dashboard/reports" },
+    { title: $_('navSettings'),  icon: "icon/settings",      href: "/dashboard/setting" },
+  ]);
 </script>
 
 <svelte:head>
   <link rel="icon" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin="anonymous"
-  />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
   <link
     href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Raleway:wght@400;500;600;700&display=swap"
     rel="stylesheet"
@@ -66,19 +77,11 @@
     {#if !isInvestorPage}
       <Sidebar>
         <SidebarHeader>
-          <div class="flex items-center gap-2 px-4 py-2">
-            <div
-              class="w-10 h-10 rounded-xl bg-info flex items-center justify-center"
-            >
-              <Icon
-                iconName="icon/trending-up"
-                size={20}
-                class="text-info-foreground"
-              />
-            </div>
-            <span class="text-xl font-bold text-info">BAMANSTOCK</span>
-          </div>
+          <a href="/" class="flex items-center px-2 py-1 hover:opacity-90 transition-opacity">
+            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="w-auto object-contain" style="height: 90px;" />
+          </a>
         </SidebarHeader>
+
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
@@ -88,9 +91,7 @@
                     <a href={item.href} class="block">
                       <SidebarMenuButton
                         isActive={$page.url.pathname === item.href ||
-                          ($page.url.pathname.startsWith(
-                            "/dashboard/merchants"
-                          ) &&
+                          ($page.url.pathname.startsWith("/dashboard/merchants") &&
                             item.href === "/dashboard/merchants")}
                       >
                         <Icon iconName={item.icon as any} size={20} />
@@ -103,13 +104,14 @@
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <a href="/logout" class="block">
-                <SidebarMenuButton>
-                  <Icon iconName="icon/log-out" size={20} />
-                  <span>Logout</span>
+              <a href="/" class="block">
+                <SidebarMenuButton class="text-red-500 hover:text-red-600 hover:cursor-pointer">
+                  <Icon iconName="icon/log-out" size={20} class="text-red-500" />
+                  <span>{$_('logout')}</span>
                 </SidebarMenuButton>
               </a>
             </SidebarMenuItem>
@@ -117,42 +119,110 @@
         </SidebarFooter>
       </Sidebar>
     {/if}
-    <SidebarInset class={isInvestorPage ? "w-full" : ""}>
+
+    <SidebarInset class={isInvestorPage ? "w-full" : "bg-gray-50 dark:bg-background"}>
       {#if !isInvestorPage}
-        <header
-          class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6"
-        >
+        <header class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6">
           <SidebarTrigger class="-ml-1" />
-          <h1 class="text-2xl font-semibold text-foreground">{pageTitle}</h1>
+          <h1 class="text-xl font-semibold text-foreground">{pageTitle}</h1>
+
           <div class="flex-1"></div>
+
           <div class="flex items-center gap-4">
-            <Icon
-              iconName="icon/bell"
-              size={20}
-              class="text-muted-foreground cursor-pointer hover:text-foreground"
-            />
-            <Icon
-              iconName="icon/settings"
-              size={20}
-              class="text-muted-foreground cursor-pointer hover:text-foreground"
-            />
-            <!-- UK Flag - add to flags when available -->
-            <div
-              class="w-6 h-4 border border-border rounded cursor-pointer bg-blue-600"
-            ></div>
-            <div
-              class="w-8 h-8 rounded-full bg-muted flex items-center justify-center cursor-pointer"
+            <!-- Notifications -->
+            <div class="relative">
+              <button
+                type="button"
+                onclick={() => (showNotifications = !showNotifications)}
+                class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <Icon iconName="icon/bell" size={20} />
+              </button>
+              {#if showNotifications}
+                <div class="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div class="px-4 py-3 border-b border-border">
+                    <p class="text-sm font-semibold text-foreground">{$_('notificationsTitle')}</p>
+                  </div>
+                  <div class="px-4 py-8 flex flex-col items-center gap-2 text-center">
+                    <Icon iconName="icon/bell" size={32} class="text-muted-foreground/40" />
+                    <p class="text-sm text-muted-foreground">{$_('noNotificationsMsg')}</p>
+                  </div>
+                </div>
+              {/if}
+            </div>
+            <button
+              type="button"
+              onclick={toggleTheme}
+              aria-label="Toggle theme"
+              class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
             >
-              <Icon iconName="icon/user" size={16} />
+              {#if themeStore.current === 'Dark'}
+                <Icon iconName="icon/sun" size={18} />
+              {:else}
+                <Icon iconName="icon/moon" size={18} />
+              {/if}
+            </button>
+
+            <div class="relative">
+              <button
+                type="button"
+                onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; showNotifications = false; }}
+                class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-[10px] font-semibold cursor-pointer bg-background hover:bg-muted transition-colors text-foreground"
+              >
+                {localeAbbr($locale)}
+              </button>
+              {#if showLanguageDropdown}
+                <div class="absolute right-0 top-full mt-2 w-40 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  {#each langOptions as opt}
+                    <button
+                      type="button"
+                      class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-muted {$locale === opt.value ? 'text-[#4DA0E6] font-medium' : 'text-foreground'}"
+                      onclick={() => { setLocale(opt.value); showLanguageDropdown = false; }}
+                    >
+                      <span class="text-xs font-mono text-muted-foreground mr-2">{opt.abbr}</span>{opt.label}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+
+            <div class="relative">
+              <img
+                src="/Yohannes Abayneh.png"
+                alt="Profile"
+                class="w-8 h-8 rounded-full object-cover cursor-pointer border border-border"
+                onclick={() => (showProfileDropdown = !showProfileDropdown)}
+              />
+              {#if showProfileDropdown}
+                <div class="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div class="flex items-center gap-3 px-4 py-3 border-b border-border">
+                    <img src="/Yohannes Abayneh.png" alt="Profile" class="w-9 h-9 rounded-full object-cover shrink-0" />
+                    <div>
+                      <p class="text-sm font-semibold text-foreground">Yohannes Abayneh</p>
+                      <a href="/dashboard/profile" class="text-xs text-info hover:underline" onclick={() => (showProfileDropdown = false)}>
+                        {$_('viewProfile')}
+                      </a>
+                    </div>
+                  </div>
+                  <a href="/dashboard/setting" class="flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors" onclick={() => (showProfileDropdown = false)}>
+                    <span class="flex items-center gap-2">
+                      <Icon iconName="icon/settings" size={16} class="text-muted-foreground" />
+                      {$_('changeTheme')}
+                    </span>
+                    <Icon iconName="icon/chevron-right" size={14} class="text-muted-foreground" />
+                  </a>
+                  <a href="/" class="flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors">
+                    <Icon iconName="icon/log-out" size={16} />
+                    {$_('logout')}
+                  </a>
+                </div>
+              {/if}
             </div>
           </div>
         </header>
       {/if}
-      <main
-        class="flex flex-1 flex-col {isInvestorPage
-          ? 'w-full h-screen overflow-auto p-0'
-          : 'gap-4 overflow-auto'}"
-      >
+
+      <main class="flex flex-1 flex-col {isInvestorPage ? 'w-full h-screen overflow-auto p-0' : 'overflow-auto'}">
         {@render children()}
       </main>
     </SidebarInset>

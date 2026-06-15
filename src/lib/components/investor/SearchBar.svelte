@@ -41,7 +41,7 @@
         type="text"
         bind:value
         {placeholder}
-        class="w-full border-0 outline-0 bg-transparent"
+        class="w-full border-0 outline-none bg-transparent focus:outline-none"
         style="width: 373px; max-width: 100%; height: 20px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 15px; line-height: 20px; color: #757575; display: flex; align-items: center; flex: none; order: 0; flex-grow: 0;"
       />
     </div>
