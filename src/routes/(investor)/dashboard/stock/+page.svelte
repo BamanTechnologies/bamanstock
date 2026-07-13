@@ -5,109 +5,45 @@
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
   import RemoveStockItemModal from "$lib/components/investor/RemoveStockItemModal.svelte";
   import AddProductModal from "$lib/components/investor/AddProductModal.svelte";
+  import { _ } from "svelte-i18n";
 
   // Mock stock data - replace with real data later
   let stockItems = $state([
-    {
-      id: 1,
-      name: "Lenovo IdeaPad 3",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$3,506",
-      qty: 100,
-      status: "Adequate",
-      icon: "icon/laptop",
-    },
-    {
-      id: 2,
-      name: "Beats Pro",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$7,981",
-      qty: 140,
-      status: "Low",
-      icon: "icon/headphones",
-    },
-    {
-      id: 3,
-      name: "Nike Jordan",
-      category: "Cloth",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$450",
-      qty: 300,
-      status: "Out",
-      icon: "icon/shoe",
-    },
-    {
-      id: 4,
-      name: "Apple Series 5 Watch",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$3,506",
-      qty: 450,
-      status: "Adequate",
-      icon: "icon/watch",
-    },
-    {
-      id: 5,
-      name: "Amazon Echo Dot",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$902",
-      qty: 320,
-      status: "Low",
-      icon: "icon/package",
-    },
-    {
-      id: 6,
-      name: "Sanford Chair Sofa",
-      category: "Furniture",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$7,981",
-      qty: 650,
-      status: "Out",
-      icon: "icon/chair",
-    },
-    {
-      id: 7,
-      name: "Red Premium Satchel",
-      category: "Accessories",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$450",
-      qty: 700,
-      status: "Adequate",
-      icon: "icon/briefcase",
-    },
-    {
-      id: 8,
-      name: "Iphone 14 Pro",
-      category: "Electronics",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$3,506",
-      qty: 630,
-      status: "Low",
-      icon: "icon/package",
-    },
-    {
-      id: 9,
-      name: "Gaming Chair",
-      category: "Furniture",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$7,981",
-      qty: 410,
-      status: "Out",
-      icon: "icon/chair",
-    },
-    {
-      id: 10,
-      name: "Borealis Backpack",
-      category: "Accessories",
-      assignedMerchant: "Richard Wilson",
-      unitPrice: "$450",
-      qty: 550,
-      status: "Low",
-      icon: "icon/briefcase",
-    },
+    { id: 1,  name: "Lenovo IdeaPad 3",     category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$3,506",  qty: 100, status: "Adequate", icon: "icon/package" },
+    { id: 2,  name: "Beats Pro Headphones", category: "Electronics", assignedMerchant: "Stan Gaunter",    unitPrice: "$7,981",  qty: 8,   status: "Low",      icon: "icon/package" },
+    { id: 3,  name: "Nike Jordan Shoes",    category: "Cloth",       assignedMerchant: "Carlos Curran",   unitPrice: "$450",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 4,  name: "Apple Watch Series 9", category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$4,299",  qty: 450, status: "Adequate", icon: "icon/package" },
+    { id: 5,  name: "Amazon Echo Dot",      category: "Electronics", assignedMerchant: "Beth Noah",       unitPrice: "$902",    qty: 12,  status: "Low",      icon: "icon/package" },
+    { id: 6,  name: "Sanford Sofa",         category: "Furniture",   assignedMerchant: "James Morgan",    unitPrice: "$7,981",  qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 7,  name: "Premium Satchel Bag",  category: "Accessories", assignedMerchant: "Olivia Chen",     unitPrice: "$450",    qty: 700, status: "Adequate", icon: "icon/package" },
+    { id: 8,  name: "iPhone 15 Pro",        category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$5,200",  qty: 9,   status: "Low",      icon: "icon/package" },
+    { id: 9,  name: "Gaming Chair Pro",     category: "Furniture",   assignedMerchant: "Marcus Davis",    unitPrice: "$7,981",  qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 10, name: "Borealis Backpack",    category: "Accessories", assignedMerchant: "Sarah Johnson",   unitPrice: "$450",    qty: 550, status: "Low",      icon: "icon/package" },
+    { id: 11, name: "Samsung 4K TV 55\"",   category: "Electronics", assignedMerchant: "Stan Gaunter",    unitPrice: "$12,500", qty: 210, status: "Adequate", icon: "icon/package" },
+    { id: 12, name: "Levi's Denim Jacket",  category: "Cloth",       assignedMerchant: "Carlos Curran",   unitPrice: "$320",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 13, name: "Office Desk Premium",  category: "Furniture",   assignedMerchant: "Daniel Park",     unitPrice: "$3,200",  qty: 85,  status: "Adequate", icon: "icon/package" },
+    { id: 14, name: "Fitbit Charge 6",      category: "Electronics", assignedMerchant: "Fatima Hassan",   unitPrice: "$1,800",  qty: 5,   status: "Low",      icon: "icon/package" },
+    { id: 15, name: "Leather Wallet",       category: "Accessories", assignedMerchant: "Lucas Ferreira",  unitPrice: "$180",    qty: 320, status: "Adequate", icon: "icon/package" },
+    { id: 16, name: "Running Shoes Nike",   category: "Cloth",       assignedMerchant: "Nina Patel",      unitPrice: "$520",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 17, name: "iPad Air 5th Gen",     category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$6,900",  qty: 180, status: "Adequate", icon: "icon/package" },
+    { id: 18, name: "Bookshelf 5-Tier",     category: "Furniture",   assignedMerchant: "Kwame Asante",    unitPrice: "$1,200",  qty: 14,  status: "Low",      icon: "icon/package" },
+    { id: 19, name: "Adidas Hoodie",        category: "Cloth",       assignedMerchant: "Priya Sharma",    unitPrice: "$280",    qty: 420, status: "Adequate", icon: "icon/package" },
+    { id: 20, name: "Sony WH-1000XM5",      category: "Electronics", assignedMerchant: "Thomas Green",    unitPrice: "$3,100",  qty: 7,   status: "Low",      icon: "icon/package" },
+    { id: 21, name: "Desk Lamp LED",        category: "Furniture",   assignedMerchant: "Amara Obi",       unitPrice: "$180",    qty: 95,  status: "Adequate", icon: "icon/package" },
+    { id: 22, name: "Polo T-Shirt Pack",    category: "Cloth",       assignedMerchant: "Priya Sharma",    unitPrice: "$95",     qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 23, name: "Dell Monitor 27\"",    category: "Electronics", assignedMerchant: "Kwame Asante",    unitPrice: "$8,200",  qty: 45,  status: "Adequate", icon: "icon/package" },
+    { id: 24, name: "Ergonomic Mouse",      category: "Electronics", assignedMerchant: "Fatima Hassan",   unitPrice: "$620",    qty: 6,   status: "Low",      icon: "icon/package" },
+    { id: 25, name: "Denim Jeans Slim",     category: "Cloth",       assignedMerchant: "Lucas Ferreira",  unitPrice: "$240",    qty: 310, status: "Adequate", icon: "icon/package" },
+    { id: 26, name: "Standing Desk",        category: "Furniture",   assignedMerchant: "Daniel Park",     unitPrice: "$5,800",  qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 27, name: "Google Nest Hub",      category: "Electronics", assignedMerchant: "Beth Noah",       unitPrice: "$1,400",  qty: 11,  status: "Low",      icon: "icon/package" },
+    { id: 28, name: "Leather Belt",         category: "Accessories", assignedMerchant: "Nina Patel",      unitPrice: "$120",    qty: 480, status: "Adequate", icon: "icon/package" },
+    { id: 29, name: "Office Chair Mesh",    category: "Furniture",   assignedMerchant: "Marcus Davis",    unitPrice: "$4,500",  qty: 28,  status: "Adequate", icon: "icon/package" },
+    { id: 30, name: "Xbox Controller",      category: "Electronics", assignedMerchant: "James Morgan",    unitPrice: "$2,300",  qty: 4,   status: "Low",      icon: "icon/package" },
+    { id: 31, name: "Yoga Mat Premium",     category: "Accessories", assignedMerchant: "Olivia Chen",     unitPrice: "$350",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 32, name: "MacBook Air M2",       category: "Electronics", assignedMerchant: "Richard Wilson",  unitPrice: "$14,800", qty: 130, status: "Adequate", icon: "icon/package" },
+    { id: 33, name: "Puffer Jacket",        category: "Cloth",       assignedMerchant: "Stan Gaunter",    unitPrice: "$480",    qty: 8,   status: "Low",      icon: "icon/package" },
+    { id: 34, name: "Portable Charger",     category: "Electronics", assignedMerchant: "Sarah Johnson",   unitPrice: "$450",    qty: 0,   status: "Out",      icon: "icon/package" },
+    { id: 35, name: "Wicker Storage Basket",category: "Accessories", assignedMerchant: "Carlos Curran",   unitPrice: "$220",    qty: 670, status: "Adequate", icon: "icon/package" },
   ]);
 
   let searchQuery = $state("");
@@ -118,7 +54,7 @@
 
   let currentPage = $state(1);
   let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(stockItems.length / rowsPerPage));
+  const totalPages = $derived(Math.ceil(filteredStockItems.length / rowsPerPage));
 
   let isRemoveStockModalOpen = $state(false);
   let stockItemToRemove = $state<(typeof stockItems)[0] | undefined>(undefined);
@@ -159,12 +95,7 @@
       ) {
         return false;
       }
-      if (
-        assignedMerchantFilter &&
-        item.assignedMerchant !== "Richard Wilson"
-      ) {
-        return false;
-      }
+      if (assignedMerchantFilter && item.assignedMerchant.toLowerCase().replace(/\s+/g, "-") !== assignedMerchantFilter) return false;
       if (categoryFilter && item.category.toLowerCase() !== categoryFilter) {
         return false;
       }
@@ -182,11 +113,10 @@
     )
   );
 
-  // Table configuration
-  const columns = [
+  const columns = $derived([
     {
       key: "name",
-      label: "Stock Item",
+      label: $_('navStock'),
       sortable: true,
       render: (row: (typeof stockItems)[0]) => {
         return `
@@ -201,14 +131,10 @@
         `;
       },
     },
-    {
-      key: "category",
-      label: "Category",
-      sortable: true,
-    },
+    { key: "category",        label: $_('category'), sortable: true },
     {
       key: "assignedMerchant",
-      label: "Assigned Merchant",
+      label: $_('merchant'),
       sortable: true,
       render: (row: (typeof stockItems)[0]) => {
         return `
@@ -223,73 +149,73 @@
         `;
       },
     },
-    {
-      key: "unitPrice",
-      label: "Unit Price",
-      sortable: true,
-    },
-    {
-      key: "qty",
-      label: "Qty",
-      sortable: true,
-    },
+    { key: "unitPrice", label: "Unit Price", sortable: true },
+    { key: "qty",       label: "Qty",        sortable: true },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       sortable: true,
       render: (row: (typeof stockItems)[0]) => {
+        const label = row.status === "Adequate" ? $_('statusAdequate')
+                    : row.status === "Low"      ? $_('statusLowStock')
+                    : row.status === "Out"      ? $_('allStatus')
+                    : row.status;
         return `
           <span class="inline-flex items-center gap-1.5 ${getStatusClass(row.status)}">
             <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
-            <span class="text-sm">${row.status}</span>
+            <span class="text-sm">${label}</span>
           </span>
         `;
       },
     },
-  ];
+  ]);
 
-  const filters = [
+  const filters = $derived([
     {
       key: "assignedMerchant",
-      label: "Assigned Merchant",
+      label: $_('merchant'),
       options: [
-        { value: "", label: "All Merchants" },
+        { value: "", label: $_('allMerchants') },
         { value: "richard-wilson", label: "Richard Wilson" },
-        { value: "other", label: "Other" },
+        { value: "stan-gaunter",   label: "Stan Gaunter" },
+        { value: "carlos-curran",  label: "Carlos Curran" },
+        { value: "beth-noah",      label: "Beth Noah" },
+        { value: "james-morgan",   label: "James Morgan" },
+        { value: "others",         label: "Others" },
       ],
     },
     {
       key: "location",
-      label: "Location",
+      label: $_('navLocation'),
       options: [
-        { value: "", label: "All Locations" },
+        { value: "", label: $_('allLocations') },
         { value: "santa-clara", label: "Santa Clara Area #1" },
-        { value: "branch-1", label: "Branch #1" },
-        { value: "branch-2", label: "Branch #2" },
+        { value: "branch-1",    label: "Branch #1" },
+        { value: "branch-2",    label: "Branch #2" },
       ],
     },
     {
       key: "category",
-      label: "Category",
+      label: $_('category'),
       options: [
-        { value: "", label: "All Categories" },
-        { value: "electronics", label: "Electronics" },
-        { value: "cloth", label: "Cloth" },
-        { value: "furniture", label: "Furniture" },
-        { value: "accessories", label: "Accessories" },
+        { value: "",             label: $_('allCategories') },
+        { value: "electronics",  label: $_('electronics') },
+        { value: "cloth",        label: $_('clothing') },
+        { value: "furniture",    label: $_('furniture') },
+        { value: "accessories",  label: "Accessories" },
       ],
     },
     {
       key: "status",
-      label: "Status",
+      label: $_('filterStatus'),
       options: [
-        { value: "", label: "All Status" },
-        { value: "adequate", label: "Adequate" },
-        { value: "low", label: "Low" },
-        { value: "out", label: "Out" },
+        { value: "",         label: $_('allStatus') },
+        { value: "adequate", label: $_('statusAdequate') },
+        { value: "low",      label: $_('statusLowStock') },
+        { value: "out",      label: "Out" },
       ],
     },
-  ];
+  ]);
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -370,11 +296,11 @@
   <!-- Header with Add Stock Button -->
   <div class="flex items-center justify-end">
     <Button
-      class="bg-info text-info-foreground hover:bg-info/90"
+      class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
       onclick={handleAddStock}
     >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
-      Add Stock
+      {$_('addStock')}
     </Button>
   </div>
 
@@ -387,40 +313,26 @@
       onAction={handleAddStock}
     />
   {:else}
-    <DataTable
-      {columns}
-      data={paginatedItems}
-      searchable={true}
-      searchPlaceholder="Search by stock name..."
-      {filters}
-      actions={[
-        {
-          icon: "icon/edit",
-          label: "Edit",
-          onClick: handleEdit,
-        },
-        {
-          icon: "icon/refresh-cw",
-          label: "Transfer",
-          onClick: handleTransfer,
-        },
-        {
-          icon: "icon/trash",
-          label: "Delete",
-          onClick: handleDelete,
-          variant: "destructive",
-        },
-      ]}
-      pagination={{
-        currentPage,
-        totalPages,
-        rowsPerPage,
-        onPageChange: handlePageChange,
-        onRowsPerPageChange: handleRowsPerPageChange,
-      }}
-      onSearch={handleSearch}
-      onFilterChange={handleFilterChange}
-    />
+ <DataTable
+  {columns}
+  data={paginatedItems}
+  searchable={true}
+  searchPlaceholder={$_('searchByStockName')}
+  {filters}
+  onSearch={handleSearch}
+  onFilterChange={handleFilterChange}
+  actions={[
+    { icon: "icon/edit",  label: $_('edit'),   onClick: handleEdit },
+    { icon: "icon/trash", label: $_('delete'), onClick: handleDelete, variant: "destructive" },
+  ]}
+  pagination={{
+    currentPage,
+    totalPages,
+    rowsPerPage,
+    onPageChange: handlePageChange,
+    onRowsPerPageChange: handleRowsPerPageChange,
+  }}
+  />
   {/if}
 
   <!-- Remove Stock Item Modal -->

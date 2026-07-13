@@ -177,7 +177,7 @@
     tabindex="-1"
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      class="bg-card rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
@@ -405,7 +405,7 @@
         </Button>
         <Button
           onclick={handleCreate}
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
         >
           Create Product
         </Button>

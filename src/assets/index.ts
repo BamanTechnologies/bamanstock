@@ -85,10 +85,12 @@ const icon = {
 	'icon/map-pin': () => import('@lucide/svelte/icons/map-pin'),
 	'icon/box': () => import('@lucide/svelte/icons/box'),
 	'icon/log-out': () => import('@lucide/svelte/icons/log-out'),
+	'icon/user-minus': () => import('@lucide/svelte/icons/user-minus'),
 	
 	// Status & Feedback
 	'icon/info': () => import('@lucide/svelte/icons/info'),
 	'icon/alert-circle': () => import('@lucide/svelte/icons/alert-circle'),
+	'icon/alert-triangle': () => import('@lucide/svelte/icons/alert-triangle'),
 	'icon/check-circle': () => import('@lucide/svelte/icons/check-circle'),
 	'icon/x-circle': () => import('@lucide/svelte/icons/x-circle'),
 	'icon/eye': () => import('@lucide/svelte/icons/eye'),
@@ -115,6 +117,8 @@ const icon = {
 	'icon/calendar': () => import('@lucide/svelte/icons/calendar'),
 	'icon/dollar-sign': () => import('@lucide/svelte/icons/dollar-sign'),
 	'icon/clock': () => import('@lucide/svelte/icons/clock'),
+
+	'icon/activity': () => import('@lucide/svelte/icons/activity'),
 	
 	// Custom SVG icons can be added here:
 	// 'icon/custom-name': () => import('./icon/custom-name.svg?component'),

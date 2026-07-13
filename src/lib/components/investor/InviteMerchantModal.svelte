@@ -117,7 +117,7 @@
     tabindex="-1"
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      class="bg-card rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
@@ -222,7 +222,7 @@
               </button>
               {#if locationDropdownOpen}
                 <div
-                  class="absolute z-10 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+                  class="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto"
                   role="listbox"
                 >
                   {#each locationOptions.filter((opt) => opt.value !== "") as option}
@@ -307,7 +307,7 @@
         </Button>
         <Button
           onclick={handleSubmit}
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
         >
           Send Invitation
         </Button>

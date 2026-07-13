@@ -31,7 +31,7 @@
       change: "-19% vs Last Month",
       changeType: "negative",
       icon: "icon/bar-chart",
-      iconColor: "bg-green-100",
+      iconColor: "bg-green-100 dark:bg-green-900/40",
     },
     {
       label: "Total Stock Value",
@@ -39,7 +39,7 @@
       change: "+35% vs Last Month",
       changeType: "positive",
       icon: "icon/trending-up",
-      iconColor: "bg-blue-100",
+      iconColor: "bg-blue-100 dark:bg-blue-900/40",
     },
     {
       label: "Active Merchants",
@@ -47,7 +47,7 @@
       change: "+41% vs Last Month",
       changeType: "positive",
       icon: "icon/building",
-      iconColor: "bg-purple-100",
+      iconColor: "bg-purple-100 dark:bg-purple-900/40",
     },
     {
       label: "Low Stock Items",
@@ -55,7 +55,7 @@
       change: "-20% vs Last Month",
       changeType: "negative",
       icon: "icon/box",
-      iconColor: "bg-orange-100",
+      iconColor: "bg-orange-100 dark:bg-orange-900/40",
     },
   ];
 
@@ -94,7 +94,7 @@
   let isTransferStockModalOpen = $state(false);
   let isRemoveStockItemModalOpen = $state(false);
   let stockItemToRemove = $state<(typeof locationStockItems)[0] | undefined>(
-    undefined
+    undefined,
   );
 
   const tabs = ["Overview", "Stock", "Merchants", "Report"];
@@ -216,7 +216,7 @@
   let currentStockPage = $state(1);
   let rowsPerStockPage = $state(10);
   const totalStockPages = $derived(
-    Math.ceil(locationStockItems.length / rowsPerStockPage)
+    Math.ceil(locationStockItems.length / rowsPerStockPage),
   );
 
   // Stock table columns
@@ -341,7 +341,7 @@
   let currentMerchantsPage = $state(1);
   let rowsPerMerchantsPage = $state(10);
   const totalMerchantsPages = $derived(
-    Math.ceil(locationMerchants.length / rowsPerMerchantsPage)
+    Math.ceil(locationMerchants.length / rowsPerMerchantsPage),
   );
 
   // Merchants table columns
@@ -376,13 +376,13 @@
       key: "status",
       label: "Status",
       sortable: true,
-      render: (row: (typeof locationMerchants)[0]) => {
+      render: (row: (typeof locationStockItems)[0]) => {
         return `
-          <span class="inline-flex items-center gap-1.5 ${row.statusColor}">
-            <span class="w-1.5 h-1.5 rounded-full ${row.statusDot}"></span>
-            <span class="text-sm">${row.status}</span>
-          </span>
-        `;
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-white font-medium bg-[#00C98B]">
+        <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+        <span class="text-xs">${row.status}</span>
+      </span>
+    `;
       },
     },
   ];
@@ -513,7 +513,7 @@
   let currentReportsPage = $state(1);
   const rowsPerReportsPage = 10;
   const totalReportsPages = $derived(
-    Math.ceil(locationReports.length / rowsPerReportsPage)
+    Math.ceil(locationReports.length / rowsPerReportsPage),
   );
 
   function handleBack() {
@@ -543,24 +543,27 @@
         <h2 class="text-2xl font-semibold text-foreground mb-2">
           {location.name}
         </h2>
-        <p class="text-sm text-muted-foreground mb-2">{location.address}</p>
-        <span
-          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-green-100 text-green-800 border-green-200"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-          {location.status}
-        </span>
+        <div class="flex items-center gap-2 mb-2">
+          <p class="text-sm text-muted-foreground">{location.address}</p>
+          <span
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-green-600"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            {location.status}
+          </span>
+        </div>
       </div>
       <div class="flex items-center gap-3">
         <Button
           variant="outline"
-          class="border-border text-foreground"
+          class="border-[#4DA0E6] text-[#4DA0E6] hover:bg-[#4DA0E6]/10"
           onclick={() => (isDeleteLocationModalOpen = true)}
         >
           Close Location
         </Button>
+
         <Button
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[#4DA0E6] text-white hover:bg-[#4DA0E6]/90"
           onclick={() => (isEditLocationModalOpen = true)}
         >
           Edit Location
@@ -731,51 +734,77 @@
     </div>
   {:else if activeTab === "Stock"}
     <div class="space-y-6">
-      <!-- Action Buttons -->
-      <div class="flex items-center justify-end gap-3">
-        <Button
-          variant="outline"
-          class="border-info text-info"
-          onclick={() => (isTransferStockModalOpen = true)}
-        >
-          <Icon iconName="icon/refresh-cw" size={16} class="mr-2" />
-          Transfer Stock
-        </Button>
-        <Button
-          class="bg-info text-info-foreground hover:bg-info/90"
-          onclick={() => (isAssignStockToLocationModalOpen = true)}
-        >
-          <Icon iconName="icon/plus" size={16} class="mr-2" />
-          Assign Stock
-        </Button>
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border"
+      >
+        <div class="flex flex-1 flex-wrap items-center gap-3">
+          <div class="relative min-w-[240px]">
+            <Icon
+              iconName="icon/search"
+              size={18}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search by stock name..."
+              class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-info/50"
+            />
+          </div>
+
+          <Dropdown
+            options={stockFilters.find((f) => f.key === "category")?.options ||
+              []}
+            placeholder="Category"
+            class="min-w-[140px]"
+          />
+
+          <Dropdown
+            options={stockFilters.find((f) => f.key === "status")?.options ||
+              []}
+            placeholder="Status"
+            class="min-w-[140px]"
+          />
+        </div>
+
+        <div class="flex items-center gap-3">
+          <Button
+            variant="outline"
+            class="bg-[#4DA0E6] text-white hover:bg-[#4DA0E6]/90"
+            onclick={() => (isTransferStockModalOpen = true)}
+          >
+            <Icon iconName="icon/refresh-cw" size={16} class="mr-2" />
+            Transfer Stock
+          </Button>
+          <Button
+            class="bg-[#4DA0E6] text-white hover:bg-[#4DA0E6]/90"
+            onclick={() => (isAssignStockToLocationModalOpen = true)}
+          >
+            <Icon iconName="icon/plus" size={16} class="mr-2" />
+            Assign Stock
+          </Button>
+        </div>
       </div>
 
-      <!-- Stock Items Table or Empty State -->
       {#if locationStockItems.length === 0}
         <EmptyState
           illustration="stock"
           title="No Stock Added Yet"
-          description="Start by assigning stock to this location. Once added, you can track inventory levels, transfer items, and monitor stock status."
+          description="Start by assigning stock to this location."
           actionLabel="Assign Stock"
           onAction={() => (isAssignStockToLocationModalOpen = true)}
         />
       {:else}
         {@const paginatedStockItems = locationStockItems.slice(
           (currentStockPage - 1) * rowsPerStockPage,
-          currentStockPage * rowsPerStockPage
+          currentStockPage * rowsPerStockPage,
         )}
         <DataTable
           columns={stockColumns}
           data={paginatedStockItems}
-          searchable={true}
-          searchPlaceholder="Search by stock name..."
-          filters={stockFilters}
+          searchable={false}
+          filters={[]}
           actions={[
-            {
-              icon: "icon/edit",
-              label: "Edit",
-              onClick: handleStockEdit,
-            },
+            { icon: "icon/edit", label: "Edit", onClick: handleStockEdit },
             {
               icon: "icon/refresh-cw",
               label: "Transfer",
@@ -802,7 +831,7 @@
     <div class="space-y-6">
       <!-- Header with Invite Merchant Button -->
       <div class="flex items-center justify-end">
-        <Button class="bg-info text-info-foreground hover:bg-info/90">
+        <Button class="bg-[var(--primary-blue)] text-white hover:opacity-90">
           <Icon iconName="icon/plus" size={16} class="mr-2" />
           Invite Merchant
         </Button>
@@ -823,7 +852,7 @@
       {:else}
         {@const paginatedMerchants = locationMerchants.slice(
           (currentMerchantsPage - 1) * rowsPerMerchantsPage,
-          currentMerchantsPage * rowsPerMerchantsPage
+          currentMerchantsPage * rowsPerMerchantsPage,
         )}
         <DataTable
           columns={merchantColumns}
@@ -965,11 +994,10 @@
                   </td>
                   <td class="px-4 py-4">
                     <span
-                      class="inline-flex items-center gap-1.5 {report.statusColor}"
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-white font-medium bg-[#00C98B]"
                     >
-                      <span class="w-1.5 h-1.5 rounded-full {report.statusDot}"
-                      ></span>
-                      <span class="text-sm">{report.status}</span>
+                      <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                      <span class="text-xs">{report.status}</span>
                     </span>
                   </td>
                   <td class="px-4 py-4">
@@ -1131,7 +1159,7 @@
         console.log("Removing stock item:", stockItemToRemove);
         // TODO: Implement API call to remove stock item
         locationStockItems = locationStockItems.filter(
-          (item) => item.id !== stockItemToRemove?.id
+          (item) => item.id !== stockItemToRemove?.id,
         );
         stockItemToRemove = undefined;
       }

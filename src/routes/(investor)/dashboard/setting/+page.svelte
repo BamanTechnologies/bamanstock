@@ -3,44 +3,47 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import ToggleSwitch from "$lib/components/investor/ToggleSwitch.svelte";
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
+  import { themeStore } from "$lib/stores/theme.svelte.js";
+  import { _ } from "svelte-i18n";
+  import { locale, setLocale } from "$lib/i18n/index.js";
 
-  let theme = $state<"Light" | "Dark" | "System">("Light");
-  let language = $state("English");
+  const theme = $derived(themeStore.current);
   let notificationsEnabled = $state(true);
   let twoFactorEnabled = $state(true);
 
+  const langOptions = [
+    { value: "en", label: "English" },
+    { value: "am", label: "አማርኛ" },
+    { value: "om", label: "Afaan Oromoo" },
+  ];
+
   function handleChangePassword() {
-    // TODO: Open change password modal
     console.log("Change password");
   }
 
   function handleExportData() {
-    // TODO: Implement data export
     console.log("Export data");
   }
 
   function handleDeleteAccount() {
-    // TODO: Open delete account confirmation modal
     console.log("Delete account");
   }
 
   function handleOpenHelpCenter() {
-    // TODO: Open help center
     console.log("Open help center");
   }
 
   function handleContactSupport() {
-    // TODO: Open contact support modal
     console.log("Contact support");
   }
 </script>
 
-<div class="flex-1 px-6 py-6 space-y-8">
+<div class="flex-1 px-12 py-15 space-y-8">
   <!-- Application Preferences Section -->
   <div class="space-y-6">
     <div>
       <h2 class="text-lg font-semibold text-foreground mb-1">
-        Application Preferences
+        {$_('appPreferences')}
       </h2>
       <div class="h-px bg-border mt-2"></div>
     </div>
@@ -49,45 +52,32 @@
       <!-- Theme -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon iconName="icon/sun" size={20} class="text-muted-foreground" />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/sun" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground">Theme</span>
+          <span class="text-sm font-medium text-foreground">{$_('theme')}</span>
         </div>
-        <div
-          class="flex items-center gap-1 border border-border rounded-lg p-1"
-        >
+        <div class="flex items-center gap-1 border border-border rounded-lg p-1 bg-[#4DA0E6]/10">
           <button
             type="button"
-            onclick={() => (theme = "Light")}
-            class="px-4 py-2 text-sm rounded-md transition-colors {theme ===
-            'Light'
-              ? 'bg-info text-info-foreground'
-              : 'text-muted-foreground hover:text-foreground'}"
+            onclick={() => themeStore.set("Light")}
+            class="px-4 py-2 text-sm rounded-md transition-colors {theme === 'Light' ? 'bg-info text-info-foreground' : 'text-muted-foreground hover:text-foreground'}"
           >
-            Light
+            {$_('light')}
           </button>
           <button
             type="button"
-            onclick={() => (theme = "Dark")}
-            class="px-4 py-2 text-sm rounded-md transition-colors {theme ===
-            'Dark'
-              ? 'bg-info text-info-foreground'
-              : 'text-muted-foreground hover:text-foreground'}"
+            onclick={() => themeStore.set("Dark")}
+            class="px-4 py-2 text-sm rounded-md transition-colors {theme === 'Dark' ? 'bg-info text-info-foreground' : 'text-muted-foreground hover:text-foreground'}"
           >
-            Dark
+            {$_('dark')}
           </button>
           <button
             type="button"
-            onclick={() => (theme = "System")}
-            class="px-4 py-2 text-sm rounded-md transition-colors {theme ===
-            'System'
-              ? 'bg-info text-info-foreground'
-              : 'text-muted-foreground hover:text-foreground'}"
+            onclick={() => themeStore.set("System")}
+            class="px-4 py-2 text-sm rounded-md transition-colors {theme === 'System' ? 'bg-info text-info-foreground' : 'text-muted-foreground hover:text-foreground'}"
           >
-            System
+            {$_('system')}
           </button>
         </div>
       </div>
@@ -95,42 +85,26 @@
       <!-- Language -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/languages"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/languages" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground">Language</span>
+          <span class="text-sm font-medium text-foreground">{$_('settingsLanguage')}</span>
         </div>
         <Dropdown
-          bind:value={language}
-          options={[
-            { value: "English", label: "English" },
-            { value: "Spanish", label: "Spanish" },
-            { value: "French", label: "French" },
-            { value: "German", label: "German" },
-          ]}
-          class="min-w-[150px]"
+          value={$locale ?? "en"}
+          onchange={(v) => setLocale(v)}
+          options={langOptions}
+          class="min-w-37.5"
         />
       </div>
 
       <!-- Notifications -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/bell"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/bell" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground">Notifications</span>
+          <span class="text-sm font-medium text-foreground">{$_('notificationsLabel')}</span>
         </div>
         <ToggleSwitch bind:checked={notificationsEnabled} label="" />
       </div>
@@ -140,7 +114,7 @@
   <!-- Security Section -->
   <div class="space-y-6">
     <div>
-      <h2 class="text-lg font-semibold text-foreground mb-1">Security</h2>
+      <h2 class="text-lg font-semibold text-foreground mb-1">{$_('security')}</h2>
       <div class="h-px bg-border mt-2"></div>
     </div>
 
@@ -148,43 +122,28 @@
       <!-- Password -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/lock"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/lock" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground">Password</span>
+          <span class="text-sm font-medium text-foreground">{$_('password')}</span>
         </div>
-        <Button
-          class="bg-info text-info-foreground hover:bg-info/90"
-          onclick={handleChangePassword}
-        >
-          Change Password
+        <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={handleChangePassword}>
+          {$_('changePassword')}
         </Button>
       </div>
 
       <!-- Two-Factor Authentication -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/shield-check"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/shield-check" size={20} class="text-[#4DA0E6]" />
           </div>
           <div>
             <span class="text-sm font-medium text-foreground block">
-              Two-Factor Authentication
+              {$_('twoFactorAuth')}
             </span>
             <span class="text-xs text-muted-foreground">
-              Authenticator app required
+              {$_('authenticatorRequired')}
             </span>
           </div>
         </div>
@@ -196,7 +155,7 @@
   <!-- Data & Privacy Section -->
   <div class="space-y-6">
     <div>
-      <h2 class="text-lg font-semibold text-foreground mb-1">Data & Privacy</h2>
+      <h2 class="text-lg font-semibold text-foreground mb-1">{$_('dataPrivacy')}</h2>
       <div class="h-px bg-border mt-2"></div>
     </div>
 
@@ -204,47 +163,29 @@
       <!-- Export Data -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/download"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/download" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground">Export Data</span>
+          <span class="text-sm font-medium text-foreground">{$_('exportData')}</span>
         </div>
-        <Button
-          variant="outline"
-          class="border-info text-info hover:bg-info/10"
-          onclick={handleExportData}
-        >
-          Download My Data
+        <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={handleExportData}>
+          {$_('downloadMyData')}
         </Button>
       </div>
 
       <!-- Account Deletion -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/trash"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/trash" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground"
-            >Account Deletion</span
-          >
+          <span class="text-sm font-medium text-foreground">{$_('accountDeletion')}</span>
         </div>
         <Button
-          class="bg-red-600 text-white hover:bg-red-700"
+          class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:border-red-800"
           onclick={handleDeleteAccount}
         >
-          Delete Account
+          {$_('deleteAccount')}
         </Button>
       </div>
     </div>
@@ -253,7 +194,7 @@
   <!-- Support Section -->
   <div class="space-y-6">
     <div>
-      <h2 class="text-lg font-semibold text-foreground mb-1">Support</h2>
+      <h2 class="text-lg font-semibold text-foreground mb-1">{$_('support')}</h2>
       <div class="h-px bg-border mt-2"></div>
     </div>
 
@@ -261,49 +202,26 @@
       <!-- Help & Support -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/help-circle"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/help-circle" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground">Help & Support</span
-          >
+          <span class="text-sm font-medium text-foreground">{$_('helpSupport')}</span>
         </div>
-        <Button
-          variant="outline"
-          class="border-info text-info hover:bg-info/10"
-          onclick={handleOpenHelpCenter}
-        >
-          Open help center
+        <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={handleOpenHelpCenter}>
+          {$_('openHelpCenter')}
         </Button>
       </div>
 
       <!-- Contact Support -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-          >
-            <Icon
-              iconName="icon/send"
-              size={20}
-              class="text-muted-foreground"
-            />
+          <div class="w-10 h-10 rounded-full bg-[#4DA0E6]/15 flex items-center justify-center">
+            <Icon iconName="icon/send" size={20} class="text-[#4DA0E6]" />
           </div>
-          <span class="text-sm font-medium text-foreground"
-            >Contact Support</span
-          >
+          <span class="text-sm font-medium text-foreground">{$_('contactSupport')}</span>
         </div>
-        <Button
-          variant="outline"
-          class="border-info text-info hover:bg-info/10"
-          onclick={handleContactSupport}
-        >
-          Send message
+        <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={handleContactSupport}>
+          {$_('sendMessage')}
         </Button>
       </div>
     </div>

@@ -149,7 +149,7 @@
     tabindex="-1"
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full max-w-md"
+      class="bg-card rounded-lg shadow-xl w-full max-w-md"
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
@@ -205,7 +205,7 @@
             </div>
             {#if stockItemDropdownOpen && filteredStockItems.length > 0}
               <div
-                class="absolute z-10 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+                class="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto"
                 role="listbox"
               >
                 {#each filteredStockItems as item}
@@ -288,7 +288,7 @@
             </button>
             {#if categoryDropdownOpen}
               <div
-                class="absolute z-10 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+                class="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto"
                 role="listbox"
               >
                 {#each categories as category}
@@ -324,7 +324,7 @@
         </Button>
         <Button
           onclick={handleSubmit}
-          class="bg-info text-info-foreground hover:bg-info/90"
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
         >
           Assign
         </Button>
