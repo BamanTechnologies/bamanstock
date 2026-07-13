@@ -15,11 +15,14 @@
     SidebarTrigger,
   } from "$lib/components/ui/sidebar/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
+  import SharedHeader from "$lib/components/Header.svelte";
 
   import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
   import { themeStore } from "$lib/stores/theme.svelte.js";
   import { _, locale } from "svelte-i18n";
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
+  import { authStore } from "$lib/stores/auth.svelte.js";
 
   let { children } = $props();
 
@@ -72,6 +75,10 @@
   />
 </svelte:head>
 
+{#if isInvestorPage}
+  <SharedHeader />
+{/if}
+
 <SidebarProvider>
   <div class="flex min-h-screen w-full">
     {#if !isInvestorPage}
@@ -107,14 +114,18 @@
 
         <SidebarFooter>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <a href="/" class="block">
-                <SidebarMenuButton class="text-red-500 hover:text-red-600 hover:cursor-pointer">
-                  <Icon iconName="icon/log-out" size={20} class="text-red-500" />
-                  <span>{$_('logout')}</span>
-                </SidebarMenuButton>
-              </a>
-            </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <button
+                    type="button"
+                    class="w-full block"
+                    onclick={() => { authStore.logout(); goto("/"); }}
+                  >
+                    <SidebarMenuButton class="text-red-500 hover:text-red-600 hover:cursor-pointer">
+                      <Icon iconName="icon/log-out" size={20} class="text-red-500" />
+                      <span>{$_('logout')}</span>
+                    </SidebarMenuButton>
+                  </button>
+                </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
@@ -187,18 +198,31 @@
             </div>
 
             <div class="relative">
-              <img
-                src="/Yohannes Abayneh.png"
-                alt="Profile"
-                class="w-8 h-8 rounded-full object-cover cursor-pointer border border-border"
+              <button
+                type="button"
                 onclick={() => (showProfileDropdown = !showProfileDropdown)}
-              />
+                class="w-8 h-8 rounded-full overflow-hidden cursor-pointer border border-border focus:outline-none"
+              >
+                {#if authStore.user?.avatar}
+                  <img src={authStore.user.avatar} alt={authStore.user.name} class="w-full h-full object-cover" />
+                {:else}
+                  <span class="w-full h-full bg-info flex items-center justify-center text-xs font-bold text-info-foreground">
+                    {authStore.user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                {/if}
+              </button>
               {#if showProfileDropdown}
                 <div class="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                   <div class="flex items-center gap-3 px-4 py-3 border-b border-border">
-                    <img src="/Yohannes Abayneh.png" alt="Profile" class="w-9 h-9 rounded-full object-cover shrink-0" />
+                    {#if authStore.user?.avatar}
+                      <img src={authStore.user.avatar} alt={authStore.user.name} class="w-9 h-9 rounded-full object-cover shrink-0" />
+                    {:else}
+                      <span class="w-9 h-9 rounded-full bg-info flex items-center justify-center text-xs font-bold text-info-foreground shrink-0">
+                        {authStore.user?.name?.charAt(0).toUpperCase()}
+                      </span>
+                    {/if}
                     <div>
-                      <p class="text-sm font-semibold text-foreground">Yohannes Abayneh</p>
+                      <p class="text-xs font-semibold text-foreground">{authStore.user?.name}</p>
                       <a href="/dashboard/profile" class="text-xs text-info hover:underline" onclick={() => (showProfileDropdown = false)}>
                         {$_('viewProfile')}
                       </a>
@@ -211,10 +235,14 @@
                     </span>
                     <Icon iconName="icon/chevron-right" size={14} class="text-muted-foreground" />
                   </a>
-                  <a href="/" class="flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors">
+                  <button
+                    type="button"
+                    class="w-full flex items-center gap-2 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors"
+                    onclick={() => { authStore.logout(); goto("/"); }}
+                  >
                     <Icon iconName="icon/log-out" size={16} />
                     {$_('logout')}
-                  </a>
+                  </button>
                 </div>
               {/if}
             </div>

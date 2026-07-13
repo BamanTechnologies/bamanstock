@@ -1,4 +1,5 @@
 {
+  "signIn": "በመለያ ግባ",
   "goToDashboard": "ወደ ዳሽቦርድ ሂድ",
   "pageTitle": "የታመኑ ነጋዴዎችን ያግኙ እና ይስሩ",
   "pageSubtitle": "የተመዘገቡ ነጋዴዎችን ያስሱ ወይም አዳዲስ ሰዎችን ጋብዘው የዕቃ ክምችትና ሽያጭ አብረው ያስተዳድሩ።",
@@ -168,5 +169,6 @@
   "thisMonth": "ይህ ወር",
   "thisYear": "ይህ ዓመት",
   "custom": "ብጁ",
-  "selectPeriod": "ጊዜ ይምረጡ"
+  "selectPeriod": "ጊዜ ይምረጡ",
+  "sessionExpired": "የእርስዎ ክፍለ ጊዜ አልቋል። እባክዎ እንደገና ይግቡ።"
 }

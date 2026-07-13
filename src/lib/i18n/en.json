@@ -1,4 +1,5 @@
 {
+  "signIn": "Sign In",
   "goToDashboard": "Go to Dashboard",
   "pageTitle": "Find & Work With Trusted Merchants",
   "pageSubtitle": "Browse registered merchants or invite new ones to manage stock and sales together.",
@@ -168,5 +169,6 @@
   "thisMonth": "This Month",
   "thisYear": "This Year",
   "custom": "Custom",
-  "selectPeriod": "Select period"
+  "selectPeriod": "Select period",
+  "sessionExpired": "Your session has expired. Please sign in again."
 }

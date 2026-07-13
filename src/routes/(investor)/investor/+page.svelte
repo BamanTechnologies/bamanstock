@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    Header,
     SearchBar,
     FilterDropdown,
     MerchantCard,
@@ -10,6 +9,8 @@
   } from "$lib/components/investor/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { _ } from "svelte-i18n";
+  import { authStore } from "$lib/stores/auth.svelte.js";
+  import { goto } from "$app/navigation";
 
   let searchQuery = $state("");
   let locationFilter = $state("");
@@ -142,7 +143,16 @@
     })
   );
 
+  function requireAuth() {
+    if (!authStore.isAuthenticated) {
+      goto("/onboarding/signin");
+      return false;
+    }
+    return true;
+  }
+
   function handleHire(merchantId: number) {
+    if (!requireAuth()) return;
     const merchant = mockMerchants.find((m) => m.id === merchantId);
     if (merchant) {
       selectedMerchant = merchant;
@@ -151,6 +161,7 @@
   }
 
   function handleInvite() {
+    if (!requireAuth()) return;
     selectedMerchant = mockMerchants[0];
     isModalOpen = true;
   }
@@ -181,8 +192,6 @@
 </script>
 
 <div class="min-h-screen bg-background">
-  <Header />
-
   <main class="container mx-auto px-5 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
       <h1

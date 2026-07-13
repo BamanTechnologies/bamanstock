@@ -234,20 +234,21 @@
 
   <!-- Pagination -->
   {#if pagination}
-    <div class="px-4 py-3 border-t border-border flex items-center justify-between">
-      <div class="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>Row Per Page</span>
+    <div class="p-4 border-t border-border flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-muted-foreground">Row Per Page</span>
         <select
-          class="px-2 py-1 border border-border rounded-md bg-background text-foreground text-sm focus:outline-none"
+          class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
           value={pagination.rowsPerPage}
-          onchange={(e) => pagination.onRowsPerPageChange(Number(e.currentTarget.value))}
+          onchange={(e) =>
+            pagination.onRowsPerPageChange(Number(e.currentTarget.value))}
         >
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
         </select>
-        <span>Entries</span>
+        <span class="text-sm text-muted-foreground">Entries</span>
       </div>
       <div class="flex items-center gap-1">
         <button
