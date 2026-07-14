@@ -105,6 +105,7 @@ const icon = {
 	'icon/moon': () => import('@lucide/svelte/icons/moon'),
 	'icon/monitor': () => import('@lucide/svelte/icons/monitor'),
 	'icon/languages': () => import('@lucide/svelte/icons/languages'),
+	'icon/globe': () => import('@lucide/svelte/icons/globe'),
 	'icon/more-vertical': () => import('@lucide/svelte/icons/more-vertical'),
 	'icon/printer': () => import('@lucide/svelte/icons/printer'),
 	'icon/laptop': () => import('@lucide/svelte/icons/laptop'),

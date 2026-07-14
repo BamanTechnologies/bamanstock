@@ -59,6 +59,8 @@
   "navStock": "ክምችት",
   "navReport": "ሪፖርት",
   "navSettings": "ቅንብሮች",
+  "lightMode": "ብርሃን ሁነታ",
+  "darkMode": "ጨለማ ሁነታ",
   "logout": "ውጣ",
   "pageDashboard": "ዳሽቦርድ",
   "pageMerchants": "ነጋዴዎች",
@@ -170,5 +172,6 @@
   "thisYear": "ይህ ዓመት",
   "custom": "ብጁ",
   "selectPeriod": "ጊዜ ይምረጡ",
-  "sessionExpired": "የእርስዎ ክፍለ ጊዜ አልቋል። እባክዎ እንደገና ይግቡ።"
+  "sessionExpired": "የእርስዎ ክፍለ ጊዜ አልቋል። እባክዎ እንደገና ይግቡ።",
+  "somethingWentWrong": "የሆነ ችግር ተፈጥሯል"
 }

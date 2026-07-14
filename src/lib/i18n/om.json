@@ -59,6 +59,8 @@
   "navStock": "Kuusaa",
   "navReport": "Gabaasa",
   "navSettings": "Qindaa'ina",
+  "lightMode": "Haala Ifa",
+  "darkMode": "Haala Dukkana",
   "logout": "Ba'i",
   "pageDashboard": "Gabatee Bulchiinsaa",
   "pageMerchants": "Daldaltota",
@@ -170,5 +172,6 @@
   "thisYear": "Waggaa Kana",
   "custom": "Filannoowwan",
   "selectPeriod": "Yeroo Filadhu",
-  "sessionExpired": "Seessaa kee kan dhumateera. Mee ashiin deebi'ii seeni."
+  "sessionExpired": "Seessaa kee kan dhumateera. Mee ashiin deebi'ii seeni.",
+  "somethingWentWrong": "Wanta tokko dogoggoraa"
 }

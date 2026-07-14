@@ -2,14 +2,6 @@
   import "../../app.css";
   import {
     Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
     SidebarProvider,
     SidebarInset,
     SidebarTrigger,
@@ -79,55 +71,83 @@
   <SharedHeader />
 {/if}
 
-<SidebarProvider>
+<SidebarProvider style="--sidebar-width: 260px">
   <div class="flex min-h-screen w-full">
     {#if !isInvestorPage}
       <Sidebar>
-        <SidebarHeader>
-          <a href="/" class="flex items-center px-2 py-1 hover:opacity-90 transition-opacity">
-            <img src="/bamanstock logo 1.png" alt="BAMANSTOCK" class="w-auto object-contain" style="height: 90px;" />
+        <div class="mb-6 flex mx-auto shrink-0 items-center justify-between gap-2 px-1">
+          <a href="/" class="flex items-center" aria-label="Go to homepage">
+            <img src="/logonew.png" alt="Bamanstock" class="h-14 w-auto max-w-full object-cover md:h-20" />
           </a>
-        </SidebarHeader>
+        </div>
 
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu class="gap-2">
-                {#each navigation as item}
-                  <SidebarMenuItem>
-                    <a href={item.href} class="block">
-                      <SidebarMenuButton
-                        isActive={$page.url.pathname === item.href ||
-                          ($page.url.pathname.startsWith("/dashboard/merchants") &&
-                            item.href === "/dashboard/merchants")}
-                      >
-                        <Icon iconName={item.icon as any} size={20} />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </a>
-                  </SidebarMenuItem>
-                {/each}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+        <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain">
+          {#each navigation as item}
+            {@const active = $page.url.pathname === item.href || ($page.url.pathname.startsWith("/dashboard/merchants") && item.href === "/dashboard/merchants")}
+            <a
+              href={item.href}
+              class="relative flex items-center gap-3 rounded-r-lg py-2.5 pl-4 pr-3 text-sm font-medium transition
+                {active
+                  ? 'bg-[#F0F7FF] font-semibold text-[#4DA0E6] dark:bg-[#4DA0E6]/15'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white'}"
+            >
+              {#if active}
+                <span class="absolute bottom-2 left-0 top-2 w-0.5 rounded-full bg-[#4DA0E6]" aria-hidden="true"></span>
+              {/if}
+              <Icon iconName={item.icon as any} size={20} class={active ? "text-[#4DA0E6]" : "text-gray-500 dark:text-gray-400"} />
+              {item.title}
+            </a>
+          {/each}
+        </nav>
 
-        <SidebarFooter>
-          <SidebarMenu>
-                <SidebarMenuItem>
+        <div class="mt-auto flex flex-col gap-1 border-t border-gray-100 pt-4 dark:border-white/10">
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
+            onclick={toggleTheme}
+            aria-pressed={themeStore.current === 'Dark'}
+          >
+            {#if themeStore.current === 'Dark'}
+              <Icon iconName="icon/sun" size={20} class="text-[#4DA0E6]" />
+              {$_('lightMode')}
+            {:else}
+              <Icon iconName="icon/moon" size={20} class="text-gray-500" />
+              {$_('darkMode')}
+            {/if}
+          </button>
+          <div class="relative">
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
+              onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; showNotifications = false; }}
+              aria-label="Switch language"
+            >
+              <Icon iconName="icon/globe" size={20} class="text-gray-500 dark:text-gray-400" />
+              {localeAbbr($locale)}
+            </button>
+            {#if showLanguageDropdown}
+              <div class="absolute bottom-full left-0 mb-2 w-44 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-white/10 dark:bg-[#0f172a] z-50 overflow-hidden">
+                {#each langOptions as opt}
                   <button
                     type="button"
-                    class="w-full block"
-                    onclick={() => { authStore.logout(); goto("/"); }}
+                    class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-white/5 {$locale === opt.value ? 'text-[#4DA0E6] font-medium' : 'text-gray-700 dark:text-gray-300'}"
+                    onclick={() => { setLocale(opt.value); showLanguageDropdown = false; }}
                   >
-                    <SidebarMenuButton class="text-red-500 hover:text-red-600 hover:cursor-pointer">
-                      <Icon iconName="icon/log-out" size={20} class="text-red-500" />
-                      <span>{$_('logout')}</span>
-                    </SidebarMenuButton>
+                    <span class="mr-2 font-mono text-xs text-gray-400">{opt.abbr}</span>{opt.label}
                   </button>
-                </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
+                {/each}
+              </div>
+            {/if}
+          </div>
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#D15B7A] transition hover:bg-red-50 dark:hover:bg-red-500/10"
+            onclick={() => { authStore.logout(); goto("/"); }}
+          >
+            <Icon iconName="icon/log-out" size={20} />
+            {$_('logout')}
+          </button>
+        </div>
       </Sidebar>
     {/if}
 
@@ -158,41 +178,6 @@
                     <Icon iconName="icon/bell" size={32} class="text-muted-foreground/40" />
                     <p class="text-sm text-muted-foreground">{$_('noNotificationsMsg')}</p>
                   </div>
-                </div>
-              {/if}
-            </div>
-            <button
-              type="button"
-              onclick={toggleTheme}
-              aria-label="Toggle theme"
-              class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-            >
-              {#if themeStore.current === 'Dark'}
-                <Icon iconName="icon/sun" size={18} />
-              {:else}
-                <Icon iconName="icon/moon" size={18} />
-              {/if}
-            </button>
-
-            <div class="relative">
-              <button
-                type="button"
-                onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; showNotifications = false; }}
-                class="w-7 h-7 rounded-full border border-border flex items-center justify-center text-[10px] font-semibold cursor-pointer bg-background hover:bg-muted transition-colors text-foreground"
-              >
-                {localeAbbr($locale)}
-              </button>
-              {#if showLanguageDropdown}
-                <div class="absolute right-0 top-full mt-2 w-40 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
-                  {#each langOptions as opt}
-                    <button
-                      type="button"
-                      class="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-muted {$locale === opt.value ? 'text-[#4DA0E6] font-medium' : 'text-foreground'}"
-                      onclick={() => { setLocale(opt.value); showLanguageDropdown = false; }}
-                    >
-                      <span class="text-xs font-mono text-muted-foreground mr-2">{opt.abbr}</span>{opt.label}
-                    </button>
-                  {/each}
                 </div>
               {/if}
             </div>

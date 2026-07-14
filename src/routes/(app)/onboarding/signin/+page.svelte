@@ -68,7 +68,7 @@
         }
         toast.success("Login successful");
         authStore.loginWithToken(data.token);
-        goto("/dashboard");
+        goto("/");
       } else if (data?.message) {
         toast.error(data.message);
       } else {

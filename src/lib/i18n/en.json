@@ -17,7 +17,7 @@
   "statusActive": "Active",
   "statusDeclined": "Declined",
   "statusInvited": "Invited",
-  "productSold": "Product Sold",
+  "productSold": "Orders Sold",
   "hire": "Hire",
   "welcome": "Welcome",
   "totalRevenue": "Total Revenue",
@@ -59,6 +59,8 @@
   "navStock": "Stock",
   "navReport": "Report",
   "navSettings": "Settings",
+  "lightMode": "Light mode",
+  "darkMode": "Dark mode",
   "logout": "Logout",
   "pageDashboard": "Dashboard",
   "pageMerchants": "Merchants",
@@ -170,5 +172,6 @@
   "thisYear": "This Year",
   "custom": "Custom",
   "selectPeriod": "Select period",
-  "sessionExpired": "Your session has expired. Please sign in again."
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "somethingWentWrong": "Something went wrong"
 }
