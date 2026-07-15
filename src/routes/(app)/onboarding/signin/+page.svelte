@@ -215,7 +215,7 @@
   });
 </script>
 
-<div class="min-h-screen bg-white flex items-center justify-center p-4">
+<div class="min-h-screen bg-background flex items-center justify-center p-4">
   <div
     class="w-full max-w-6xl flex flex-col lg:flex-row rounded-2xl overflow-hidden"
   >
@@ -301,7 +301,7 @@
     </div>
 
     <div
-      class="w-full lg:w-1/2 bg-white flex items-center justify-center p-8 lg:p-16"
+      class="w-full lg:w-1/2 bg-background flex items-center justify-center p-8 lg:p-16"
     >
       <div class="w-full max-w-md space-y-8">
         <div class="space-y-2 text-center lg:text-left">
