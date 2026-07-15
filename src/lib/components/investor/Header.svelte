@@ -35,6 +35,13 @@
       <Logo />
 
       <div class="flex items-center gap-4">
+        <a
+          href="/onboarding/signin"
+          class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {$_('signIn')}
+        </a>
+
         <button
           type="button"
           class="px-4 py-2 text-white font-bold text-sm rounded-md transition-colors flex items-center justify-center min-w-40 h-10 hover:opacity-90 bg-(--primary-blue)"

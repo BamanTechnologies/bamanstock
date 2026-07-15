@@ -1,11 +1,8 @@
 <script lang="ts">
   import "../../app.css";
-  import Navbar from "$lib/components/ui/navbar/index.js";
-  import { page } from "$app/stores";
+  import Header from "$lib/components/Header.svelte";
 
   let { children } = $props();
-
-  const showNavbar = $derived($page.url.pathname !== '/');
 </script>
 
 <svelte:head>
@@ -22,7 +19,5 @@
   />
 </svelte:head>
 
-{#if showNavbar}
-  <Navbar />
-{/if}
+<Header />
 {@render children()}

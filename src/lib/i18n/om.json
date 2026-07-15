@@ -1,4 +1,5 @@
 {
+  "signIn": "Seeni",
   "goToDashboard": "Gara Dashboard Deemi",
   "pageTitle": "Daldaltota Amanamoo Barbaadaa fi Waliin Hojjadha",
   "pageSubtitle": "Daldaltota galmooftee ilaalaa yookiin haaraa affeeraa kuusaa fi gurgurtaa waliin bulchaa.",
@@ -58,6 +59,8 @@
   "navStock": "Kuusaa",
   "navReport": "Gabaasa",
   "navSettings": "Qindaa'ina",
+  "lightMode": "Haala Ifa",
+  "darkMode": "Haala Dukkana",
   "logout": "Ba'i",
   "pageDashboard": "Gabatee Bulchiinsaa",
   "pageMerchants": "Daldaltota",
@@ -168,5 +171,7 @@
   "thisMonth": "Ji'a Kana",
   "thisYear": "Waggaa Kana",
   "custom": "Filannoowwan",
-  "selectPeriod": "Yeroo Filadhu"
+  "selectPeriod": "Yeroo Filadhu",
+  "sessionExpired": "Seessaa kee kan dhumateera. Mee ashiin deebi'ii seeni.",
+  "somethingWentWrong": "Wanta tokko dogoggoraa"
 }
