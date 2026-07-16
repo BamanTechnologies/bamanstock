@@ -4,13 +4,40 @@ import { HttpLink } from '@apollo/client/link/http';
 import { onError } from '@apollo/client/link/error';
 import { CombinedGraphQLErrors, ServerError } from '@apollo/client/errors';
 import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
 import { PUBLIC_HASURA_URL } from '$env/static/public';
+import { authStore } from '$lib/stores/auth.svelte.js';
 
 const HASURA_URL = browser ? (PUBLIC_HASURA_URL || 'http://localhost:8080/v1/graphql') : '';
 
 function errorLink() {
   return onError(({ error }) => {
     if (CombinedGraphQLErrors.is(error)) {
+      for (const err of error.errors) {
+        console.error(`[GraphQL]: ${err.message}`);
+      }
+    } else if (ServerError.is(error)) {
+      console.error(`[Network ${error.statusCode}]: ${error.message}`);
+    } else {
+      console.error(`[Error]: ${error.message}`);
+    }
+  });
+}
+
+function authErrorLink() {
+  return onError(({ error }) => {
+    if (CombinedGraphQLErrors.is(error)) {
+      const isJwtExpired = error.errors?.some(
+        (err) => err.extensions?.code === 'invalid-jwt'
+      );
+      if (isJwtExpired) {
+        authStore.logout();
+        resetClients();
+        if (browser) {
+          goto('/onboarding/signin');
+        }
+        return;
+      }
       for (const err of error.errors) {
         console.error(`[GraphQL]: ${err.message}`);
       }
@@ -34,7 +61,7 @@ function authLink(token: string, role?: string) {
     if (role) headers['x-hasura-role'] = role;
     return { headers };
   });
-  return from([errorLink(), auth, http]);
+  return from([authErrorLink(), auth, http]);
 }
 
 function getToken(): string | null {

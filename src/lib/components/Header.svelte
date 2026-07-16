@@ -90,11 +90,11 @@
               {/if}
             </button>
             {#if showUserDropdown}
-              <div class="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden" onblur={() => (showUserDropdown = false)}>
+              <div class="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                 <button
                   type="button"
                   class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
-                  onclick={() => { showUserDropdown = false; goto("/dashboard"); }}
+                  onmousedown={() => { showUserDropdown = false; goto("/dashboard"); }}
                 >
                   {$_('goToDashboard')}
                 </button>
@@ -102,7 +102,7 @@
                 <button
                   type="button"
                   class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-muted transition-colors cursor-pointer"
-                  onclick={() => { showUserDropdown = false; authStore.logout(); goto("/"); }}
+                  onmousedown={() => { showUserDropdown = false; authStore.logout(); goto("/"); }}
                 >
                   {$_('logout')}
                 </button>

@@ -1,0 +1,6 @@
+query getProducts($limit: Int, $offset: Int, $filter: products_bool_exp) {
+  products(limit: $limit, offset: $offset, where: $filter) {
+    id
+    name
+  }
+}

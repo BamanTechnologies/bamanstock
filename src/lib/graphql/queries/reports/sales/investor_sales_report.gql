@@ -1,0 +1,79 @@
+query investorSalesReport(
+  $limit: Int
+  $offset: Int
+  $filter: orders_bool_exp!
+  $order: [orders_order_by!]!
+) {
+  orders(
+    limit: $limit
+    offset: $offset
+    where: { _and: [{ status: { _neq: "cancelled" } }, $filter] }
+    order_by: $order
+  ) {
+    created_at
+    customer_address
+    customer_name
+    customer_phone
+    id
+    order_quantity
+    status
+    stock_id
+    total_amount
+    outstanding_amount
+    unit
+    merchant {
+      id
+      first_name
+      last_name
+      phone_number
+      branch: branchByBranch {
+        id
+        name
+      }
+    }
+    order_items(order_by: [{ created_at: asc }, { id: asc }]) {
+      stock_id
+      product_id
+      quantity
+      unit
+      line_total
+      unit_price
+      factor_snapshot
+      product {
+        id
+        name
+        default_unit
+        factor
+        attributes
+        product_type {
+          id
+          name
+        }
+      }
+      order_item_batches {
+        stock_id
+        quantity
+        unit_price
+        line_total
+        stock {
+          batch_number
+          selling_price
+        }
+      }
+      stock {
+        unit
+        type
+        product_type
+        model_number
+        country
+      }
+    }
+  }
+  total: orders_aggregate(
+    where: { _and: [{ status: { _neq: "cancelled" } }, $filter] }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
