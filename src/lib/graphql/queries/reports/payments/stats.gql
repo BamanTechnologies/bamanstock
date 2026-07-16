@@ -1,0 +1,30 @@
+query GetPaymentStats {
+  total_payment: payment_aggregate {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+  total_payed: payment_aggregate(
+    where: { order: { status: { _eq: "paid" } } }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+  total_overdue: orders_aggregate {
+    aggregate {
+      sum {
+        outstanding_amount
+      }
+    }
+  }
+  completed_orderes: orders_aggregate(where: { status: { _eq: "paid" } }) {
+    aggregate {
+      count
+    }
+  }
+}

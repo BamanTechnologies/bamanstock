@@ -129,140 +129,206 @@
 
   let revenueDateRange = $state("01-Jan-2025 - 12-Dec-2025");
 
-  // Payments tab data
-  const paymentsKpiCards = $derived([
-    { label: $_('totalAmount'), value: "$4,56,000", icon: "icon/bar-chart"      as any, iconBgClass: "bg-green-50  dark:bg-green-900/40",  iconColor: "#16a34a" },
-    { label: $_('totalPaid'),   value: "$2,56,42",  icon: "icon/credit-card"    as any, iconBgClass: "bg-blue-50   dark:bg-blue-900/40",   iconColor: "#3b82f6" },
-    { label: $_('totalUnpaid'), value: "$1,52,45",  icon: "icon/dollar-sign"    as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316" },
-    { label: $_('overdue'),     value: "$2,56,12",  icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50    dark:bg-red-900/40",    iconColor: "#ef4444" },
-  ]);
+  // === Payments Tab: Queries and Stats ===
+  import PAYMENTS_QUERY from "$graphql/queries/reports/payments/payments.gql";
+  import PAYMENT_STATS_QUERY from "$graphql/queries/reports/payments/stats.gql";
 
-  // Mock payments report data
-  let paymentsReportData = $state([
-    { id: "INV001", merchant: "Carl Evans",       dueDate: "24 Dec 2024", amount: "$500",  paid: "$500",  amountDue: "$500",  status: "Paid",   branch: "Branch #1" },
-    { id: "INV002", merchant: "Minerva Rameriz",  dueDate: "10 Dec 2024", amount: "$1500", paid: "$1500", amountDue: "$1500", status: "Paid",   branch: "Branch #2" },
-    { id: "INV003", merchant: "Robert Lamon",     dueDate: "27 Nov 2024", amount: "$600",  paid: "$600",  amountDue: "$600",  status: "Paid",   branch: "Branch #3" },
-    { id: "INV004", merchant: "Patricia Lewis",   dueDate: "18 Nov 2024", amount: "$1000", paid: "$1000", amountDue: "$1000", status: "Paid",   branch: "Branch #1" },
-    { id: "INV005", merchant: "Mark Joslyn",      dueDate: "06 Nov 2024", amount: "$1200", paid: "$1200", amountDue: "$1200", status: "Paid",   branch: "Branch #4" },
-    { id: "INV006", merchant: "Marsha Betts",     dueDate: "25 Oct 2024", amount: "$800",  paid: "$800",  amountDue: "$800",  status: "Paid",   branch: "Branch #2" },
-    { id: "INV007", merchant: "Daniel Jude",      dueDate: "14 Oct 2024", amount: "$2000", paid: "$2000", amountDue: "$2000", status: "Paid",   branch: "Branch #5" },
-    { id: "INV008", merchant: "Emma Bates",       dueDate: "03 Oct 2024", amount: "$100",  paid: "$100",  amountDue: "$100",  status: "Paid",   branch: "Branch #3" },
-    { id: "INV009", merchant: "Richard Fralick",  dueDate: "20 Sep 2024", amount: "$300",  paid: "$300",  amountDue: "$300",  status: "Paid",   branch: "Branch #1" },
-    { id: "INV010", merchant: "Michelle Robison", dueDate: "10 Sep 2024", amount: "$5000", paid: "$0",    amountDue: "$5000", status: "Unpaid", branch: "Branch #2" },
-    { id: "INV011", merchant: "John Smith",    dueDate: "05 Jan 2025", amount: "$750",  paid: "$750", amountDue: "$750",  status: "Paid",   branch: "Branch #4" },
-    { id: "INV012", merchant: "Sarah Johnson",    dueDate: "15 Jan 2025", amount: "$1200", paid: "$0",    amountDue: "$1200", status: "Unpaid", branch: "Branch #3" },
-    { id: "INV013", merchant: "Daniel Park",      dueDate: "20 Jan 2025", amount: "$890",  paid: "$890",  amountDue: "$890",  status: "Paid",   branch: "Branch #4" },
-    { id: "INV014", merchant: "Fatima Hassan",    dueDate: "25 Jan 2025", amount: "$2300", paid: "$0",    amountDue: "$2300", status: "Unpaid", branch: "Branch #5" },
-    { id: "INV015", merchant: "Lucas Ferreira",   dueDate: "30 Jan 2025", amount: "$650",  paid: "$650",  amountDue: "$650",  status: "Paid",   branch: "Branch #1" },
-    { id: "INV016", merchant: "Nina Patel",        dueDate: "05 Feb 2025", amount: "$4200", paid: "$4200", amountDue: "$4200", status: "Paid",   branch: "Branch #2" },
-    { id: "INV017", merchant: "Kwame Asante",     dueDate: "10 Feb 2025", amount: "$780",  paid: "$0",    amountDue: "$780",  status: "Unpaid", branch: "Branch #3" },
-    { id: "INV018", merchant: "Priya Sharma",     dueDate: "14 Feb 2025", amount: "$1100", paid: "$1100", amountDue: "$1100", status: "Paid",   branch: "Branch #4" },
-    { id: "INV019", merchant: "Thomas Green",     dueDate: "18 Feb 2025", amount: "$3400", paid: "$0",    amountDue: "$3400", status: "Unpaid", branch: "Branch #5" },
-    { id: "INV020", merchant: "Amara Obi",        dueDate: "22 Feb 2025", amount: "$560",  paid: "$560",  amountDue: "$560",  status: "Paid",   branch: "Branch #1" },
-    { id: "INV021", merchant: "Lena Müller",      dueDate: "28 Feb 2025", amount: "$920",  paid: "$920",  amountDue: "$920",  status: "Paid",   branch: "Branch #2" },
-    { id: "INV022", merchant: "Ravi Kumar",        dueDate: "05 Mar 2025", amount: "$1650", paid: "$0",    amountDue: "$1650", status: "Unpaid", branch: "Branch #3" },
-    { id: "INV023", merchant: "Marcus Davis",     dueDate: "10 Mar 2025", amount: "$430",  paid: "$430",  amountDue: "$430",  status: "Paid",   branch: "Branch #4" },
-    { id: "INV024", merchant: "Emma Collins",     dueDate: "15 Mar 2025", amount: "$2800", paid: "$2800", amountDue: "$2800", status: "Paid",   branch: "Branch #5" },
-    { id: "INV025", merchant: "James Morgan",     dueDate: "20 Mar 2025", amount: "$710",  paid: "$0",    amountDue: "$710",  status: "Unpaid", branch: "Branch #1" },
-    { id: "INV026", merchant: "Olivia Chen",      dueDate: "25 Mar 2025", amount: "$1980", paid: "$1980", amountDue: "$1980", status: "Paid",   branch: "Branch #2" },
-    { id: "INV027", merchant: "Beth Noah",        dueDate: "01 Apr 2025", amount: "$340",  paid: "$0",    amountDue: "$340",  status: "Unpaid", branch: "Branch #3" },
-    { id: "INV028", merchant: "Yohannes Abayneh", dueDate: "08 Apr 2025", amount: "$6100", paid: "$6100", amountDue: "$6100", status: "Paid",   branch: "Branch #4" },
-    { id: "INV029", merchant: "Carlos Curran",    dueDate: "15 Apr 2025", amount: "$870",  paid: "$0",    amountDue: "$870",  status: "Unpaid", branch: "Branch #5" },
-    { id: "INV030", merchant: "Stan Gaunter",     dueDate: "22 Apr 2025", amount: "$1450", paid: "$1450", amountDue: "$1450", status: "Paid",   branch: "Branch #1" },
-  ]);
+  let paymentStatsData = $state<Record<string, any> | null>(null);
+  let paymentStatsLoading = $state(true);
 
-  let paymentsDateRange = $state("01-Jan-2025 - 12-Dec-2025");
-  let paymentsPage = $state(1);
-  let paymentsRowsPerPage = $state(10);
-
-  // Payments table columns
-  const paymentsColumns = $derived([
-    {
-      key: "id",
-      label: $_('invoiceId'),
-      sortable: true,
-    },
-    {
-      key: "merchant",
-      label: $_('merchant'),
-      sortable: true,
-      render: (row: (typeof paymentsReportData)[0]) => {
-        return `
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-              <svg class="w-4 h-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <span class="text-sm font-medium text-foreground">${row.merchant}</span>
-          </div>
-        `;
-      },
-    },
-    {
-      key: "dueDate",
-      label: $_('dueDate'),
-      sortable: true,
-    },
-    {
-      key: "amount",
-      label: $_('amount'),
-      sortable: true,
-    },
-    {
-      key: "paid",
-      label: $_('paid'),
-      sortable: true,
-    },
-    {
-      key: "amountDue",
-      label: $_('amountDue'),
-      sortable: true,
-    },
-    {
-      key: "status",
-      label: $_('filterStatus'),
-      sortable: true,
-      render: (row: (typeof paymentsReportData)[0]) => {
-        const isPaid = row.status === "Paid";
-        return `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            isPaid ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
-          }">
-            <span class="w-1.5 h-1.5 rounded-full ${
-              isPaid ? "bg-green-600" : "bg-red-600"
-            }"></span>
-            ${row.status}
-          </span>
-        `;
-      },
-    },
-  ]);
-
-  let paymentsStatusFilter = $state("");
-  let paymentsMerchantFilter = $state("");
-  let paymentsBranchFilter = $state("");
-
-  const filteredPaymentsData = $derived(
-    paymentsReportData.filter((row) => {
-      const matchesStatus = !paymentsStatusFilter || row.status.toLowerCase() === paymentsStatusFilter;
-      const matchesMerchant = !paymentsMerchantFilter || row.merchant.toLowerCase().includes(paymentsMerchantFilter);
-      const matchesBranch = !paymentsBranchFilter || (row as any).branch === paymentsBranchFilter;
-      return matchesStatus && matchesMerchant && matchesBranch;
-    })
-  );
-
-  const paymentsTotalPages = $derived(Math.ceil(filteredPaymentsData.length / paymentsRowsPerPage));
-
-  $effect(() => { paymentsStatusFilter; paymentsMerchantFilter; paymentsBranchFilter; paymentsPage = 1; });
-
-  function handlePaymentsPageChange(page: number) {
-    paymentsPage = page;
+  async function loadPaymentStats() {
+    paymentStatsLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      const result = await client.query({
+        query: PAYMENT_STATS_QUERY,
+      });
+      paymentStatsData = result.data as Record<string, any>;
+    } catch {
+      paymentStatsData = null;
+    } finally {
+      paymentStatsLoading = false;
+    }
   }
 
-  function handlePaymentsRowsPerPageChange(rows: number) {
-    paymentsRowsPerPage = rows;
-    paymentsPage = 1;
+  $effect(() => {
+    void activeTab;
+    if (activeTab !== "Payments") return;
+    loadPaymentStats();
+  });
+
+  const paymentsKpiCards = $derived.by(() => {
+    if (!paymentStatsData) return [];
+    const s = paymentStatsData;
+    const totalAmount = parseMoney(s.total_payment?.aggregate?.sum?.amount);
+    const totalPaid = parseMoney(s.total_payed?.aggregate?.sum?.amount);
+    return [
+      { label: $_('totalAmount'), value: fmtCurrency(totalAmount), icon: "icon/bar-chart" as any, iconBgClass: "bg-green-50 dark:bg-green-900/40", iconColor: "#16a34a" },
+      { label: $_('totalPaid'), value: fmtCurrency(totalPaid), icon: "icon/credit-card" as any, iconBgClass: "bg-blue-50 dark:bg-blue-900/40", iconColor: "#3b82f6" },
+      { label: $_('totalUnpaid'), value: fmtCurrency(totalAmount - totalPaid), icon: "icon/dollar-sign" as any, iconBgClass: "bg-orange-50 dark:bg-orange-900/40", iconColor: "#f97316" },
+      { label: $_('overdue'), value: fmtCurrency(parseMoney(s.total_overdue?.aggregate?.sum?.outstanding_amount)), icon: "icon/alert-triangle" as any, iconBgClass: "bg-red-50 dark:bg-red-900/40", iconColor: "#ef4444" },
+    ];
+  });
+
+  // === Payments Tab: Filters from URL ===
+  let paymentsDateFrom = $state($page.url.searchParams.get("dateFrom") ?? "");
+  let paymentsDateTo = $state($page.url.searchParams.get("dateTo") ?? "");
+  let paymentsLocationId = $state($page.url.searchParams.get("location") ?? "");
+  let paymentsMerchantId = $state($page.url.searchParams.get("merchant") ?? "");
+
+  // === Payments Tab: Table ===
+  let paymentsSearchQuery = $state($page.url.searchParams.get("search") ?? "");
+  let paymentsCurrentPage = $state(Number($page.url.searchParams.get("page")) || 1);
+  let paymentsRowsPerPage = $state(Number($page.url.searchParams.get("limit")) || 10);
+  let paymentsSortColumn = $state($page.url.searchParams.get("sort") || "created_at");
+  let paymentsSortDirection = $state<"asc" | "desc">(
+    ($page.url.searchParams.get("dir") as "asc" | "desc") || "desc"
+  );
+
+  let paymentsData = $state<any[]>([]);
+  let paymentsTotalCount = $state(0);
+  let paymentsLoading = $state(false);
+
+  let paymentsDebouncedSearch = $state(paymentsSearchQuery);
+  let paymentsDebounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(paymentsDebounceTimer);
+    if (paymentsSearchQuery === paymentsDebouncedSearch) return;
+    paymentsDebounceTimer = setTimeout(() => {
+      paymentsDebouncedSearch = paymentsSearchQuery;
+      paymentsCurrentPage = 1;
+    }, 400);
+    return () => clearTimeout(paymentsDebounceTimer);
+  });
+
+  const paymentsTotalPages = $derived(Math.max(1, Math.ceil(paymentsTotalCount / paymentsRowsPerPage)));
+
+  function paymentsBuildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [];
+    if (paymentsDateFrom) {
+      conditions.push({ created_at: { _gte: paymentsDateFrom } });
+    }
+    if (paymentsDateTo) {
+      conditions.push({ created_at: { _lte: paymentsDateTo } });
+    }
+    if (paymentsLocationId) {
+      conditions.push({ order: { merchant: { branch: { _eq: paymentsLocationId } } } });
+    }
+    if (paymentsMerchantId) {
+      conditions.push({ order: { merchant: { id: { _eq: paymentsMerchantId } } } });
+    }
+    if (paymentsDebouncedSearch) {
+      conditions.push({
+        _or: [
+          { order: { merchant: { first_name: { _ilike: `%${paymentsDebouncedSearch}%` } } } },
+          { order: { merchant: { last_name: { _ilike: `%${paymentsDebouncedSearch}%` } } } },
+          { order: { customer: { first_name: { _ilike: `%${paymentsDebouncedSearch}%` } } } },
+          { order: { customer: { last_name: { _ilike: `%${paymentsDebouncedSearch}%` } } } },
+          { order: { stock: { product: { name: { _ilike: `%${paymentsDebouncedSearch}%` } } } } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
+  }
+
+  function paymentsBuildOrder(): Record<string, unknown>[] {
+    switch (paymentsSortColumn) {
+      case "merchant":
+        return [{ order: { merchant: { first_name: paymentsSortDirection } } }];
+      case "customer":
+        return [{ order: { customer: { first_name: paymentsSortDirection } } }];
+      case "product":
+        return [{ order: { stock: { product: { name: paymentsSortDirection } } } }];
+      case "amount":
+        return [{ amount: paymentsSortDirection }];
+      case "status":
+        return [{ order: { status: paymentsSortDirection } }];
+      case "created_at":
+        return [{ created_at: paymentsSortDirection }];
+      default:
+        return [{ created_at: paymentsSortDirection }];
+    }
+  }
+
+  function paymentsSyncUrl() {
+    const params = new URLSearchParams();
+    params.set("tab", "Payments");
+    if (paymentsDebouncedSearch) params.set("search", paymentsDebouncedSearch);
+    if (paymentsCurrentPage > 1) params.set("page", String(paymentsCurrentPage));
+    if (paymentsRowsPerPage !== 10) params.set("limit", String(paymentsRowsPerPage));
+    if (paymentsSortColumn !== "created_at") params.set("sort", paymentsSortColumn);
+    if (paymentsSortDirection !== "desc") params.set("dir", paymentsSortDirection);
+    if (paymentsDateFrom) params.set("dateFrom", paymentsDateFrom);
+    if (paymentsDateTo) params.set("dateTo", paymentsDateTo);
+    if (paymentsLocationId) params.set("location", paymentsLocationId);
+    if (paymentsMerchantId) params.set("merchant", paymentsMerchantId);
+    const qs = params.toString();
+    goto(qs ? `?${qs}` : $page.url.pathname, { replaceState: true, keepFocus: true, noScroll: true });
+  }
+
+  $effect(() => {
+    void activeTab;
+    void paymentsDebouncedSearch;
+    void paymentsCurrentPage;
+    void paymentsRowsPerPage;
+    void paymentsSortColumn;
+    void paymentsSortDirection;
+    void paymentsDateFrom;
+    void paymentsDateTo;
+    void paymentsLocationId;
+    void paymentsMerchantId;
+
+    if (activeTab !== "Payments") return;
+    paymentsLoading = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          payment: any[];
+          payment_aggregate: { aggregate: { count: number } };
+        }>({
+          query: PAYMENTS_QUERY,
+          variables: {
+            limit: paymentsRowsPerPage,
+            offset: (paymentsCurrentPage - 1) * paymentsRowsPerPage,
+            filter: paymentsBuildFilter(),
+            order: paymentsBuildOrder(),
+          },
+        });
+        paymentsData = result.data?.payment ?? [];
+        paymentsTotalCount = result.data?.payment_aggregate?.aggregate?.count ?? 0;
+        paymentsSyncUrl();
+      } catch {
+        paymentsData = [];
+        paymentsTotalCount = 0;
+      } finally {
+        paymentsLoading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function paymentsMerchantLabel(item: any): string {
+    if (!item?.order?.merchant) return "-";
+    return [item.order.merchant.first_name, item.order.merchant.last_name].filter(Boolean).join(" ");
+  }
+
+  function paymentsCustomerLabel(item: any): string {
+    if (!item?.order?.customer) return "-";
+    return [item.order.customer.first_name, item.order.customer.last_name].filter(Boolean).join(" ");
+  }
+
+  function paymentsHandleSort(column: string) {
+    if (paymentsSortColumn === column) {
+      paymentsSortDirection = paymentsSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      paymentsSortColumn = column;
+      paymentsSortDirection = "asc";
+    }
+    paymentsCurrentPage = 1;
   }
 
   // Stock Movement tab data
@@ -840,6 +906,16 @@
     const num = Number(val);
     if (isNaN(num)) return String(val);
     return `ETB ${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function parseMoney(val: unknown): number {
+    if (val == null) return 0;
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      const cleaned = val.replace(/[^0-9.\-]/g, '');
+      return parseFloat(cleaned) || 0;
+    }
+    return 0;
   }
 
   function pctChange(current: unknown, previous: unknown): { change: string; type: "positive" | "negative" } {
@@ -1581,105 +1657,254 @@
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {#each paymentsKpiCards as kpi}
-          <IconKpiCard
-            label={kpi.label}
-            value={kpi.value}
-            icon={kpi.icon}
-            iconBgClass={kpi.iconBgClass}
-            iconColor={kpi.iconColor}
-          />
-        {/each}
+        {#if paymentStatsLoading}
+          {#each [1,2,3,4] as _}
+            <div class="bg-card border border-border rounded-lg p-5 animate-pulse">
+              <div class="h-4 bg-muted rounded w-24 mb-3"></div>
+              <div class="h-8 bg-muted rounded w-32 mb-3"></div>
+              <div class="h-5 bg-muted rounded w-36"></div>
+            </div>
+          {/each}
+        {:else}
+          {#each paymentsKpiCards as kpi}
+            <IconKpiCard label={kpi.label} value={kpi.value} icon={kpi.icon} iconBgClass={kpi.iconBgClass} iconColor={kpi.iconColor} />
+          {/each}
+        {/if}
       </div>
 
       <!-- Filters Section -->
-      <ReportFilterBar
-        id="payments-date-range"
-        bind:dateRange={paymentsDateRange}
-        filters={[
-          { id: "payments-status-filter", label: $_('filterStatus'), options: [
-              { value: "",       label: $_('filterAll') },
-              { value: "paid",   label: $_('paid') },
-              { value: "unpaid", label: $_('unpaid') },
-            ], value: paymentsStatusFilter, onchange: (v) => { paymentsStatusFilter = v; } },
-          { id: "payments-merchant-filter", label: $_('merchant'), options: [
-              { value: "", label: $_('filterAll') },
-              { value: "carl", label: "Carl Evans" },
-              { value: "minerva", label: "Minerva Rameriz" },
-              { value: "robert", label: "Robert Lamon" },
-              { value: "john", label: "John Smith" },
-              { value: "sarah", label: "Sarah Johnson" },
-            ], value: paymentsMerchantFilter, onchange: (v) => { paymentsMerchantFilter = v; } },
-          { id: "payments-branch-filter", label: $_('filterBranch'), options: [
-              { value: "", label: $_('filterAll') },
-              { value: "Branch #1", label: "Branch #1" },
-              { value: "Branch #2", label: "Branch #2" },
-              { value: "Branch #3", label: "Branch #3" },
-              { value: "Branch #4", label: "Branch #4" },
-              { value: "Branch #5", label: "Branch #5" },
-            ], value: paymentsBranchFilter, onchange: (v) => { paymentsBranchFilter = v; } },
-        ]}
-      />
+      <div class="bg-card border border-border rounded-lg px-4 py-3">
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterFrom')}</label>
+            <input
+              type="date"
+              bind:value={paymentsDateFrom}
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterTo')}</label>
+            <input
+              type="date"
+              bind:value={paymentsDateTo}
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('merchant')}</label>
+            <SearchSelect
+              query={MERCHANT_QUERY}
+              dataKey="merchant"
+              filterBuilder={(s) => ({
+                _or: [
+                  { first_name: { _ilike: `%${s}%` } },
+                  { last_name: { _ilike: `%${s}%` } },
+                ]
+              })}
+              displayLabel={(item) => [item.first_name, item.last_name].filter(Boolean).join(" ")}
+              placeholder={$_('searchMerchant')}
+              initialValue={paymentsMerchantId}
+              onSelect={(item) => { paymentsMerchantId = item?.id ?? ""; paymentsCurrentPage = 1; }}
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('navLocation')}</label>
+            <SearchSelect
+              query={LOCATION_QUERY}
+              dataKey="branches"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder={$_('searchLocation')}
+              initialValue={paymentsLocationId}
+              onSelect={(item) => { paymentsLocationId = item?.id ?? ""; paymentsCurrentPage = 1; }}
+            />
+          </div>
+        </div>
+      </div>
 
       <!-- Payment Report Table -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex items-center justify-between mb-6">
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex items-center justify-between">
           <h3 class="text-lg font-semibold text-foreground">{$_('paymentReport')}</h3>
-          <div class="flex items-center gap-3">
-            <button
-              type="button"
-              class="p-2 hover:bg-muted rounded transition-colors"
-              aria-label="Export to PDF"
-              onclick={handleExportPDF}
-            >
+          <div class="flex items-center gap-2">
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="PDF" onclick={handleExportPDF}>
               <Icon iconName="icon/file-text" size={20} class="text-red-500" />
             </button>
-            <button
-              type="button"
-              class="p-2 hover:bg-muted rounded transition-colors"
-              aria-label="Export to XLS"
-              onclick={handleExportXLS}
-            >
-              <Icon
-                iconName="icon/file-text"
-                size={20}
-                class="text-green-500"
-              />
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="XLS" onclick={handleExportXLS}>
+              <Icon iconName="icon/file-text" size={20} class="text-green-500" />
             </button>
-            <button
-              type="button"
-              class="p-2 hover:bg-muted rounded transition-colors"
-              aria-label="Print"
-              onclick={handlePrint}
-            >
-              <Icon
-                iconName="icon/file-text"
-                size={20}
-                class="text-muted-foreground"
-              />
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="Print" onclick={handlePrint}>
+              <Icon iconName="icon/file-text" size={20} class="text-muted-foreground" />
             </button>
           </div>
         </div>
+        <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+          <div class="relative w-72 shrink-0">
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder={$_('search')}
+              class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={paymentsSearchQuery}
+            />
+          </div>
+        </div>
 
-        {#if true}
-          {@const paginatedPaymentsData = filteredPaymentsData.slice(
-            (paymentsPage - 1) * paymentsRowsPerPage,
-            paymentsPage * paymentsRowsPerPage,
-          )}
-          <DataTable
-            columns={paymentsColumns}
-            data={paginatedPaymentsData}
-            searchable={false}
-            filters={[]}
-            pagination={{
-              currentPage: paymentsPage,
-              totalPages: paymentsTotalPages,
-              rowsPerPage: paymentsRowsPerPage,
-              onPageChange: handlePaymentsPageChange,
-              onRowsPerPageChange: handlePaymentsRowsPerPageChange,
-            }}
-          />
+        {#if paymentsLoading}
+          <div class="h-1 bg-muted/30 w-full overflow-hidden">
+            <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+          </div>
         {/if}
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-muted/30 border-b border-border">
+              <tr class="text-left text-xs text-muted-foreground uppercase">
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => paymentsHandleSort("merchant")}>
+                    {$_('merchant')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={paymentsSortColumn === 'merchant' && paymentsSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={paymentsSortColumn === 'merchant' && paymentsSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => paymentsHandleSort("customer")}>
+                    {$_('customer')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={paymentsSortColumn === 'customer' && paymentsSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={paymentsSortColumn === 'customer' && paymentsSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => paymentsHandleSort("product")}>
+                    {$_('productName')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={paymentsSortColumn === 'product' && paymentsSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={paymentsSortColumn === 'product' && paymentsSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  {$_('paymentMethod')}
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => paymentsHandleSort("amount")}>
+                    {$_('amount')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={paymentsSortColumn === 'amount' && paymentsSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={paymentsSortColumn === 'amount' && paymentsSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => paymentsHandleSort("status")}>
+                    {$_('filterStatus')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={paymentsSortColumn === 'status' && paymentsSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={paymentsSortColumn === 'status' && paymentsSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => paymentsHandleSort("created_at")}>
+                    {$_('date')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={paymentsSortColumn === 'created_at' && paymentsSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={paymentsSortColumn === 'created_at' && paymentsSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {#if paymentsData.length === 0 && !paymentsLoading}
+                <tr>
+                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
+                      <p>{$_('noPaymentsFound')}</p>
+                    </div>
+                  </td>
+                </tr>
+              {:else}
+                {#each paymentsData as payment}
+                  <tr class="hover:bg-muted/20 transition-colors">
+                    <td class="px-4 py-3 text-foreground">{paymentsMerchantLabel(payment)}</td>
+                    <td class="px-4 py-3 text-foreground">{paymentsCustomerLabel(payment)}</td>
+                    <td class="px-4 py-3 text-foreground">{payment.order?.stock?.product?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{payment.payment_method ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground font-medium">{fmtCurrency(payment.amount)}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium {payment.order?.status === 'paid' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : payment.order?.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'}">
+                        <span class="w-1.5 h-1.5 rounded-full {payment.order?.status === 'paid' ? 'bg-green-600' : payment.order?.status === 'cancelled' ? 'bg-red-600' : 'bg-yellow-600'}"></span>
+                        {payment.order?.status ?? "-"}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">
+                      {payment.created_at ? new Date(payment.created_at).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-4 border-t border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <select
+              class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+              value={paymentsRowsPerPage}
+              onchange={(e) => { paymentsRowsPerPage = Number(e.currentTarget.value); paymentsCurrentPage = 1; }}
+            >
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span class="text-sm text-muted-foreground">Entries</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={paymentsCurrentPage === 1}
+              onclick={() => paymentsCurrentPage = paymentsCurrentPage - 1}
+            >
+              <Icon iconName="icon/chevron-left" size={16} />
+            </button>
+            {#each getVisiblePages(paymentsCurrentPage, paymentsTotalPages) as p}
+              {#if typeof p === "number"}
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === paymentsCurrentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                  style={p === paymentsCurrentPage ? 'background-color:#4DA0E6;' : ''}
+                  onclick={() => paymentsCurrentPage = p}
+                >
+                  {p}
+                </button>
+              {:else}
+                <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+              {/if}
+            {/each}
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={paymentsCurrentPage === paymentsTotalPages}
+              onclick={() => paymentsCurrentPage = paymentsCurrentPage + 1}
+            >
+              <Icon iconName="icon/chevron-right" size={16} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   {/if}

@@ -1,0 +1,46 @@
+query paymentsReport(
+  $filter: payment_bool_exp
+  $limit: Int
+  $offset: Int
+  $order: [payment_order_by!]!
+) {
+  payment(where: $filter, limit: $limit, offset: $offset, order_by: $order) {
+    id
+    payment_method
+    amount
+    created_at
+    order {
+      id
+      status
+      outstanding_amount
+      total_amount
+      stock {
+        id
+        product {
+          id
+          name
+          type: product_type {
+            id
+            name
+          }
+        }
+      }
+      customer {
+        id
+        first_name
+        last_name
+      }
+      merchant {
+        id
+        first_name
+        last_name
+        phone_number
+      }
+    }
+  }
+  payment_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}
