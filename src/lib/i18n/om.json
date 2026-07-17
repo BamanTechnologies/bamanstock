@@ -174,5 +174,9 @@
   "custom": "Filannoowwan",
   "selectPeriod": "Yeroo Filadhu",
   "sessionExpired": "Seessaa kee kan dhumateera. Mee ashiin deebi'ii seeni.",
-  "somethingWentWrong": "Wanta tokko dogoggoraa"
+  "somethingWentWrong": "Wanta tokko dogoggoraa",
+  "stockMovementReport": "Gabaasa Sochiinsa Kuusaa",
+  "noStockMovementsFound": "Sochiin kuusaa tokkollee hin argamne",
+  "movementType": "Gosa Sochii",
+  "batchNumber": "Lakkoofsa Garee"
 }

@@ -1,0 +1,35 @@
+query getStockMovementStats {
+  total_stocks_in: stock_movements_aggregate(
+    where: {
+      _or: [
+        { movement_type: { _eq: "PURCHASE" } }
+        { movement_type: { _eq: "TRANSFER_IN" } }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        quantity_delta
+      }
+    }
+  }
+  total_stocks_out: stock_movements_aggregate(
+    where: {
+      _or: [
+        { movement_type: { _eq: "TRANSFER_OUT" } }
+        { movement_type: { _eq: "SALE" } }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        quantity_delta
+      }
+    }
+  }
+  number_of_transfers: stock_movements_aggregate {
+    aggregate {
+      count
+    }
+  }
+}

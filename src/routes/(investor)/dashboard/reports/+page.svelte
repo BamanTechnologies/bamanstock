@@ -331,186 +331,225 @@
     paymentsCurrentPage = 1;
   }
 
-  // Stock Movement tab data
-  const stockMovementKpiCards = $derived([
-    { label: $_('totalStockIn'),  value: "1340 Units", change: "25.5", changeType: "positive", changeLabel: $_('fromLastMonth'), icon: "icon/package",     iconColor: "bg-green-100 dark:bg-green-900/40", textColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
-    { label: $_('totalStockOut'), value: "895 Units",  change: "12.2", changeType: "positive", changeLabel: $_('fromLastMonth'), icon: "icon/shopping-bag", iconColor: "bg-blue-100 dark:bg-blue-900/40",   textColor: "text-blue-600 dark:text-blue-400",   borderColor: "border-l-blue-500"  },
-    { label: $_('numTransfers'),  value: "87",         change: "16.3", changeType: "positive", changeLabel: $_('fromLastMonth'), icon: "icon/refresh-cw",  iconColor: "bg-pink-100 dark:bg-pink-900/40",   textColor: "text-pink-600 dark:text-pink-400",   borderColor: "border-l-pink-500"  },
-  ]);
+  // === Stock Movement Tab: Queries and Stats ===
+  import STOCK_MOVEMENT_QUERY from "$graphql/queries/reports/stock_movement/stock_movement.gql";
+  import STOCK_MOVEMENT_STATS_QUERY from "$graphql/queries/reports/stock_movement/stats.gql";
 
-  // Mock stock movement data
-  let stockMovementData = $state([
-    {
-      id: 1,
-      fromWarehouse: "Lavish Warehouse",
-      toWarehouse: "North Zone Warehouse",
-      numberOfProducts: "20",
-      quantityTransferred: "15",
-      referenceNumber: "#458924",
-      date: "24 Dec 2024",
-    },
-    {
-      id: 2,
-      fromWarehouse: "Quaint Warehouse",
-      toWarehouse: "Nova Storage Hub",
-      numberOfProducts: "25",
-      quantityTransferred: "20",
-      referenceNumber: "#429054",
-      date: "10 Dec 2024",
-    },
-    {
-      id: 3,
-      fromWarehouse: "Central Distribution",
-      toWarehouse: "East Side Depot",
-      numberOfProducts: "18",
-      quantityTransferred: "12",
-      referenceNumber: "#512389",
-      date: "05 Dec 2024",
-    },
-    {
-      id: 4,
-      fromWarehouse: "Main Storage",
-      toWarehouse: "West End Warehouse",
-      numberOfProducts: "30",
-      quantityTransferred: "25",
-      referenceNumber: "#487621",
-      date: "28 Nov 2024",
-    },
-    {
-      id: 5,
-      fromWarehouse: "Primary Hub",
-      toWarehouse: "Secondary Facility",
-      numberOfProducts: "15",
-      quantityTransferred: "10",
-      referenceNumber: "#523147",
-      date: "20 Nov 2024",
-    },
-    {
-      id: 6,
-      fromWarehouse: "Distribution Center",
-      toWarehouse: "Regional Warehouse",
-      numberOfProducts: "22",
-      quantityTransferred: "18",
-      referenceNumber: "#498765",
-      date: "15 Nov 2024",
-    },
-    {
-      id: 7,
-      fromWarehouse: "Storage Facility A",
-      toWarehouse: "Storage Facility B",
-      numberOfProducts: "28",
-      quantityTransferred: "22",
-      referenceNumber: "#456789",
-      date: "10 Nov 2024",
-    },
-    {
-      id: 8,
-      fromWarehouse: "Warehouse Alpha",
-      toWarehouse: "Warehouse Beta",
-      numberOfProducts: "35",
-      quantityTransferred: "30",
-      referenceNumber: "#432156",
-      date: "05 Nov 2024",
-    },
-    {
-      id: 9,
-      fromWarehouse: "Supply Chain Hub",
-      toWarehouse: "Retail Distribution",
-      numberOfProducts: "40",
-      quantityTransferred: "35",
-      referenceNumber: "#419876",
-      date: "01 Nov 2024",
-    },
-    {
-      id: 10,
-      fromWarehouse: "Fulfillment Hub",
-      toWarehouse: "EdgeWare Solutions",
-      numberOfProducts: "45",
-      quantityTransferred: "35",
-      referenceNumber: "#139064",
-      date: "10 Sep 2024",
-    },
-    {
-      id: 11,
-      fromWarehouse: "Logistics Center",
-      toWarehouse: "Express Warehouse",
-      numberOfProducts: "32",
-      quantityTransferred: "28",
-      referenceNumber: "#145678",
-      date: "25 Sep 2024",
-    },
-    { id: 12, fromWarehouse: "Main Depot",           toWarehouse: "Satellite Storage",    numberOfProducts: "27", quantityTransferred: "20", referenceNumber: "#152345", date: "15 Sep 2024" },
-    { id: 13, fromWarehouse: "Northern Hub",          toWarehouse: "Southside Depot",      numberOfProducts: "38", quantityTransferred: "30", referenceNumber: "#163490", date: "05 Aug 2024" },
-    { id: 14, fromWarehouse: "City Warehouse",        toWarehouse: "Suburb Storage",       numberOfProducts: "22", quantityTransferred: "18", referenceNumber: "#174832", date: "18 Aug 2024" },
-    { id: 15, fromWarehouse: "Eastgate Facility",     toWarehouse: "Westgate Hub",         numberOfProducts: "50", quantityTransferred: "42", referenceNumber: "#185674", date: "30 Aug 2024" },
-    { id: 16, fromWarehouse: "Alpha Warehouse",       toWarehouse: "Beta Distribution",    numberOfProducts: "31", quantityTransferred: "25", referenceNumber: "#196521", date: "12 Jul 2024" },
-    { id: 17, fromWarehouse: "Central Storage",       toWarehouse: "Peripheral Depot",     numberOfProducts: "44", quantityTransferred: "38", referenceNumber: "#207364", date: "24 Jul 2024" },
-    { id: 18, fromWarehouse: "Metro Fulfillment",     toWarehouse: "Rural Distribution",   numberOfProducts: "19", quantityTransferred: "14", referenceNumber: "#218203", date: "08 Jun 2024" },
-    { id: 19, fromWarehouse: "Tech Storage Unit",     toWarehouse: "Retail Supply Hub",    numberOfProducts: "36", quantityTransferred: "29", referenceNumber: "#229045", date: "20 Jun 2024" },
-    { id: 20, fromWarehouse: "Bulk Goods Facility",   toWarehouse: "Express Depot",        numberOfProducts: "60", quantityTransferred: "55", referenceNumber: "#239887", date: "02 May 2024" },
-    { id: 21, fromWarehouse: "Import Center",         toWarehouse: "Local Distribution",   numberOfProducts: "25", quantityTransferred: "21", referenceNumber: "#250729", date: "14 May 2024" },
-    { id: 22, fromWarehouse: "Freight Terminal",      toWarehouse: "Inland Warehouse",     numberOfProducts: "42", quantityTransferred: "36", referenceNumber: "#261572", date: "28 May 2024" },
-    { id: 23, fromWarehouse: "Supply Chain Base",     toWarehouse: "Outlet Storage",       numberOfProducts: "17", quantityTransferred: "13", referenceNumber: "#272414", date: "10 Apr 2024" },
-    { id: 24, fromWarehouse: "Primary Distribution",  toWarehouse: "Secondary Hub",        numberOfProducts: "53", quantityTransferred: "47", referenceNumber: "#283256", date: "22 Apr 2024" },
-    { id: 25, fromWarehouse: "Grand Warehouse",       toWarehouse: "Micro Depot",          numberOfProducts: "29", quantityTransferred: "23", referenceNumber: "#294099", date: "05 Mar 2024" },
-  ]);
+  let stockMovementStatsData = $state<Record<string, any> | null>(null);
+  let stockMovementStatsLoading = $state(true);
 
-  let stockMovementDateRange = $state("01-Jan-2025 - 12-Dec-2025");
-  let stockMovementSearchQuery = $state("");
-  let stockMovementPage = $state(1);
-  let stockMovementRowsPerPage = $state(10);
+  async function loadStockMovementStats() {
+    stockMovementStatsLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      const result = await client.query({
+        query: STOCK_MOVEMENT_STATS_QUERY,
+      });
+      stockMovementStatsData = result.data as Record<string, any>;
+    } catch {
+      stockMovementStatsData = null;
+    } finally {
+      stockMovementStatsLoading = false;
+    }
+  }
 
-  // Stock Movement table columns
-  const stockMovementColumns = $derived([
-    { key: "fromWarehouse",      label: $_('fromWarehouse'),      sortable: true },
-    { key: "toWarehouse",        label: $_('toWarehouse'),        sortable: true },
-    { key: "numberOfProducts",   label: $_('noOfProducts'),       sortable: true },
-    { key: "quantityTransferred",label: $_('quantityTransferred'),sortable: true },
-    { key: "referenceNumber",    label: $_('referenceNumber'),    sortable: true },
-    { key: "date",               label: $_('date'),               sortable: true },
-  ]);
+  $effect(() => {
+    void activeTab;
+    if (activeTab !== "Stock Movement") return;
+    loadStockMovementStats();
+  });
 
-  let stockMovementLocationFilter = $state("");
+  const stockMovementKpiCards = $derived.by(() => {
+    if (!stockMovementStatsData) return [];
+    const s = stockMovementStatsData;
+    const totalIn = Math.abs(Number(s.total_stocks_in?.aggregate?.sum?.quantity_delta) || 0);
+    const totalOut = Math.abs(Number(s.total_stocks_out?.aggregate?.sum?.quantity_delta) || 0);
+    const totalTransfers = Number(s.number_of_transfers?.aggregate?.count) || 0;
+    return [
+      { label: $_('totalStockIn'),  value: `${totalIn} Units`, icon: "icon/package",     iconBgClass: "bg-green-100 dark:bg-green-900/40", iconColor: "#16a34a" },
+      { label: $_('totalStockOut'), value: `${totalOut} Units`, icon: "icon/shopping-bag", iconBgClass: "bg-blue-100 dark:bg-blue-900/40",  iconColor: "#3b82f6" },
+      { label: $_('numTransfers'),  value: `${totalTransfers}`, icon: "icon/refresh-cw",  iconBgClass: "bg-pink-100 dark:bg-pink-900/40", iconColor: "#ec4899" },
+    ];
+  });
 
-  const filteredStockMovementData = $derived(
-    stockMovementData.filter((row) => {
-      const matchesLocation = !stockMovementLocationFilter ||
-        row.fromWarehouse.toLowerCase().includes(stockMovementLocationFilter.toLowerCase()) ||
-        row.toWarehouse.toLowerCase().includes(stockMovementLocationFilter.toLowerCase());
-      const matchesSearch = !stockMovementSearchQuery ||
-        row.fromWarehouse.toLowerCase().includes(stockMovementSearchQuery.toLowerCase()) ||
-        row.toWarehouse.toLowerCase().includes(stockMovementSearchQuery.toLowerCase()) ||
-        row.referenceNumber.toLowerCase().includes(stockMovementSearchQuery.toLowerCase());
-      return matchesLocation && matchesSearch;
-    })
+  // === Stock Movement Tab: Filters from URL ===
+  let stockDateFrom = $state($page.url.searchParams.get("dateFrom") ?? "");
+  let stockDateTo = $state($page.url.searchParams.get("dateTo") ?? "");
+  let stockLocationId = $state($page.url.searchParams.get("location") ?? "");
+  let stockMerchantId = $state($page.url.searchParams.get("merchant") ?? "");
+  let stockMovementType = $state($page.url.searchParams.get("type") ?? "");
+
+  // === Stock Movement Tab: Table ===
+  let stockSearchQuery = $state($page.url.searchParams.get("search") ?? "");
+  let stockCurrentPage = $state(Number($page.url.searchParams.get("page")) || 1);
+  let stockRowsPerPage = $state(Number($page.url.searchParams.get("limit")) || 10);
+  let stockSortColumn = $state($page.url.searchParams.get("sort") || "created_at");
+  let stockSortDirection = $state<"asc" | "desc">(
+    ($page.url.searchParams.get("dir") as "asc" | "desc") || "desc"
   );
 
-  const stockMovementTotalPages = $derived(Math.ceil(filteredStockMovementData.length / stockMovementRowsPerPage));
+  let stockMovementsData = $state<any[]>([]);
+  let stockMovementsTotalCount = $state(0);
+  let stockLoading = $state(false);
 
-  $effect(() => { stockMovementLocationFilter; stockMovementSearchQuery; stockMovementPage = 1; });
+  let stockDebouncedSearch = $state(stockSearchQuery);
+  let stockDebounceTimer: ReturnType<typeof setTimeout>;
 
-  const stockMovementWarehouseOptions = $derived([
+  $effect(() => {
+    clearTimeout(stockDebounceTimer);
+    if (stockSearchQuery === stockDebouncedSearch) return;
+    stockDebounceTimer = setTimeout(() => {
+      stockDebouncedSearch = stockSearchQuery;
+      stockCurrentPage = 1;
+    }, 400);
+    return () => clearTimeout(stockDebounceTimer);
+  });
+
+  const stockTotalPages = $derived(Math.max(1, Math.ceil(stockMovementsTotalCount / stockRowsPerPage)));
+
+  const movementTypeOptions = $derived([
     { value: "", label: $_('filterAll') },
-    ...[...new Set(stockMovementData.flatMap((r) => [r.fromWarehouse, r.toWarehouse]))].map((w) => ({ value: w.toLowerCase(), label: w })),
+    { value: "PURCHASE", label: "Purchase" },
+    { value: "SALE", label: "Sale" },
+    { value: "TRANSFER_IN", label: "Transfer In" },
+    { value: "TRANSFER_OUT", label: "Transfer Out" },
   ]);
 
-  function handleStockMovementPageChange(page: number) {
-    stockMovementPage = page;
+  function stockBuildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [];
+    if (stockDateFrom) {
+      conditions.push({ created_at: { _gte: stockDateFrom } });
+    }
+    if (stockDateTo) {
+      conditions.push({ created_at: { _lte: stockDateTo } });
+    }
+    if (stockLocationId) {
+      conditions.push({ branch: { id: { _eq: stockLocationId } } });
+    }
+    if (stockMerchantId) {
+      conditions.push({ merchant: { id: { _eq: stockMerchantId } } });
+    }
+    if (stockMovementType) {
+      conditions.push({ movement_type: { _eq: stockMovementType } });
+    }
+    if (stockDebouncedSearch) {
+      conditions.push({
+        _or: [
+          { stock: { product: { name: { _ilike: `%${stockDebouncedSearch}%` } } } },
+          { stock: { batch_number: { _ilike: `%${stockDebouncedSearch}%` } } },
+          { reference_type: { _ilike: `%${stockDebouncedSearch}%` } },
+          { merchant: { first_name: { _ilike: `%${stockDebouncedSearch}%` } } },
+          { merchant: { last_name: { _ilike: `%${stockDebouncedSearch}%` } } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
   }
 
-  function handleStockMovementRowsPerPageChange(rows: number) {
-    stockMovementRowsPerPage = rows;
-    stockMovementPage = 1;
+  function stockBuildOrder(): Record<string, unknown>[] {
+    switch (stockSortColumn) {
+      case "movement_type":
+        return [{ movement_type: stockSortDirection }];
+      case "product":
+        return [{ stock: { product: { name: stockSortDirection } } }];
+      case "branch":
+        return [{ branch: { name: stockSortDirection } }];
+      case "merchant":
+        return [{ merchant: { first_name: stockSortDirection } }];
+      case "quantity":
+        return [{ quantity_delta: stockSortDirection }];
+      case "created_at":
+        return [{ created_at: stockSortDirection }];
+      default:
+        return [{ created_at: stockSortDirection }];
+    }
   }
 
-  function handleEditStockMovement(row: (typeof stockMovementData)[0]) {
-    console.log("Edit stock movement:", row);
-    // TODO: Open edit modal
+  function stockSyncUrl() {
+    const params = new URLSearchParams();
+    params.set("tab", "Stock Movement");
+    if (stockDebouncedSearch) params.set("search", stockDebouncedSearch);
+    if (stockCurrentPage > 1) params.set("page", String(stockCurrentPage));
+    if (stockRowsPerPage !== 10) params.set("limit", String(stockRowsPerPage));
+    if (stockSortColumn !== "created_at") params.set("sort", stockSortColumn);
+    if (stockSortDirection !== "desc") params.set("dir", stockSortDirection);
+    if (stockDateFrom) params.set("dateFrom", stockDateFrom);
+    if (stockDateTo) params.set("dateTo", stockDateTo);
+    if (stockLocationId) params.set("location", stockLocationId);
+    if (stockMerchantId) params.set("merchant", stockMerchantId);
+    if (stockMovementType) params.set("type", stockMovementType);
+    const qs = params.toString();
+    goto(qs ? `?${qs}` : $page.url.pathname, { replaceState: true, keepFocus: true, noScroll: true });
   }
 
-  function handleDeleteStockMovement(row: (typeof stockMovementData)[0]) {
-    console.log("Delete stock movement:", row);
-    // TODO: Open delete confirmation modal
+  $effect(() => {
+    void activeTab;
+    void stockDebouncedSearch;
+    void stockCurrentPage;
+    void stockRowsPerPage;
+    void stockSortColumn;
+    void stockSortDirection;
+    void stockDateFrom;
+    void stockDateTo;
+    void stockLocationId;
+    void stockMerchantId;
+    void stockMovementType;
+
+    if (activeTab !== "Stock Movement") return;
+    stockLoading = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          stock_movements: any[];
+          stock_movements_aggregate: { aggregate: { count: number } };
+        }>({
+          query: STOCK_MOVEMENT_QUERY,
+          variables: {
+            limit: stockRowsPerPage,
+            offset: (stockCurrentPage - 1) * stockRowsPerPage,
+            filter: stockBuildFilter(),
+            order: stockBuildOrder(),
+          },
+        });
+        stockMovementsData = result.data?.stock_movements ?? [];
+        stockMovementsTotalCount = result.data?.stock_movements_aggregate?.aggregate?.count ?? 0;
+        stockSyncUrl();
+      } catch {
+        stockMovementsData = [];
+        stockMovementsTotalCount = 0;
+      } finally {
+        stockLoading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function stockMerchantLabel(item: any): string {
+    if (!item?.merchant) return "-";
+    return [item.merchant.first_name, item.merchant.last_name].filter(Boolean).join(" ");
+  }
+
+  function stockHandleSort(column: string) {
+    if (stockSortColumn === column) {
+      stockSortDirection = stockSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      stockSortColumn = column;
+      stockSortDirection = "asc";
+    }
+    stockCurrentPage = 1;
+  }
+
+  function movementTypeClass(type: string): string {
+    switch (type) {
+      case "PURCHASE": return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
+      case "SALE": return "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300";
+      case "TRANSFER_IN": return "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300";
+      case "TRANSFER_OUT": return "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300";
+      default: return "bg-gray-100 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300";
+    }
   }
 
   // Low Stock tab data
@@ -1391,13 +1430,13 @@
             <span class="text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
-              value={salesRowsPerPage}
-              onchange={(e) => { salesRowsPerPage = Number(e.currentTarget.value); salesCurrentPage = 1; }}
+              bind:value={salesRowsPerPage}
+              onchange={() => { salesCurrentPage = 1; }}
             >
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
             <span class="text-sm text-muted-foreground">Entries</span>
           </div>
@@ -1863,13 +1902,13 @@
             <span class="text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
-              value={paymentsRowsPerPage}
-              onchange={(e) => { paymentsRowsPerPage = Number(e.currentTarget.value); paymentsCurrentPage = 1; }}
+              bind:value={paymentsRowsPerPage}
+              onchange={() => { paymentsCurrentPage = 1; }}
             >
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
             <span class="text-sm text-muted-foreground">Entries</span>
           </div>
@@ -1912,64 +1951,265 @@
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {#each stockMovementKpiCards as kpi}
-          <StatKpiCard
-            label={kpi.label}
-            value={kpi.value}
-            change={kpi.change}
-            changeLabel={kpi.changeLabel}
-            icon={kpi.icon}
-            iconColor={kpi.iconColor}
-            textColor={kpi.textColor}
-          />
-        {/each}
+        {#if stockMovementStatsLoading}
+          {#each [1,2,3] as _}
+            <div class="bg-card border border-border rounded-lg p-5 animate-pulse">
+              <div class="h-4 bg-muted rounded w-24 mb-3"></div>
+              <div class="h-8 bg-muted rounded w-32 mb-3"></div>
+              <div class="h-5 bg-muted rounded w-36"></div>
+            </div>
+          {/each}
+        {:else}
+          {#each stockMovementKpiCards as kpi}
+            <IconKpiCard label={kpi.label} value={kpi.value} icon={kpi.icon} iconBgClass={kpi.iconBgClass} iconColor={kpi.iconColor} />
+          {/each}
+        {/if}
       </div>
 
       <!-- Filters Section -->
-      <ReportFilterBar
-        id="stock-movement-date-range"
-        bind:dateRange={stockMovementDateRange}
-        filters={[
-          { id: "stock-movement-location-filter", label: $_('warehouse'), options: stockMovementWarehouseOptions, value: stockMovementLocationFilter, onchange: (v) => { stockMovementLocationFilter = v; } },
-        ]}
-      />
+      <div class="bg-card border border-border rounded-lg px-4 py-3">
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterFrom')}</label>
+            <input
+              type="date"
+              bind:value={stockDateFrom}
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterTo')}</label>
+            <input
+              type="date"
+              bind:value={stockDateTo}
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('navLocation')}</label>
+            <SearchSelect
+              query={LOCATION_QUERY}
+              dataKey="branches"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder={$_('searchLocation')}
+              initialValue={stockLocationId}
+              onSelect={(item) => { stockLocationId = item?.id ?? ""; stockCurrentPage = 1; }}
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('merchant')}</label>
+            <SearchSelect
+              query={MERCHANT_QUERY}
+              dataKey="merchant"
+              filterBuilder={(s) => ({
+                _or: [
+                  { first_name: { _ilike: `%${s}%` } },
+                  { last_name: { _ilike: `%${s}%` } },
+                ]
+              })}
+              displayLabel={(item) => [item.first_name, item.last_name].filter(Boolean).join(" ")}
+              placeholder={$_('searchMerchant')}
+              initialValue={stockMerchantId}
+              onSelect={(item) => { stockMerchantId = item?.id ?? ""; stockCurrentPage = 1; }}
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('movementType')}</label>
+            <select
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={stockMovementType}
+              onchange={() => { stockCurrentPage = 1; }}
+            >
+              {#each movementTypeOptions as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
+          </div>
+        </div>
+      </div>
 
-      <!-- Stock Movement Table -->
+      <!-- Stock Movement Report Table -->
       <div class="bg-card border border-border rounded-lg overflow-hidden">
-        {#if true}
-          {@const paginatedStockMovementData = filteredStockMovementData.slice(
-            (stockMovementPage - 1) * stockMovementRowsPerPage,
-            stockMovementPage * stockMovementRowsPerPage,
-          )}
-          <DataTable
-            columns={stockMovementColumns}
-            data={paginatedStockMovementData}
-            searchable={true}
-            searchPlaceholder={$_('search')}
-            onSearch={(q) => { stockMovementSearchQuery = q; }}
-            filters={[]}
-            actions={[
-              {
-                icon: "icon/edit",
-                label: $_('edit'),
-                onClick: handleEditStockMovement,
-              },
-              {
-                icon: "icon/trash",
-                label: $_('delete'),
-                onClick: handleDeleteStockMovement,
-                variant: "destructive",
-              },
-            ]}
-            pagination={{
-              currentPage: stockMovementPage,
-              totalPages: stockMovementTotalPages,
-              rowsPerPage: stockMovementRowsPerPage,
-              onPageChange: handleStockMovementPageChange,
-              onRowsPerPageChange: handleStockMovementRowsPerPageChange,
-            }}
-          />
+        <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-foreground">{$_('stockMovementReport')}</h3>
+          <div class="flex items-center gap-2">
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="PDF" onclick={handleExportPDF}>
+              <Icon iconName="icon/file-text" size={20} class="text-red-500" />
+            </button>
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="XLS" onclick={handleExportXLS}>
+              <Icon iconName="icon/file-text" size={20} class="text-green-500" />
+            </button>
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="Print" onclick={handlePrint}>
+              <Icon iconName="icon/file-text" size={20} class="text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+          <div class="relative w-72 shrink-0">
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder={$_('search')}
+              class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={stockSearchQuery}
+            />
+          </div>
+        </div>
+
+        {#if stockLoading}
+          <div class="h-1 bg-muted/30 w-full overflow-hidden">
+            <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+          </div>
         {/if}
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-muted/30 border-b border-border">
+              <tr class="text-left text-xs text-muted-foreground uppercase">
+                <th class="px-4 py-3 font-medium">{$_('referenceNumber')}</th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("movement_type")}>
+                    {$_('movementType')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'movement_type' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'movement_type' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("product")}>
+                    {$_('productName')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'product' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'product' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">{$_('batchNumber')}</th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("branch")}>
+                    {$_('navLocation')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'branch' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'branch' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("merchant")}>
+                    {$_('merchant')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'merchant' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'merchant' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("quantity")}>
+                    {$_('qty')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'quantity' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'quantity' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("created_at")}>
+                    {$_('date')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'created_at' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'created_at' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {#if stockMovementsData.length === 0 && !stockLoading}
+                <tr>
+                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
+                      <p>{$_('noStockMovementsFound')}</p>
+                    </div>
+                  </td>
+                </tr>
+              {:else}
+                {#each stockMovementsData as movement}
+                  <tr class="hover:bg-muted/20 transition-colors">
+                    <td class="px-4 py-3 text-foreground text-xs">{movement.reference_type ?? "-"}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {movementTypeClass(movement.movement_type)}">
+                        {movement.movement_type}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-foreground">{movement.stock?.product?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">{movement.stock?.batch_number ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{movement.branch?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{stockMerchantLabel(movement)}</td>
+                    <td class="px-4 py-3 text-foreground font-medium">{movement.quantity_delta ?? 0}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">
+                      {movement.created_at ? new Date(movement.created_at).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-4 border-t border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <select
+              class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+              bind:value={stockRowsPerPage}
+              onchange={() => { stockCurrentPage = 1; }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span class="text-sm text-muted-foreground">Entries</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={stockCurrentPage === 1}
+              onclick={() => stockCurrentPage = stockCurrentPage - 1}
+            >
+              <Icon iconName="icon/chevron-left" size={16} />
+            </button>
+            {#each getVisiblePages(stockCurrentPage, stockTotalPages) as p}
+              {#if typeof p === "number"}
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === stockCurrentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                  style={p === stockCurrentPage ? 'background-color:#4DA0E6;' : ''}
+                  onclick={() => stockCurrentPage = p}
+                >
+                  {p}
+                </button>
+              {:else}
+                <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+              {/if}
+            {/each}
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={stockCurrentPage === stockTotalPages}
+              onclick={() => stockCurrentPage = stockCurrentPage + 1}
+            >
+              <Icon iconName="icon/chevron-right" size={16} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   {/if}

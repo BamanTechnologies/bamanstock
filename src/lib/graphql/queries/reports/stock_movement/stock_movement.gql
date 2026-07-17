@@ -1,0 +1,46 @@
+query getStockTransfers(
+  $limit: Int
+  $offset: Int
+  $filter: stock_movements_bool_exp
+  $order: [stock_movements_order_by!]!
+) {
+  stock_movements(
+    limit: $limit
+    offset: $offset
+    where: $filter
+    order_by: $order
+  ) {
+    id
+    quantity_delta
+    reference_type
+    movement_type
+    company {
+      id
+      name
+    }
+    branch {
+      id
+      name
+    }
+    stock {
+      id
+      batch_number
+      product {
+        id
+        name
+      }
+    }
+    merchant {
+      id
+      first_name
+      last_name
+      phone_number
+    }
+    created_at
+  }
+  stock_movements_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

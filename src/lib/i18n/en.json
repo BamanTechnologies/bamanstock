@@ -174,5 +174,9 @@
   "custom": "Custom",
   "selectPeriod": "Select period",
   "sessionExpired": "Your session has expired. Please sign in again.",
-  "somethingWentWrong": "Something went wrong"
+  "somethingWentWrong": "Something went wrong",
+  "stockMovementReport": "Stock Movement Report",
+  "noStockMovementsFound": "No stock movements found",
+  "movementType": "Movement Type",
+  "batchNumber": "Batch Number"
 }

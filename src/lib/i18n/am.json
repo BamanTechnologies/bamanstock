@@ -174,5 +174,9 @@
   "custom": "ብጁ",
   "selectPeriod": "ጊዜ ይምረጡ",
   "sessionExpired": "የእርስዎ ክፍለ ጊዜ አልቋል። እባክዎ እንደገና ይግቡ።",
-  "somethingWentWrong": "የሆነ ችግር ተፈጥሯል"
+  "somethingWentWrong": "የሆነ ችግር ተፈጥሯል",
+  "stockMovementReport": "የክምችት እንቅስቃሴ ሪፖርት",
+  "noStockMovementsFound": "ምንም የክምችት እንቅስቃሴ አልተገኘም",
+  "movementType": "የእንቅስቃሴ አይነት",
+  "batchNumber": "የቡድን ቁጥር"
 }
