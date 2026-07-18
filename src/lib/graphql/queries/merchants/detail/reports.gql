@@ -1,0 +1,17 @@
+query getMerchantsReport($id: uuid!, $limit: Int, $offset: Int) {
+  reports(
+    where: { merchant_id: { _eq: $id } }
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    message
+    sms_status
+    created_at
+  }
+  reports_aggregate(where: { merchant_id: { _eq: $id } }) {
+    aggregate {
+      count
+    }
+  }
+}
