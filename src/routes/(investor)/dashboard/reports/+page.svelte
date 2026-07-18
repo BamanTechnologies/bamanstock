@@ -16,6 +16,8 @@
   import MERCHANT_QUERY from "$graphql/queries/selector/merchant.gql";
   import CATEGORY_QUERY from "$graphql/queries/selector/product_category.gql";
   import PRODUCT_QUERY from "$graphql/queries/selector/products.gql";
+  import LOW_STOCK_QUERY from "$graphql/queries/reports/low_stock_products/low_stock_products.gql";
+  import LOW_STOCK_STATS_QUERY from "$graphql/queries/reports/low_stock_products/stats.gql";
 
   const tabs = $derived([
     { key: "Sales",             label: $_('tabSales') },
@@ -552,244 +554,216 @@
     }
   }
 
-  // Low Stock tab data
-  const lowStockKpiCards = $derived([
-    { label: $_('totalLowStockItems'), value: "142",        valueColor: "text-foreground", change: "25.5", changeLabel: $_('fromLastMonth'), icon: "icon/alert-triangle" as any, iconColor: "bg-green-100 dark:bg-green-900/40", textColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
-    { label: $_('criticalStockItems'), value: "35",         valueColor: "text-red-500",    change: "12.2", changeLabel: $_('fromLastMonth'), icon: "icon/shopping-bag"   as any, iconColor: "bg-blue-100 dark:bg-blue-900/40",  textColor: "text-blue-600 dark:text-blue-400",  borderColor: "border-l-blue-500"  },
-    { label: $_('valueAtRisk'),        value: "$12,890.75", valueColor: "text-foreground", change: "16.3", changeLabel: $_('fromLastMonth'), icon: "icon/eye"            as any, iconColor: "bg-pink-100 dark:bg-pink-900/40",  textColor: "text-pink-600 dark:text-pink-400",  borderColor: "border-l-pink-500"  },
-  ]);
+  // === Low Stock Tab: Queries and Stats ===
+  let lowStockStatsData = $state<Record<string, any> | null>(null);
+  let lowStockStatsLoading = $state(true);
 
-  // Mock low stock data
-  let lowStockData = $state([
-    {
-      id: 1,
-      sku: "PT001",
-      location: "Lavish Warehouse",
-      productName: "Lenovo IdeaPad 3",
-      category: "Computers",
-      qty: 20,
-      qtyAlert: 15,
-      icon: "icon/laptop",
-    },
-    {
-      id: 2,
-      sku: "PT002",
-      location: "Quaint Warehouse",
-      productName: "Beats Pro",
-      category: "Electronics",
-      qty: 25,
-      qtyAlert: 20,
-      icon: "icon/headphones",
-    },
-    {
-      id: 3,
-      sku: "PT003",
-      location: "Traditional Warehouse",
-      productName: "Nike Jordan",
-      category: "Shoe",
-      qty: 40,
-      qtyAlert: 35,
-      icon: "icon/shoe",
-    },
-    {
-      id: 4,
-      sku: "PT004",
-      location: "Modern Storage",
-      productName: "Apple Series 5 Watch",
-      category: "Electronics",
-      qty: 30,
-      qtyAlert: 25,
-      icon: "icon/watch",
-    },
-    {
-      id: 5,
-      sku: "PT005",
-      location: "Central Depot",
-      productName: "Amazon Echo Dot",
-      category: "Electronics",
-      qty: 35,
-      qtyAlert: 30,
-      icon: "icon/package",
-    },
-    {
-      id: 6,
-      sku: "PT006",
-      location: "Main Warehouse",
-      productName: "Sanford Chair Sofa",
-      category: "Furniture",
-      qty: 28,
-      qtyAlert: 25,
-      icon: "icon/chair",
-    },
-    {
-      id: 7,
-      sku: "PT007",
-      location: "Distribution Center",
-      productName: "Red Premium Satchel",
-      category: "Bags",
-      qty: 22,
-      qtyAlert: 20,
-      icon: "icon/briefcase",
-    },
-    {
-      id: 8,
-      sku: "PT008",
-      location: "Storage Facility",
-      productName: "Iphone 14 Pro",
-      category: "Phone",
-      qty: 18,
-      qtyAlert: 15,
-      icon: "icon/package",
-    },
-    {
-      id: 9,
-      sku: "PT009",
-      location: "Regional Hub",
-      productName: "Gaming Chair",
-      category: "Furniture",
-      qty: 32,
-      qtyAlert: 30,
-      icon: "icon/chair",
-    },
-    {
-      id: 10,
-      sku: "PT010",
-      location: "Supply Chain",
-      productName: "Borealis Backpack",
-      category: "Bags",
-      qty: 26,
-      qtyAlert: 25,
-      icon: "icon/briefcase",
-    },
-    {
-      id: 11,
-      sku: "PT011",
-      location: "Logistics Center",
-      productName: "Samsung Galaxy S24",
-      category: "Phone",
-      qty: 24,
-      qtyAlert: 20,
-      icon: "icon/package",
-    },
-    {
-      id: 12,
-      sku: "PT012",
-      location: "Express Warehouse",
-      productName: "MacBook Pro",
-      category: "Computers",
-      qty: 19,
-      qtyAlert: 15,
-      icon: "icon/laptop",
-    },
-  ]);
+  async function loadLowStockStats() {
+    lowStockStatsLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      const result = await client.query({
+        query: LOW_STOCK_STATS_QUERY,
+      });
+      lowStockStatsData = result.data as Record<string, any>;
+    } catch {
+      lowStockStatsData = null;
+    } finally {
+      lowStockStatsLoading = false;
+    }
+  }
 
-  let lowStockDateRange = $state("01-Jan-2025 - 12-Dec-2025");
-  let lowStockSearchQuery = $state("");
-  let lowStockLocationFilter = $state("");
-  let lowStockCategoryFilter = $state("");
+  function fmtCurrencyShort(val: unknown): string {
+    if (val == null) return "ETB 0";
+    const num = Number(val);
+    if (isNaN(num)) return String(val);
+    if (num >= 1_000_000) return `ETB ${(num / 1_000_000).toFixed(1)}M`;
+    if (num >= 1_000) return `ETB ${(num / 1_000).toFixed(1)}K`;
+    return `ETB ${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
 
-  const lowStockCategoryOptions = $derived([
-    { value: "", label: $_('filterAll') },
-    { value: "computers", label: "Computers" },
-    { value: "electronics", label: $_('electronics') },
-    { value: "shoe", label: "Shoe" },
-    { value: "furniture", label: $_('furniture') },
-    { value: "bags", label: $_('bags') },
-    { value: "phone", label: $_('phone') },
-  ]);
-  let lowStockPage = $state(1);
-  let lowStockRowsPerPage = $state(10);
-
-  const lowStockLocationOptions = $derived([
-    { value: "", label: $_('filterAll') },
-    ...[...new Set(lowStockData.map((r) => r.location))].map((loc) => ({ value: loc, label: loc })),
-  ]);
-
-  const filteredLowStockData = $derived(
-    lowStockData.filter((row) => {
-      const matchesLocation = !lowStockLocationFilter || row.location === lowStockLocationFilter;
-      const matchesCategory = !lowStockCategoryFilter || row.category.toLowerCase() === lowStockCategoryFilter;
-      const matchesSearch =
-        !lowStockSearchQuery ||
-        row.productName.toLowerCase().includes(lowStockSearchQuery.toLowerCase()) ||
-        row.sku.toLowerCase().includes(lowStockSearchQuery.toLowerCase());
-      return matchesLocation && matchesCategory && matchesSearch;
-    }),
-  );
-
-  const lowStockTotalPages = $derived(
-    Math.ceil(filteredLowStockData.length / lowStockRowsPerPage),
-  );
-
-  $effect(() => {
-    lowStockLocationFilter;
-    lowStockCategoryFilter;
-    lowStockSearchQuery;
-    lowStockPage = 1;
+  const lowStockKpiCards = $derived.by(() => {
+    if (!lowStockStatsData) return [];
+    const s = lowStockStatsData;
+    const totalLow = Number(s.low_stock_products?.aggregate?.count) || 0;
+    const critical = Number(s.critical_low_stock_products?.aggregate?.count) || 0;
+    const valueAtRisk = parseMoney(s.low_stock_properties_prices?.aggregate?.sum?.purchased_price);
+    return [
+      { label: $_('totalLowStockItems'), value: String(totalLow),             icon: "icon/alert-triangle" as any, iconBgClass: "bg-orange-100 dark:bg-orange-900/40", iconColor: "#D7AD4A" },
+      { label: $_('criticalStockItems'), value: String(critical),             icon: "icon/shopping-bag"      as any, iconBgClass: "bg-blue-100 dark:bg-blue-900/40",  iconColor: "#3b82f6" },
+      { label: $_('valueAtRisk'),       value: fmtCurrencyShort(valueAtRisk), icon: "icon/eye"               as any, iconBgClass: "bg-pink-100 dark:bg-pink-900/40",  iconColor: "#ec4899" },
+    ];
   });
 
-  // Low Stock table columns
-  const lowStockColumns = $derived([
-    {
-      key: "sku",
-      label: $_('sku'),
-      sortable: true,
-    },
-    {
-      key: "location",
-      label: $_('navLocation'),
-    },
-    {
-      key: "productName",
-      label: $_('productName'),
-      sortable: true,
-      render: (row: (typeof lowStockData)[0]) => {
-        return `
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-              <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <span class="text-sm font-medium text-foreground">${row.productName}</span>
-          </div>
-        `;
-      },
-    },
-    {
-      key: "category",
-      label: $_('category'),
-    },
-    {
-      key: "qty",
-      label: $_('qty'),
-      sortable: true,
-    },
-    {
-      key: "qtyAlert",
-      label: $_('qtyAlert'),
-      sortable: true,
-    },
-  ]);
+  $effect(() => {
+    void activeTab;
+    if (activeTab !== "Low Stock") return;
+    loadLowStockStats();
+  });
 
+  // === Low Stock Tab: Filters from URL ===
+  let lowStockLocationId = $state($page.url.searchParams.get("location") ?? "");
+  let lowStockMerchantId = $state($page.url.searchParams.get("merchant") ?? "");
+  let lowStockCategoryId = $state($page.url.searchParams.get("category") ?? "");
+  let lowStockProductId = $state($page.url.searchParams.get("product") ?? "");
 
-  function handleLowStockPageChange(page: number) {
-    lowStockPage = page;
+  // === Low Stock Tab: Table ===
+  let lowStockSearchQuery = $state($page.url.searchParams.get("search") ?? "");
+  let lowStockCurrentPage = $state(Number($page.url.searchParams.get("page")) || 1);
+  let lowStockRowsPerPage = $state(Number($page.url.searchParams.get("limit")) || 10);
+  let lowStockSortColumn = $state($page.url.searchParams.get("sort") || "created_at");
+  let lowStockSortDirection = $state<"asc" | "desc">(
+    ($page.url.searchParams.get("dir") as "asc" | "desc") || "desc"
+  );
+
+  let lowStockData = $state<any[]>([]);
+  let lowStockTotalCount = $state(0);
+  let lowStockLoading = $state(false);
+
+  let lowStockDebouncedSearch = $state(lowStockSearchQuery);
+  let lowStockDebounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(lowStockDebounceTimer);
+    if (lowStockSearchQuery === lowStockDebouncedSearch) return;
+    lowStockDebounceTimer = setTimeout(() => {
+      lowStockDebouncedSearch = lowStockSearchQuery;
+      lowStockCurrentPage = 1;
+    }, 400);
+    return () => clearTimeout(lowStockDebounceTimer);
+  });
+
+  const lowStockTotalPages = $derived(Math.max(1, Math.ceil(lowStockTotalCount / lowStockRowsPerPage)));
+
+  function lowStockBuildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [];
+    if (lowStockLocationId) {
+      conditions.push({ company: { branches: { id: { _eq: lowStockLocationId } } } });
+    }
+    if (lowStockMerchantId) {
+      conditions.push({ created_by: { _eq: lowStockMerchantId } });
+    }
+    if (lowStockCategoryId) {
+      conditions.push({ product_type_id: { _eq: lowStockCategoryId } });
+    }
+    if (lowStockProductId) {
+      conditions.push({ id: { _eq: lowStockProductId } });
+    }
+    if (lowStockDebouncedSearch) {
+      conditions.push({
+        _or: [
+          { name: { _ilike: `%${lowStockDebouncedSearch}%` } },
+          { merchantByCreatedBy: { first_name: { _ilike: `%${lowStockDebouncedSearch}%` } } },
+          { merchantByCreatedBy: { last_name: { _ilike: `%${lowStockDebouncedSearch}%` } } },
+          { company: { name: { _ilike: `%${lowStockDebouncedSearch}%` } } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
   }
 
-  function handleLowStockRowsPerPageChange(rows: number) {
-    lowStockRowsPerPage = rows;
-    lowStockPage = 1;
+  function lowStockBuildOrder(): Record<string, unknown>[] {
+    switch (lowStockSortColumn) {
+      case "name":
+        return [{ name: lowStockSortDirection }];
+      case "type":
+        return [{ product_type: { name: lowStockSortDirection } }];
+      case "company":
+        return [{ company: { name: lowStockSortDirection } }];
+      case "merchant":
+        return [{ merchantByCreatedBy: { first_name: lowStockSortDirection } }];
+      case "quantity":
+        return [{ current_available_stock: lowStockSortDirection }];
+      case "threshold":
+        return [{ treshold_quantity: lowStockSortDirection }];
+      case "unit":
+        return [{ default_unit: lowStockSortDirection }];
+      case "created_at":
+        return [{ created_at: lowStockSortDirection }];
+      default:
+        return [{ created_at: lowStockSortDirection }];
+    }
   }
 
-  function handleEditLowStock(row: (typeof lowStockData)[0]) {
-    console.log("Edit low stock item:", row);
-    // TODO: Open edit modal
+  function lowStockSyncUrl() {
+    const params = new URLSearchParams();
+    params.set("tab", "Low Stock");
+    if (lowStockDebouncedSearch) params.set("search", lowStockDebouncedSearch);
+    if (lowStockCurrentPage > 1) params.set("page", String(lowStockCurrentPage));
+    if (lowStockRowsPerPage !== 10) params.set("limit", String(lowStockRowsPerPage));
+    if (lowStockSortColumn !== "created_at") params.set("sort", lowStockSortColumn);
+    if (lowStockSortDirection !== "desc") params.set("dir", lowStockSortDirection);
+    if (lowStockLocationId) params.set("location", lowStockLocationId);
+    if (lowStockMerchantId) params.set("merchant", lowStockMerchantId);
+    if (lowStockCategoryId) params.set("category", lowStockCategoryId);
+    if (lowStockProductId) params.set("product", lowStockProductId);
+    const qs = params.toString();
+    goto(qs ? `?${qs}` : $page.url.pathname, { replaceState: true, keepFocus: true, noScroll: true });
   }
 
-  function handleDeleteLowStock(row: (typeof lowStockData)[0]) {
-    console.log("Delete low stock item:", row);
-    // TODO: Open delete confirmation modal
+  $effect(() => {
+    void activeTab;
+    void lowStockDebouncedSearch;
+    void lowStockCurrentPage;
+    void lowStockRowsPerPage;
+    void lowStockSortColumn;
+    void lowStockSortDirection;
+    void lowStockLocationId;
+    void lowStockMerchantId;
+    void lowStockCategoryId;
+    void lowStockProductId;
+
+    if (activeTab !== "Low Stock") return;
+    lowStockLoading = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          products: any[];
+          products_aggregate: { aggregate: { count: number } };
+        }>({
+          query: LOW_STOCK_QUERY,
+          variables: {
+            limit: lowStockRowsPerPage,
+            offset: (lowStockCurrentPage - 1) * lowStockRowsPerPage,
+            filter: lowStockBuildFilter(),
+            order: lowStockBuildOrder(),
+          },
+        });
+        lowStockData = result.data?.products ?? [];
+        lowStockTotalCount = result.data?.products_aggregate?.aggregate?.count ?? 0;
+        lowStockSyncUrl();
+      } catch {
+        lowStockData = [];
+        lowStockTotalCount = 0;
+      } finally {
+        lowStockLoading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function lowStockMerchantLabel(item: any): string {
+    if (!item?.merchantByCreatedBy) return "-";
+    return [item.merchantByCreatedBy.first_name, item.merchantByCreatedBy.last_name].filter(Boolean).join(" ");
+  }
+
+  function lowStockHandleSort(column: string) {
+    if (lowStockSortColumn === column) {
+      lowStockSortDirection = lowStockSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      lowStockSortColumn = column;
+      lowStockSortDirection = "asc";
+    }
+    lowStockCurrentPage = 1;
+  }
+
+  function lowStockTypeClass(stock: number, threshold: number): string {
+    if (stock <= 0) return "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300";
+    if (stock <= threshold * 0.5) return "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300";
+    return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300";
   }
 
   // Revenue Breakdown table data
@@ -2217,66 +2191,290 @@
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {#each lowStockKpiCards as kpi}
-          <StatKpiCard
-            label={kpi.label}
-            value={kpi.value}
-            change={kpi.change}
-            changeLabel={kpi.changeLabel}
-            icon={kpi.icon}
-            iconColor={kpi.iconColor}
-            textColor={kpi.textColor}
-            valueColor={kpi.valueColor}
-          />
-        {/each}
+        {#if lowStockStatsLoading}
+          {#each [1,2,3] as _}
+            <div class="bg-card border border-border rounded-lg p-5 animate-pulse">
+              <div class="h-4 bg-muted rounded w-24 mb-3"></div>
+              <div class="h-8 bg-muted rounded w-32 mb-3"></div>
+              <div class="h-5 bg-muted rounded w-36"></div>
+            </div>
+          {/each}
+        {:else}
+          {#each lowStockKpiCards as kpi}
+            <IconKpiCard
+              label={kpi.label}
+              value={kpi.value}
+              icon={kpi.icon}
+              iconBgClass={kpi.iconBgClass}
+              iconColor={kpi.iconColor}
+            />
+          {/each}
+        {/if}
       </div>
 
       <!-- Filters Section -->
-      <ReportFilterBar
-        id="low-stock-date-range"
-        bind:dateRange={lowStockDateRange}
-        filters={[
-          { id: "low-stock-location-filter", label: $_('navLocation'), options: lowStockLocationOptions, value: lowStockLocationFilter, onchange: (v) => (lowStockLocationFilter = v) },
-          { id: "low-stock-products-filter", label: $_('products'), options: lowStockCategoryOptions, value: lowStockCategoryFilter, onchange: (v) => (lowStockCategoryFilter = v) },
-        ]}
-      />
+      <div class="bg-card border border-border rounded-lg px-4 py-3">
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('navLocation')}</label>
+            <SearchSelect
+              query={LOCATION_QUERY}
+              dataKey="branches"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder={$_('searchLocation')}
+              initialValue={lowStockLocationId}
+              onSelect={(item) => { lowStockLocationId = item?.id ?? ""; lowStockCurrentPage = 1; }}
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('merchant')}</label>
+            <SearchSelect
+              query={MERCHANT_QUERY}
+              dataKey="merchant"
+              filterBuilder={(s) => ({
+                _or: [
+                  { first_name: { _ilike: `%${s}%` } },
+                  { last_name: { _ilike: `%${s}%` } },
+                ]
+              })}
+              displayLabel={(item) => [item.first_name, item.last_name].filter(Boolean).join(" ")}
+              placeholder={$_('searchMerchant')}
+              initialValue={lowStockMerchantId}
+              onSelect={(item) => { lowStockMerchantId = item?.id ?? ""; lowStockCurrentPage = 1; }}
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('category')}</label>
+            <SearchSelect
+              query={CATEGORY_QUERY}
+              dataKey="product_types"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder={$_('searchCategory')}
+              initialValue={lowStockCategoryId}
+              onSelect={(item) => { lowStockCategoryId = item?.id ?? ""; lowStockCurrentPage = 1; }}
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('products')}</label>
+            <SearchSelect
+              query={PRODUCT_QUERY}
+              dataKey="products"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder={$_('searchProduct')}
+              initialValue={lowStockProductId}
+              onSelect={(item) => { lowStockProductId = item?.id ?? ""; lowStockCurrentPage = 1; }}
+            />
+          </div>
+        </div>
+      </div>
 
       <!-- Low Stock Table -->
       <div class="bg-card border border-border rounded-lg overflow-hidden">
-        {#if true}
-          {@const paginatedLowStockData = filteredLowStockData.slice(
-            (lowStockPage - 1) * lowStockRowsPerPage,
-            lowStockPage * lowStockRowsPerPage,
-          )}
-          <DataTable
-            columns={lowStockColumns}
-            data={paginatedLowStockData}
-            searchable={true}
-            searchPlaceholder={$_('search')}
-            onSearch={(q) => { lowStockSearchQuery = q; }}
-            filters={[]}
-            actions={[
-              {
-                icon: "icon/edit",
-                label: $_('edit'),
-                onClick: handleEditLowStock,
-              },
-              {
-                icon: "icon/trash",
-                label: $_('delete'),
-                onClick: handleDeleteLowStock,
-                variant: "destructive",
-              },
-            ]}
-            pagination={{
-              currentPage: lowStockPage,
-              totalPages: lowStockTotalPages,
-              rowsPerPage: lowStockRowsPerPage,
-              onPageChange: handleLowStockPageChange,
-              onRowsPerPageChange: handleLowStockRowsPerPageChange,
-            }}
-          />
+        <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-foreground">{$_('lowStockProducts')}</h3>
+          <div class="flex items-center gap-2">
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="PDF" onclick={handleExportPDF}>
+              <Icon iconName="icon/file-text" size={20} class="text-red-500" />
+            </button>
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="XLS" onclick={handleExportXLS}>
+              <Icon iconName="icon/file-text" size={20} class="text-green-500" />
+            </button>
+            <button type="button" class="p-2 hover:bg-muted rounded transition-colors" aria-label="Print" onclick={handlePrint}>
+              <Icon iconName="icon/file-text" size={20} class="text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+          <div class="relative w-72 shrink-0">
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder={$_('search')}
+              class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={lowStockSearchQuery}
+            />
+          </div>
+        </div>
+
+        {#if lowStockLoading}
+          <div class="h-1 bg-muted/30 w-full overflow-hidden">
+            <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+          </div>
         {/if}
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-muted/30 border-b border-border">
+              <tr class="text-left text-xs text-muted-foreground uppercase">
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("name")}>
+                    {$_('productName')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'name' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'name' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("type")}>
+                    {$_('category')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'type' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'type' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("company")}>
+                    {$_('navLocation')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'company' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'company' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("merchant")}>
+                    {$_('merchant')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'merchant' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'merchant' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("unit")}>
+                    {$_('unit')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'unit' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'unit' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("quantity")}>
+                    {$_('qty')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'quantity' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'quantity' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("threshold")}>
+                    {$_('qtyAlert')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'threshold' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'threshold' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => lowStockHandleSort("created_at")}>
+                    {$_('date')}
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={lowStockSortColumn === 'created_at' && lowStockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={lowStockSortColumn === 'created_at' && lowStockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {#if lowStockData.length === 0 && !lowStockLoading}
+                <tr>
+                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
+                      <p>{$_('noLowStockFound')}</p>
+                    </div>
+                  </td>
+                </tr>
+              {:else}
+                {#each lowStockData as product}
+                  <tr class="hover:bg-muted/20 transition-colors">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                          <Icon iconName="icon/package" size={16} class="text-muted-foreground" />
+                        </div>
+                        <span class="text-sm font-medium text-foreground">{product.name ?? "-"}</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-foreground">{product.type?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{product.company?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{lowStockMerchantLabel(product)}</td>
+                    <td class="px-4 py-3 text-foreground">{product.default_unit ?? "-"}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {lowStockTypeClass(product.current_available_stock, product.treshold_quantity)}">
+                        {product.current_available_stock ?? 0}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-foreground">{product.treshold_quantity ?? 0}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">
+                      {product.created_at ? new Date(product.created_at).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-4 border-t border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <select
+              class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+              bind:value={lowStockRowsPerPage}
+              onchange={() => { lowStockCurrentPage = 1; }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span class="text-sm text-muted-foreground">Entries</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={lowStockCurrentPage === 1}
+              onclick={() => lowStockCurrentPage = lowStockCurrentPage - 1}
+            >
+              <Icon iconName="icon/chevron-left" size={16} />
+            </button>
+            {#each getVisiblePages(lowStockCurrentPage, lowStockTotalPages) as p}
+              {#if typeof p === "number"}
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === lowStockCurrentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                  style={p === lowStockCurrentPage ? 'background-color:#4DA0E6;' : ''}
+                  onclick={() => lowStockCurrentPage = p}
+                >
+                  {p}
+                </button>
+              {:else}
+                <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+              {/if}
+            {/each}
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={lowStockCurrentPage === lowStockTotalPages}
+              onclick={() => lowStockCurrentPage = lowStockCurrentPage + 1}
+            >
+              <Icon iconName="icon/chevron-right" size={16} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   {/if}

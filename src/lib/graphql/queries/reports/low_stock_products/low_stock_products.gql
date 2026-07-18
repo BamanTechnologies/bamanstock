@@ -1,0 +1,43 @@
+query getLowStockProperties(
+  $limit: Int
+  $offset: Int
+  $filter: products_bool_exp!
+  $order: [products_order_by!]!
+) {
+  products(
+    where: { _and: [{ is_low_stock: { _eq: true } }, $filter] }
+    limit: $limit
+    offset: $offset
+    order_by: $order
+  ) {
+    id
+    name
+    default_unit
+    factor
+    current_available_stock
+    attributes
+    treshold_quantity
+    created_at
+    merchantByCreatedBy {
+      id
+      first_name
+      last_name
+      phone_number
+    }
+    type: product_type {
+      id
+      name
+    }
+    company {
+      id
+      name
+    }
+  }
+  products_aggregate(
+    where: { _and: [{ is_low_stock: { _eq: true } }, $filter] }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}

@@ -178,5 +178,7 @@
   "stockMovementReport": "የክምችት እንቅስቃሴ ሪፖርት",
   "noStockMovementsFound": "ምንም የክምችት እንቅስቃሴ አልተገኘም",
   "movementType": "የእንቅስቃሴ አይነት",
-  "batchNumber": "የቡድን ቁጥር"
+  "batchNumber": "የቡድን ቁጥር",
+  "lowStockProducts": "ዝቅተኛ ክምችት ያላቸው ምርቶች",
+  "noLowStockFound": "ዝቅተኛ ክምችት ያላቸው ምርቶች አልተገኙም"
 }

@@ -178,5 +178,7 @@
   "stockMovementReport": "Gabaasa Sochiinsa Kuusaa",
   "noStockMovementsFound": "Sochiin kuusaa tokkollee hin argamne",
   "movementType": "Gosa Sochii",
-  "batchNumber": "Lakkoofsa Garee"
+  "batchNumber": "Lakkoofsa Garee",
+  "lowStockProducts": "Oomishaawwan Kuusaa Gadi Aanaa",
+  "noLowStockFound": "Oomishni kuusaa gadi aanaa tokkollee hin argamne"
 }

@@ -178,5 +178,7 @@
   "stockMovementReport": "Stock Movement Report",
   "noStockMovementsFound": "No stock movements found",
   "movementType": "Movement Type",
-  "batchNumber": "Batch Number"
+  "batchNumber": "Batch Number",
+  "lowStockProducts": "Low Stock Products",
+  "noLowStockFound": "No low stock products found"
 }
