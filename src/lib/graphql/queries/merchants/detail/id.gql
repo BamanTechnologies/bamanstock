@@ -5,6 +5,7 @@ query getMerchantDetail($id: uuid!) {
     last_name
     phone_number
     address
+    created_at
     total_transactions: payments_aggregate {
       aggregate {
         sum {

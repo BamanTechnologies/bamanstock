@@ -1,0 +1,21 @@
+query InvestorMerchantSalesTrend(
+  $year: Int
+  $merchantId: uuid!
+  $investorId: uuid!
+) {
+  overall_orders: orders_aggregate(
+    where: { merchant: { id: { _eq: $merchantId } } }
+  ) {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  investor_merchant_sales_trend_report(
+    args: { year: $year, merchant_id: $merchantId, investor_id: $investorId }
+  ) {
+    total_sales
+    month
+  }
+}
