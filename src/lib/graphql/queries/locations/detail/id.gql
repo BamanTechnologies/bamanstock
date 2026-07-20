@@ -29,8 +29,15 @@ query getStocks($id: uuid!) {
   }
   total_low_stock_products: products_aggregate(
     where: {
-      merchantByCreatedBy: { branch: { _eq: $id } }
-      is_low_stock: { _eq: true }
+      _and: [
+        {
+          _or: [
+            { merchantByCreatedBy: { branch: { _eq: $id } } }
+            { branch_id: { _eq: $id } }
+          ]
+        }
+        { is_low_stock: { _eq: true } }
+      ]
     }
   ) {
     aggregate {
