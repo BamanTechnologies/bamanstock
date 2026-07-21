@@ -3,12 +3,20 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-  import InviteMerchantModal from "$lib/components/investor/InviteMerchantModal.svelte";
+  import CreateMerchantModal from "$lib/components/investor/CreateMerchantModal.svelte";
+  import UpdateMerchantModal from "$lib/components/investor/UpdateMerchantModal.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { getAuthClient } from "$graphql/client.ts";
   import INVESTOR_MERCHANTS_QUERY from "$graphql/queries/merchants/investor_merchants.gql";
+  import DELETE_MERCHANT from "$graphql/mutation/merchant/delete.gql";
   import { _ } from "svelte-i18n";
 
-  let isInviteModalOpen = $state(false);
+  let isCreateModalOpen = $state(false);
+  let isEditModalOpen = $state(false);
+  let isDeleteModalOpen = $state(false);
+  let deletingMerchant = $state<any>(null);
+  let editingMerchant = $state<any>(null);
+  let deleteLoading = $state(false);
 
   let searchQuery = $state($page.url.searchParams.get("search") ?? "");
   let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
@@ -117,6 +125,7 @@
     void rowsPerPage;
     void sortColumn;
     void sortDirection;
+    void refetchTrigger;
 
     loading = true;
     fetchError = null;
@@ -180,8 +189,49 @@
     goto(`/dashboard/merchants/${merchant.id}`);
   }
 
-  function handleDelete(merchant: any) {
-    console.log("Delete merchant:", merchant.id);
+  function handleEdit(merchant: any) {
+    editingMerchant = merchant;
+    isEditModalOpen = true;
+  }
+
+  function handleDeleteClick(merchant: any) {
+    deletingMerchant = merchant;
+    isDeleteModalOpen = true;
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deletingMerchant) return;
+    deleteLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: DELETE_MERCHANT,
+        variables: { id: deletingMerchant.id },
+      });
+      isDeleteModalOpen = false;
+      deletingMerchant = null;
+      fetchError = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      fetchError = (err as Error).message;
+    } finally {
+      deleteLoading = false;
+    }
+  }
+
+  function handleDeleteCancel() {
+    isDeleteModalOpen = false;
+    deletingMerchant = null;
+  }
+
+  let refetchTrigger = $state(0);
+
+  function handleCreateSuccess() {
+    refetchTrigger++;
+  }
+
+  function handleEditSuccess() {
+    refetchTrigger++;
   }
 
   const summaryCards = $derived([
@@ -220,7 +270,7 @@
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isInviteModalOpen = true)}>
+    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isCreateModalOpen = true)}>
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       {$_('inviteMerchant')}
     </Button>
@@ -252,6 +302,14 @@
       <Icon iconName="icon/alert-circle" size={48} class="text-destructive mb-4" />
       <p class="text-destructive font-medium">{$_('somethingWentWrong')}</p>
       <p class="text-muted-foreground text-sm mt-1">{fetchError}</p>
+      <Button
+        variant="outline"
+        onclick={() => refetchTrigger++}
+        class="mt-4 border-border text-foreground hover:bg-muted"
+      >
+        <Icon iconName="icon/refresh-cw" size={16} class="mr-2" />
+        Try Again
+      </Button>
     </div>
   {:else if merchants.length === 0 && !loading}
     <div class="bg-card border border-border rounded-lg overflow-hidden">
@@ -423,7 +481,16 @@
                 <td class="px-4 py-4 text-foreground">{formatBranch(row.branch?.name)}</td>
                 <td class="px-4 py-4 text-right" onclick={(e) => e.stopPropagation()}>
                   <button
-                    onclick={() => handleDelete(row)}
+                    onclick={() => handleEdit(row)}
+                    class="p-1.5 rounded hover:bg-muted transition-colors"
+                    aria-label="Edit"
+                  >
+                    <!-- <Icon iconName="icon/pencil" size={16} class="text-muted-foreground hover:text-info" /> -->
+                    <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
+
+                  </button>
+                  <button
+                    onclick={() => handleDeleteClick(row)}
                     class="p-1.5 rounded hover:bg-muted transition-colors"
                     aria-label={$_('delete')}
                   >
@@ -489,7 +556,23 @@
   {/if}
 </div>
 
-<InviteMerchantModal bind:isOpen={isInviteModalOpen} />
+<CreateMerchantModal bind:isOpen={isCreateModalOpen} onSuccess={handleCreateSuccess} />
+
+<UpdateMerchantModal
+  bind:isOpen={isEditModalOpen}
+  merchant={editingMerchant}
+  onSuccess={handleEditSuccess}
+/>
+
+<ConfirmModal
+  bind:isOpen={isDeleteModalOpen}
+  title="Remove Merchant"
+  message={deletingMerchant ? `Are you sure you want to remove <strong>${deletingMerchant.first_name} ${deletingMerchant.last_name}</strong>? This action will revoke their access to all assigned stocks and cannot be undone.` : ""}
+  confirmText="Remove Merchant"
+  loading={deleteLoading}
+  onConfirm={handleDeleteConfirm}
+  onClose={handleDeleteCancel}
+/>
 
 <style>
   :global(.loading-slide) {

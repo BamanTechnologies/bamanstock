@@ -39,9 +39,14 @@
 
   let isAssignStockModalOpen = $state(false);
   let isEditLocationModalOpen = $state(false);
+  let detailRefetchTrigger = $state(0);
 
   function handleBack() {
     goto("/dashboard/merchants");
+  }
+
+  function handleEditLocationSuccess() {
+    detailRefetchTrigger++;
   }
 
   // ===================== Overview Tab =====================
@@ -54,6 +59,7 @@
 
   $effect(() => {
     if (activeTab !== "Overview") return;
+    void detailRefetchTrigger;
     detailLoading = true;
     const timer = setTimeout(async () => {
       try {
@@ -1305,11 +1311,9 @@
   <!-- Edit Location Modal -->
   <EditLocationModal
     bind:isOpen={isEditLocationModalOpen}
-    merchantName={merchantDetail ? `${merchantDetail.first_name} ${merchantDetail.last_name}` : "Merchant"}
-    currentLocation={formatBranch(merchantDetail?.branch?.name)}
-    onConfirm={(location) => {
-      console.log("Changing location to:", location);
-    }}
+    merchantId={merchantId}
+    currentBranchId={merchantDetail?.branch?.id ?? ""}
+    onSuccess={handleEditLocationSuccess}
   />
 </div>
 

@@ -1,103 +1,89 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
-  import { Input } from "$lib/components/ui/input/index.js";
+  import SearchSelect from "$lib/components/investor/search-select/SearchSelect.svelte";
+  import { getAuthClient } from "$graphql/client.ts";
+  import UPDATE_MERCHANT from "$graphql/mutation/merchant/update.gql";
+  import LOCATION_QUERY from "$graphql/queries/selector/location.gql";
 
   interface EditLocationModalProps {
     isOpen?: boolean;
-    merchantName?: string;
-    currentLocation?: string;
+    merchantId?: string;
+    currentBranchId?: string;
     onClose?: () => void;
-    onConfirm?: (location: string) => void;
+    onSuccess?: () => void;
   }
 
   let {
     isOpen = $bindable(false),
-    merchantName = "",
-    currentLocation = "",
+    merchantId = "",
+    currentBranchId = "",
     onClose,
-    onConfirm,
+    onSuccess,
   }: EditLocationModalProps = $props();
 
-  let selectedLocation = $state("");
-  let locationDropdownOpen = $state(false);
+  let branchId = $state("");
+  let loading = $state(false);
+  let error = $state<string | null>(null);
 
-  // Mock location options - replace with real data later
-  const locationOptions = [
-    "Branch #1",
-    "Branch #2",
-    "Branch #3",
-    "Downtown Branch",
-    "Santa Clara Area #1",
-    "Addis Ababa",
-    "Dire Dawa",
-    "Hawassa",
-    "Bahir Dar",
-    "Mekelle",
-  ];
+  function resetForm() {
+    branchId = "";
+    error = null;
+  }
 
   function handleClose() {
     isOpen = false;
+    resetForm();
     onClose?.();
-    // Reset form
-    selectedLocation = "";
   }
 
   function handleBackdropClick(e: MouseEvent) {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !loading) {
       handleClose();
     }
   }
 
   function handleEscape(e: KeyboardEvent) {
-    if (e.key === "Escape") {
+    if (e.key === "Escape" && !loading) {
       handleClose();
     }
   }
 
-  function handleConfirm() {
-    if (!selectedLocation) {
-      // TODO: Add validation/error messages
+  function handleBranchSelect(item: Record<string, any> | null) {
+    branchId = item?.id ?? "";
+  }
+
+  async function handleConfirm() {
+    if (!branchId || !merchantId) {
+      error = "Please select a branch";
+      return;
+    }
+    if (branchId === currentBranchId) {
+      error = "Selected branch is the same as the current branch";
       return;
     }
 
-    onConfirm?.(selectedLocation);
-    handleClose();
-  }
+    loading = true;
+    error = null;
 
-  function toggleLocationDropdown() {
-    locationDropdownOpen = !locationDropdownOpen;
-  }
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: UPDATE_MERCHANT,
+        variables: {
+          id: merchantId,
+          object: { branch: branchId },
+        },
+      });
 
-  function selectLocation(location: string) {
-    selectedLocation = location;
-    locationDropdownOpen = false;
-  }
-
-  // Filter locations based on search
-  const filteredLocations = $derived(
-    selectedLocation
-      ? locationOptions.filter((loc) =>
-          loc.toLowerCase().includes(selectedLocation.toLowerCase())
-        )
-      : locationOptions
-  );
-
-  // Close dropdown when clicking outside
-  $effect(() => {
-    if (locationDropdownOpen) {
-      const handleClickOutside = (e: MouseEvent) => {
-        const target = e.target as HTMLElement;
-        if (!target.closest(".location-dropdown")) {
-          locationDropdownOpen = false;
-        }
-      };
-      document.addEventListener("click", handleClickOutside);
-      return () => {
-        document.removeEventListener("click", handleClickOutside);
-      };
+      onSuccess?.();
+      handleClose();
+    } catch (err: any) {
+      error = err.message ?? "An unexpected error occurred";
+    } finally {
+      loading = false;
     }
-  });
+  }
 </script>
 
 {#if isOpen}
@@ -107,7 +93,7 @@
     onkeydown={handleEscape}
     role="dialog"
     aria-modal="true"
-    aria-labelledby="modal-title"
+    aria-labelledby="edit-location-title"
     tabindex="-1"
   >
     <div
@@ -115,114 +101,70 @@
       onclick={(e) => e.stopPropagation()}
       role="document"
     >
-      <!-- Header -->
       <div class="flex items-center justify-between p-6 border-b border-border">
-        <h2 id="modal-title" class="text-xl font-bold text-foreground">
+        <h2 id="edit-location-title" class="text-xl font-bold text-foreground">
           Change Merchant Location
         </h2>
         <button
           type="button"
-          class="p-1 rounded-md hover:bg-muted transition-colors"
+          class="p-1 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
           onclick={handleClose}
+          disabled={loading}
           aria-label="Close modal"
         >
           <Icon iconName="icon/x" size={20} class="text-foreground" />
         </button>
       </div>
 
-      <!-- Form Content -->
       <div class="p-6 space-y-6">
-        <!-- Select New Location -->
-        <div class="space-y-2">
-          <label
-            for="location-select"
-            class="text-sm font-medium text-foreground"
-          >
-            Select New Location
-          </label>
-          <div class="relative location-dropdown">
-            <div class="relative">
-              <Icon
-                iconName="icon/search"
-                size={16}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              />
-              <Input
-                id="location-select"
-                type="text"
-                bind:value={selectedLocation}
-                placeholder="Choose a location"
-                class="w-full pl-10 pr-10"
-                onfocus={() => (locationDropdownOpen = true)}
-              />
-              <button
-                type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2"
-                onclick={toggleLocationDropdown}
-                aria-label="Toggle dropdown"
-              >
-                <Icon
-                  iconName="icon/chevron-down"
-                  size={16}
-                  class="text-muted-foreground"
-                />
-              </button>
-            </div>
-            {#if locationDropdownOpen && filteredLocations.length > 0}
-              <div
-                class="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto"
-                role="listbox"
-              >
-                {#each filteredLocations as location}
-                  <button
-                    type="button"
-                    class="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors {selectedLocation ===
-                    location
-                      ? 'bg-muted'
-                      : ''}"
-                    onclick={() => selectLocation(location)}
-                    role="option"
-                    aria-selected={selectedLocation === location}
-                  >
-                    {location}
-                  </button>
-                {/each}
-              </div>
-            {/if}
+        {#if error}
+          <div class="p-3 rounded-md bg-destructive/10 border border-destructive/20 flex items-start gap-2">
+            <Icon iconName="icon/alert-circle" size={16} class="text-destructive shrink-0 mt-0.5" />
+            <p class="text-sm text-destructive">{error}</p>
           </div>
+        {/if}
+
+        <div class="space-y-2">
+          <label for="branch-select" class="text-sm font-medium text-foreground">
+            Select New Branch
+          </label>
+          <SearchSelect
+            query={LOCATION_QUERY}
+            dataKey="branches"
+            initialValue={currentBranchId}
+            placeholder="Search and select branch"
+            onSelect={handleBranchSelect}
+          />
         </div>
 
-        <!-- Warning Section -->
-        <div
-          class="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-md"
-        >
-          <Icon
-            iconName="icon/alert-circle"
-            size={20}
-            class="text-orange-600 shrink-0 mt-0.5"
-          />
+        <div class="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-md">
+          <Icon iconName="icon/alert-circle" size={20} class="text-orange-600 shrink-0 mt-0.5" />
           <p class="text-sm text-orange-800 leading-relaxed">
-            Reassigning this merchant will update their assigned stock and
-            reporting data.
+            Reassigning this merchant will update their assigned stock and reporting data.
           </p>
         </div>
       </div>
 
-      <!-- Footer with Action Buttons -->
-      <div
-        class="flex items-center justify-end gap-3 p-6 border-t border-border"
-      >
+      <div class="flex items-center justify-end gap-3 p-6 border-t border-border">
         <Button
           variant="outline"
           onclick={handleClose}
+          disabled={loading}
           class="border-border text-foreground hover:bg-muted"
         >
           Cancel
         </Button>
         <Button
           onclick={handleConfirm}
-          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
+          disabled={loading}
+          class="bg-[var(--primary-blue)] text-white hover:opacity-90 min-w-[120px]"
         >
+          {#if loading}
+            <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          {/if}
           Confirm Change
         </Button>
       </div>

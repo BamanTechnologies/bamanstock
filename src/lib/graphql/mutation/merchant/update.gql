@@ -1,0 +1,5 @@
+mutation updateMerchant($id: uuid!, $object: merchant_set_input!) {
+  update_merchant_by_pk(pk_columns: { id: $id }, _set: $object) {
+    id
+  }
+}
