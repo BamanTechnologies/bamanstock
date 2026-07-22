@@ -3,13 +3,13 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import DeleteLocationModal from "$lib/components/investor/DeleteLocationModal.svelte";
   import AddLocationModal from "$lib/components/investor/AddLocationModal.svelte";
   import AssignStockToLocationModal from "$lib/components/investor/AssignStockToLocationModal.svelte";
   import TransferStockModal from "$lib/components/investor/TransferStockModal.svelte";
   import RemoveStockItemModal from "$lib/components/investor/RemoveStockItemModal.svelte";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
   import SearchSelect from "$lib/components/investor/search-select/SearchSelect.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { getAuthClient } from "$graphql/client.js";
   import { browser } from "$app/environment";
   import { jwtDecode } from "jwt-decode";
@@ -22,6 +22,8 @@
   import STOCKS_QUERY from "$graphql/queries/stocks/stocks.gql";
   import MERCHANTS_QUERY from "$graphql/queries/merchants/investor_merchants.gql";
   import CATEGORY_QUERY from "$graphql/queries/selector/product_category.gql";
+  import UPDATE_BRANCH from "$graphql/mutation/locations/update.gql";
+  import DELETE_BRANCH from "$graphql/mutation/locations/delete.gql";
 
   const locationId = $derived($page.params.id);
 
@@ -55,6 +57,10 @@
   let isTransferStockModalOpen = $state(false);
   let isRemoveStockItemModalOpen = $state(false);
   let stockItemToRemove = $state<any>(undefined);
+  let detailRefetchTrigger = $state(0);
+  let editLoading = $state(false);
+  let editError = $state<string | null>(null);
+  let deleteLoading = $state(false);
 
   function handleBack() {
     goto("/dashboard/location");
@@ -69,6 +75,7 @@
   let categoryProportion = $state<any[]>([]);
 
   $effect(() => {
+    void detailRefetchTrigger;
     if (activeTab !== "Overview") return;
     detailLoading = true;
     const timer = setTimeout(async () => {
@@ -1465,12 +1472,25 @@
   {/if}
 
   <!-- Delete Location Modal -->
-  <DeleteLocationModal
+  <ConfirmModal
     bind:isOpen={isDeleteLocationModalOpen}
-    locationName={formatLocationName(detailData?.branches_by_pk?.name)}
-    onConfirm={() => {
-      console.log("Removing location:", detailData?.branches_by_pk?.name);
-      goto("/dashboard/location");
+    title="Remove Location"
+    message="Are you sure you want to remove <strong>{formatLocationName(detailData?.branches_by_pk?.name)}</strong>? This action cannot be undone."
+    confirmText="Remove Location"
+    loading={deleteLoading}
+    onConfirm={async () => {
+      if (!detailData?.branches_by_pk?.id) return;
+      deleteLoading = true;
+      try {
+        const client = getAuthClient("investor");
+        await client.mutate({
+          mutation: DELETE_BRANCH,
+          variables: { id: detailData.branches_by_pk.id },
+        });
+        goto("/dashboard/location");
+      } catch {
+        deleteLoading = false;
+      }
     }}
   />
 
@@ -1478,14 +1498,12 @@
   <AddLocationModal
     bind:isOpen={isEditLocationModalOpen}
     location={{
+      id: detailData?.branches_by_pk?.id,
       name: formatLocationName(detailData?.branches_by_pk?.name) ?? "",
       address: detailData?.branches_by_pk?.address ?? "",
-      description: "",
-      status: true,
+      company: detailData?.branches_by_pk?.company?.id ?? "",
     }}
-    onSubmit={(data: any) => {
-      console.log("Updating location:", data);
-    }}
+    onSuccess={() => { detailRefetchTrigger++; }}
   />
 
   <!-- Assign Stock to Location Modal -->

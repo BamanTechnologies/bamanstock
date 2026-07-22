@@ -4,18 +4,26 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import AddLocationModal from "$lib/components/investor/AddLocationModal.svelte";
-  import DeleteLocationModal from "$lib/components/investor/DeleteLocationModal.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { getAuthClient } from "$graphql/client.ts";
   import INVESTOR_BRANCHES_QUERY from "$graphql/queries/locations/branches.gql";
+  import DELETE_BRANCH from "$graphql/mutation/locations/delete.gql";
   import { _ } from "svelte-i18n";
 
   let isAddLocationModalOpen = $state(false);
   let locationToEdit = $state<{
+    id?: string;
     name: string;
     address: string;
-    description: string;
-    status: boolean;
+    company?: string;
+    companyName?: string;
   } | null>(null);
+
+  let isDeleteModalOpen = $state(false);
+  let deletingLocation = $state<{ id: string; name: string } | null>(null);
+  let deleteLoading = $state(false);
+
+  let refetchTrigger = $state(0);
 
   let searchQuery = $state($page.url.searchParams.get("search") ?? "");
   let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
@@ -95,6 +103,7 @@
     void rowsPerPage;
     void sortColumn;
     void sortDirection;
+    void refetchTrigger;
 
     loading = true;
     fetchError = null;
@@ -157,28 +166,44 @@
     isAddLocationModalOpen = true;
   }
 
-  function handleEdit(location: any) {
+  function handleEdit(loc: any) {
     locationToEdit = {
-      name: location.name,
-      address: location.address ?? "",
-      description: "",
-      status: true,
+      id: loc.id,
+      name: loc.name,
+      address: loc.address ?? "",
+      company: loc.company?.id ?? "",
+      companyName: loc.company?.name ?? "",
     };
     isAddLocationModalOpen = true;
   }
 
-  function handleLocationSubmit(data: {
-    name: string;
-    address: string;
-    description: string;
-    status: boolean;
-  }) {
-    console.log("Location submit:", data);
+  function handleLocationSuccess() {
     locationToEdit = null;
+    refetchTrigger++;
   }
 
-  function handleDelete(location: any) {
-    console.log("Delete location:", location.id);
+  function handleDeleteClick(loc: any) {
+    deletingLocation = { id: loc.id, name: loc.name };
+    isDeleteModalOpen = true;
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deletingLocation) return;
+    deleteLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: DELETE_BRANCH,
+        variables: { id: deletingLocation.id },
+      });
+      isDeleteModalOpen = false;
+      deletingLocation = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      console.error("Delete failed:", err);
+    } finally {
+      deleteLoading = false;
+    }
   }
 
   const AVATAR_COLORS = [
@@ -444,7 +469,7 @@
                     <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
                   </button>
                   <button
-                    onclick={() => handleDelete(row)}
+                    onclick={() => handleDeleteClick(row)}
                     class="p-1.5 rounded hover:bg-muted transition-colors"
                     aria-label={$_('delete')}
                   >
@@ -513,7 +538,18 @@
 <AddLocationModal
   bind:isOpen={isAddLocationModalOpen}
   location={locationToEdit}
-  onSubmit={handleLocationSubmit}
+  onSuccess={handleLocationSuccess}
+  onClose={() => { locationToEdit = null; }}
+/>
+
+<ConfirmModal
+  bind:isOpen={isDeleteModalOpen}
+  title="Remove Location"
+  message="Are you sure you want to remove <strong>{deletingLocation?.name ?? ""}</strong>? All merchants and stocks assigned to this location will need to be reassigned or will become unassigned."
+  confirmText="Remove Location"
+  loading={deleteLoading}
+  onConfirm={handleDeleteConfirm}
+  onClose={() => { deletingLocation = null; }}
 />
 
 <style>
