@@ -1,0 +1,5 @@
+mutation createStock($object: stock_insert_input!) {
+  insert_stock_one(object: $object) {
+    id
+  }
+}

@@ -2,5 +2,6 @@ query getLocations($limit: Int, $offset: Int, $filter: branches_bool_exp) {
   branches(limit: $limit, offset: $offset, where: $filter) {
     id
     name
+    company
   }
 }

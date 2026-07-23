@@ -100,7 +100,7 @@
   }
 
   async function loadDefaults() {
-    await loadItems({});
+    await loadItems(filterBuilder(""));
   }
 
   function handleInput() {
@@ -166,6 +166,7 @@
       bind:value={searchText}
       oninput={handleInput}
       onfocus={handleFocus}
+      onblur={() => setTimeout(() => { isOpen = false; }, 200)}
       placeholder={placeholder}
       disabled={loading && !initialized}
       class="w-full h-9 pl-9 pr-8 border border-border rounded-md bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border disabled:opacity-50"

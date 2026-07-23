@@ -2,17 +2,25 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
-  import RemoveStockItemModal from "$lib/components/investor/RemoveStockItemModal.svelte";
-  import AddProductModal from "$lib/components/investor/AddProductModal.svelte";
+  import CreateStockModal from "$lib/components/investor/CreateStockModal.svelte";
+  import UpdateStockModal from "$lib/components/investor/UpdateStockModal.svelte";
+  import DeleteStockConfirmModal from "$lib/components/investor/DeleteStockConfirmModal.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { getAuthClient } from "$graphql/client.ts";
   import INVESTOR_STOCKS_QUERY from "$graphql/queries/stocks/stocks.gql";
   import { _ } from "svelte-i18n";
+  import SearchSelect from "$lib/components/investor/search-select/SearchSelect.svelte";
+  import PRODUCT_QUERY from "$graphql/queries/selector/products.gql";
+  import COMPANY_QUERY from "$graphql/queries/selector/company.gql";
+  import LOCATION_QUERY from "$graphql/queries/selector/location.gql";
 
-  let isRemoveStockModalOpen = $state(false);
-  let stockItemToRemove = $state<any>(undefined);
-  let isAddProductModalOpen = $state(false);
+  let isCreateStockModalOpen = $state(false);
+  let isUpdateStockModalOpen = $state(false);
+  let stockItemToEdit = $state<any>(null);
+  let isDeleteStockModalOpen = $state(false);
+  let stockItemToDelete = $state<any>(null);
+  let refetchTrigger = $state(0);
 
   let searchQuery = $state($page.url.searchParams.get("search") ?? "");
   let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
@@ -27,9 +35,9 @@
   let loading = $state(true);
   let fetchError = $state<string | null>(null);
 
-  let assignedMerchantFilter = $state("");
-  let locationFilter = $state("");
-  let categoryFilter = $state("");
+  let productFilterId = $state("");
+  let companyFilterId = $state("");
+  let branchFilterId = $state("");
   let statusFilter = $state("");
 
   let debouncedSearch = $state($page.url.searchParams.get("search") ?? "");
@@ -57,15 +65,14 @@
         ],
       });
     }
-    if (categoryFilter) {
-      conditions.push({
-        product: { type: { name: { _ilike: categoryFilter } } },
-      });
+    if (productFilterId) {
+      conditions.push({ product_id: { _eq: productFilterId } });
     }
-    if (locationFilter) {
-      conditions.push({
-        branchByBranch: { name: { _ilike: `%${locationFilter}%` } },
-      });
+    if (companyFilterId) {
+      conditions.push({ branchByBranch: { company: { _eq: companyFilterId } } });
+    }
+    if (branchFilterId) {
+      conditions.push({ branchByBranch: { id: { _eq: branchFilterId } } });
     }
     return conditions.length ? { _and: conditions } : {};
   }
@@ -80,6 +87,8 @@
         return [{ batch_number: sortDirection }];
       case "branch":
         return [{ branchByBranch: { name: sortDirection } }];
+      case "expiry":
+        return [{ expiry_date: sortDirection }];
       case "quantity":
         return [{ quantity: sortDirection }];
       case "created_at":
@@ -106,8 +115,10 @@
     void rowsPerPage;
     void sortColumn;
     void sortDirection;
-    void locationFilter;
-    void categoryFilter;
+    void productFilterId;
+    void companyFilterId;
+    void branchFilterId;
+    void refetchTrigger;
 
     loading = true;
     fetchError = null;
@@ -161,19 +172,6 @@
     return Object.entries(attrs).filter(([, v]) => v != null && String(v).trim() !== "");
   }
 
-  const filters = $derived([
-    {
-      key: "status",
-      label: $_('filterStatus'),
-      options: [
-        { value: "",         label: $_('allStatus') },
-        { value: "adequate", label: $_('statusAdequate') },
-        { value: "low",      label: $_('statusLowStock') },
-        { value: "out",      label: "Out" },
-      ],
-    },
-  ]);
-
   function handlePageChange(page: number) {
     currentPage = page;
   }
@@ -184,42 +182,25 @@
   }
 
   function handleEdit(item: any) {
-    console.log("Edit stock item:", item);
-  }
-
-  function handleTransfer(item: any) {
-    console.log("Transfer stock item:", item);
+    stockItemToEdit = item;
+    isUpdateStockModalOpen = true;
   }
 
   function handleDelete(item: any) {
-    stockItemToRemove = item;
-    isRemoveStockModalOpen = true;
-  }
-
-  function handleConfirmDelete() {
-    if (stockItemToRemove) {
-      stockItems = stockItems.filter((item) => item.id !== stockItemToRemove.id);
-      stockItemToRemove = undefined;
-    }
+    stockItemToDelete = item;
+    isDeleteStockModalOpen = true;
   }
 
   function handleAddStock() {
-    isAddProductModalOpen = true;
+    isCreateStockModalOpen = true;
   }
 
-  function handleCreateProduct(data: any) {
-    console.log("Creating product:", data);
+  function handleRefetch() {
+    refetchTrigger++;
   }
 
   function handleSearch(query: string) {
     searchQuery = query;
-    currentPage = 1;
-  }
-
-  function handleFilterChange(key: string, value: string) {
-    if (key === "status") statusFilter = value;
-    if (key === "category") categoryFilter = value;
-    if (key === "location") locationFilter = value;
     currentPage = 1;
   }
 
@@ -289,22 +270,49 @@
             bind:value={searchQuery}
           />
         </div>
-        {#if filters.length > 0}
-          <div class="flex gap-3 ml-auto">
-            {#each filters as filter}
-              <div class="w-40">
-                <select
-                  class="w-full px-3 py-2 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none"
-                  onchange={(e) => handleFilterChange(filter.key, e.currentTarget.value)}
-                >
-                  {#each filter.options as opt}
-                    <option value={opt.value}>{opt.label}</option>
-                  {/each}
-                </select>
-              </div>
-            {/each}
+        <div class="flex gap-2 ml-auto flex-wrap items-center">
+          <div class="w-44">
+            <SearchSelect
+              query={PRODUCT_QUERY}
+              dataKey="products"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder="Product"
+              onSelect={(item) => { productFilterId = item?.id ?? ""; currentPage = 1; }}
+            />
           </div>
-        {/if}
+          <div class="w-44">
+            <SearchSelect
+              query={COMPANY_QUERY}
+              dataKey="companies"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder="Company"
+              onSelect={(item) => { companyFilterId = item?.id ?? ""; currentPage = 1; }}
+            />
+          </div>
+          <div class="w-44">
+            <SearchSelect
+              query={LOCATION_QUERY}
+              dataKey="branches"
+              filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+              displayLabel={(item) => item.name}
+              placeholder="Branch"
+              onSelect={(item) => { branchFilterId = item?.id ?? ""; currentPage = 1; }}
+            />
+          </div>
+          <div class="w-32">
+            <select
+              class="w-full px-3 py-2 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none"
+              onchange={(e) => { statusFilter = e.currentTarget.value; currentPage = 1; }}
+            >
+              <option value="">All Status</option>
+              <option value="adequate">Adequate</option>
+              <option value="low">Low Stock</option>
+              <option value="out">Out</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {#if loading}
@@ -422,6 +430,23 @@
                   </span>
                 </button>
               </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("expiry")}
+                >
+                  Expiry
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'expiry' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'expiry' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
               <th class="px-4 py-3 font-medium">Attributes</th>
               <th class="px-4 py-3 text-right font-medium">Actions</th>
             </tr>
@@ -429,7 +454,7 @@
           <tbody class="divide-y divide-border">
             {#if stockItems.length === 0 && !loading}
               <tr>
-                <td colspan="9" class="p-0">
+                <td colspan="10" class="p-0">
                   <EmptyState
                     illustration="stock-page"
                     title="No Stock Assigned Yet"
@@ -459,6 +484,19 @@
                   <td class="px-4 py-4 text-foreground">{row.quantity ?? 0}</td>
                   <td class="px-4 py-4 text-muted-foreground text-xs">
                     {row.created_at ? new Date(row.created_at).toLocaleDateString() : "-"}
+                  </td>
+                  <td class="px-4 py-4">
+                    {#if row.expiry_date}
+                      {@const expired = new Date(row.expiry_date) < new Date()}
+                      <span class="inline-flex items-center gap-1 text-xs {expired ? 'text-destructive' : 'text-muted-foreground'}">
+                        {#if expired}
+                          <Icon iconName="icon/alert-circle" size={12} class="text-destructive" />
+                        {/if}
+                        {new Date(row.expiry_date).toLocaleDateString()}
+                      </span>
+                    {:else}
+                      <span class="text-muted-foreground text-xs">—</span>
+                    {/if}
                   </td>
                   <td class="px-4 py-4 text-foreground">
                     {#if attributeEntries(row.attributes).length > 0}
@@ -549,15 +587,21 @@
     </div>
   {/if}
 
-  <RemoveStockItemModal
-    bind:isOpen={isRemoveStockModalOpen}
-    stockItemName={stockItemToRemove?.product?.name || stockItemToRemove?.id || ""}
-    onConfirm={handleConfirmDelete}
+  <CreateStockModal
+    bind:isOpen={isCreateStockModalOpen}
+    onSuccess={handleRefetch}
   />
 
-  <AddProductModal
-    bind:isOpen={isAddProductModalOpen}
-    onCreate={handleCreateProduct}
+  <UpdateStockModal
+    bind:isOpen={isUpdateStockModalOpen}
+    stock={stockItemToEdit}
+    onSuccess={handleRefetch}
+  />
+
+  <DeleteStockConfirmModal
+    bind:isOpen={isDeleteStockModalOpen}
+    stock={stockItemToDelete}
+    onSuccess={handleRefetch}
   />
 </div>
 
