@@ -180,5 +180,13 @@
   "movementType": "Movement Type",
   "batchNumber": "Batch Number",
   "lowStockProducts": "Low Stock Products",
-  "noLowStockFound": "No low stock products found"
+  "noLowStockFound": "No low stock products found",
+  "oldPassword": "Old Password",
+  "newPassword": "New Password",
+  "cancel": "Cancel",
+  "bothFieldsRequired": "Both fields are required",
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "failedToChangePassword": "Failed to change password",
+  "oldPasswordPlaceholder": "Enter your current password",
+  "newPasswordPlaceholder": "Enter your new password"
 }

@@ -11,6 +11,7 @@ query getProfile($id: uuid!) {
       first_name
       last_name
       phone_number
+      address
       company_investors {
         company: companyByCompany {
           id

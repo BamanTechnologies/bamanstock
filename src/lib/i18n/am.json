@@ -180,5 +180,13 @@
   "movementType": "የእንቅስቃሴ አይነት",
   "batchNumber": "የቡድን ቁጥር",
   "lowStockProducts": "ዝቅተኛ ክምችት ያላቸው ምርቶች",
-  "noLowStockFound": "ዝቅተኛ ክምችት ያላቸው ምርቶች አልተገኙም"
+  "noLowStockFound": "ዝቅተኛ ክምችት ያላቸው ምርቶች አልተገኙም",
+  "oldPassword": "የድሮ የይለፍ ቃል",
+  "newPassword": "አዲስ የይለፍ ቃል",
+  "cancel": "ሰርዝ",
+  "bothFieldsRequired": "ሁለቱም መስኮች ያስፈልጋሉ።",
+  "passwordChangedSuccessfully": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
+  "failedToChangePassword": "የይለፍ ቃል መቀየር አልተቻለም",
+  "oldPasswordPlaceholder": "የአሁኑን የይለፍ ቃልዎን ያስገቡ",
+  "newPasswordPlaceholder": "አዲስ የይለፍ ቃልዎን ያስገቡ"
 }
