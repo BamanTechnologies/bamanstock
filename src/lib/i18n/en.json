@@ -157,6 +157,7 @@
   "valueAtRisk": "Value at Risk",
   "totalSales": "Total Sales",
   "totalOrders": "Total Orders",
+  "address": "Address",
   "totalTransaction": "Total Transaction",
   "unitsSold": "Units Sold",
   "totalOutstanding": "Total Outstanding",
@@ -186,7 +187,11 @@
   "cancel": "Cancel",
   "bothFieldsRequired": "Both fields are required",
   "passwordChangedSuccessfully": "Password changed successfully",
+  "quantity": "Quantity",
   "failedToChangePassword": "Failed to change password",
   "oldPasswordPlaceholder": "Enter your current password",
-  "newPasswordPlaceholder": "Enter your new password"
+  "newPasswordPlaceholder": "Enter your new password",
+  "actions": "Actions",
+  "view": "View",
+  "topCustomers": "Top Customers"
 }

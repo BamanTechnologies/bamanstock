@@ -1,0 +1,30 @@
+query topCustomers($limit: Int, $offset: Int, $filter: customers_bool_exp) {
+  customers(
+    limit: $limit
+    offset: $offset
+    where: $filter
+    order_by: { orders_aggregate: { count: desc_nulls_last } }
+  ) {
+    id
+    first_name
+    last_name
+    address
+    orders_aggregate {
+      aggregate {
+        count
+      }
+    }
+    revenue: orders_aggregate {
+      aggregate {
+        sum {
+          total_amount
+        }
+      }
+    }
+  }
+  total: customers_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}
