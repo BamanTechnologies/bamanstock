@@ -77,8 +77,9 @@
   }
 
   const activeRevenueChart = $derived(revenueChartData[chartTimeframe] ?? revenueChartData["1Y"]);
-  const svgRevenue = $derived(toReportPath(activeRevenueChart.revenue));
-  const svgProfit  = $derived(toReportPath(activeRevenueChart.profit));
+  const hasRevenueData = $derived(activeRevenueChart.revenue.length > 0);
+  const svgRevenue = $derived(hasRevenueData ? toReportPath(activeRevenueChart.revenue) : null);
+  const svgProfit  = $derived(hasRevenueData ? toReportPath(activeRevenueChart.profit) : null);
 
   const CAT_CIRC = 351.9;
   const catColors = ["#3b82f6", "#ec4899", "#f59e0b", "#22c55e", "#a855f7"];
@@ -1496,46 +1497,54 @@
           </div>
 
           <!-- Revenue vs Profit SVG Chart -->
-          <div class="flex gap-3">
-            <!-- Y-axis labels -->
-            <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-10 shrink-0 text-right">
-              {#each activeRevenueChart.yLabels as lbl}
-                <span>{lbl}</span>
-              {/each}
-            </div>
-            <div class="flex-1 relative h-64">
-              <svg viewBox="0 0 860 200" class="w-full h-full" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="revGradReport" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.2" />
-                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.01" />
-                  </linearGradient>
-                  <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stop-color="#ec4899" stop-opacity="0.2" />
-                    <stop offset="100%" stop-color="#ec4899" stop-opacity="0.01" />
-                  </linearGradient>
-                </defs>
-                {#each [0, 40, 80, 120, 160, 200] as y}
-                  <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.07" stroke-width="1" />
-                {/each}
-                <path d={svgRevenue.fill} fill="url(#revGradReport)" />
-                <path d={svgRevenue.line} fill="none" stroke="#3b82f6" stroke-width="2.5" />
-                <path d={svgProfit.fill}  fill="url(#profitGrad)" />
-                <path d={svgProfit.line}  fill="none" stroke="#ec4899" stroke-width="2.5" />
-                {#each svgRevenue.pts as pt}
-                  <circle cx={pt.x} cy={pt.y} r="4" fill="#3b82f6" />
-                {/each}
-                {#each svgProfit.pts as pt}
-                  <circle cx={pt.x} cy={pt.y} r="4" fill="#ec4899" />
-                {/each}
-              </svg>
-              <div class="absolute bottom-0 left-0 right-0 flex justify-between">
-                {#each activeRevenueChart.labels as m}
-                  <span class="text-[10px] text-muted-foreground">{m}</span>
+          {#if hasRevenueData}
+            <div class="flex gap-3">
+              <!-- Y-axis labels -->
+              <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-10 shrink-0 text-right">
+                {#each activeRevenueChart.yLabels as lbl}
+                  <span>{lbl}</span>
                 {/each}
               </div>
+              <div class="flex-1 relative h-64">
+                <svg viewBox="0 0 860 200" class="w-full h-full" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="revGradReport" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.2" />
+                      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.01" />
+                    </linearGradient>
+                    <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stop-color="#ec4899" stop-opacity="0.2" />
+                      <stop offset="100%" stop-color="#ec4899" stop-opacity="0.01" />
+                    </linearGradient>
+                  </defs>
+                  {#each [0, 40, 80, 120, 160, 200] as y}
+                    <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.07" stroke-width="1" />
+                  {/each}
+                  <path d={svgRevenue.fill} fill="url(#revGradReport)" />
+                  <path d={svgRevenue.line} fill="none" stroke="#3b82f6" stroke-width="2.5" />
+                  <path d={svgProfit.fill}  fill="url(#profitGrad)" />
+                  <path d={svgProfit.line}  fill="none" stroke="#ec4899" stroke-width="2.5" />
+                  {#each svgRevenue.pts as pt}
+                    <circle cx={pt.x} cy={pt.y} r="4" fill="#3b82f6" />
+                  {/each}
+                  {#each svgProfit.pts as pt}
+                    <circle cx={pt.x} cy={pt.y} r="4" fill="#ec4899" />
+                  {/each}
+                </svg>
+                <div class="absolute bottom-0 left-0 right-0 flex justify-between">
+                  {#each activeRevenueChart.labels as m}
+                    <span class="text-[10px] text-muted-foreground">{m}</span>
+                  {/each}
+                </div>
+              </div>
             </div>
-          </div>
+          {:else}
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+              <Icon iconName="icon/bar-chart" size={48} class="text-muted-foreground mb-4" />
+              <p class="text-foreground font-medium">No Revenue Data</p>
+              <p class="text-muted-foreground text-sm mt-1">There is no revenue data available for the selected period.</p>
+            </div>
+          {/if}
         </div>
 
         <!-- Revenue by Category -->

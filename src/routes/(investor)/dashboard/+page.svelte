@@ -538,6 +538,12 @@
         <div class="relative">
           <div use:chartAction class="w-full"></div>
         </div>
+      {:else}
+        <div class="h-52 flex flex-col items-center justify-center text-center">
+          <Icon iconName="icon/bar-chart" size={40} class="text-muted-foreground mb-3" />
+          <p class="text-foreground font-medium">No Revenue Data</p>
+          <p class="text-muted-foreground text-sm mt-1">There is no revenue data available for the selected period.</p>
+        </div>
       {/if}
     </div>
 
@@ -669,51 +675,56 @@
         </h3>
       </div>
 
-      {#if loading}
-        <div class="flex items-center gap-4">
-          <Skeleton class="w-36 h-36 rounded-full" />
-          <div class="flex-1 space-y-3">
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-          </div>
-        </div>
-      {:else if donutSeries.length > 0}
-        <div>
-          <div use:donutChartAction class="w-full"></div>
-        </div>
-        <div class="flex flex-col gap-4">
-          {#each stockDistributionData as item}
-            <div class="flex items-start gap-2">
-              <span class="w-1.5 h-9 {item.color} rounded-full shrink-0 mt-0.5"></span>
-              <div>
-                <p class="text-xs text-muted-foreground">{item.label}</p>
-                <p class="text-sm font-bold text-foreground">{item.value}</p>
-              </div>
-            </div>
-          {/each}
-        </div>
-      {/if}
+      <div class="w-full h-fit flex items-center gap-10 justify-center">
 
-      <div class="mt-auto space-y-3">
+        {#if loading}
+          <div class="flex items-center gap-4">
+            <Skeleton class="w-36 h-36 rounded-full" />
+            <div class="flex-1 space-y-3">
+              <Skeleton class="h-10 w-full" />
+              <Skeleton class="h-10 w-full" />
+              <Skeleton class="h-10 w-full" />
+            </div>
+          </div>
+        {:else if donutSeries.length > 0}
+          <div>
+            <div use:donutChartAction class="w-full"></div>
+          </div>
+          <div class="flex flex-col gap-4">
+            {#each stockDistributionData as item}
+              <div class="flex items-start gap-2">
+                <span class="w-1.5 h-9 {item.color} rounded-full shrink-0 mt-0.5"></span>
+                <div>
+                  <p class="text-xs text-muted-foreground">{item.label}</p>
+                  <p class="text-sm font-bold text-foreground">{item.value}</p>
+                </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
+
+      </div>
+      <div class="mt-auto space-y-1">
         <h3 class="text-sm font-semibold text-foreground">{$_('categoryStatistics')}</h3>
-        <div class="border border-border rounded-lg divide-y divide-border">
-          <div class="flex items-center justify-between px-4 py-3 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-              <span class="text-muted-foreground">{$_('totalCategories')}</span>
-            </div>
-            <span class="font-bold text-foreground">{categoryStats.categories}</span>
+      </div>
+      <div class="border border-border rounded-lg divide-y divide-border">
+        <div class="flex items-center justify-between px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            <span class="text-muted-foreground">{$_('totalCategories')}</span>
           </div>
-          <div class="flex items-center justify-between px-4 py-3 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-              <span class="text-muted-foreground">{$_('totalProducts')} {$_('quantity')}</span>
-            </div>
-            <span class="font-bold text-foreground">{categoryStats.products.toLocaleString()}</span>
+          <span class="font-bold text-foreground">{categoryStats.categories}</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            <span class="text-muted-foreground">{$_('totalProducts')} {$_('quantity')}</span>
           </div>
+          <span class="font-bold text-foreground">{categoryStats.products.toLocaleString()}</span>
         </div>
       </div>
+
+
 
     </div>
   </div>
