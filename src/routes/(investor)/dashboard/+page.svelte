@@ -701,6 +701,12 @@
               </div>
             {/each}
           </div>
+        {:else}
+          <div class="flex flex-col items-center justify-center py-10 text-center w-full">
+            <Icon iconName="icon/activity" size={40} class="text-muted-foreground mb-3" />
+            <p class="text-foreground font-medium">No Stock Distribution Data</p>
+            <p class="text-muted-foreground text-xs mt-1">Stock distribution data will appear once products are added.</p>
+          </div>
         {/if}
 
       </div>
