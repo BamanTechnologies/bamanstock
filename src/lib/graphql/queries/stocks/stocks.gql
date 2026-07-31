@@ -1,0 +1,38 @@
+query fetchInvestorStocks(
+  $limit: Int
+  $offset: Int
+  $filter: stock_bool_exp
+  $order: [stock_order_by!]!
+) {
+  stock(limit: $limit, offset: $offset, where: $filter, order_by: $order) {
+    id
+    type
+    quantity
+    created_at
+    batch_number
+    expiry_date
+    unit
+    attributes
+    product {
+      id
+      name
+      type: product_type {
+        id
+        name
+      }
+    }
+    branch: branchByBranch {
+      id
+      name
+    }
+    origin: branchByOrigin {
+      id
+      name
+    }
+  }
+  stock_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

@@ -1,0 +1,18 @@
+query getMerchantsReport(
+  $limit: Int
+  $offset: Int
+  $filter: reports_bool_exp
+  $order: [reports_order_by!]!
+) {
+  reports(where: $filter, limit: $limit, offset: $offset, order_by: $order) {
+    id
+    message
+    sms_status
+    created_at
+  }
+  reports_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

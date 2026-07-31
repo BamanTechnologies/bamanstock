@@ -1,0 +1,8 @@
+query getInvestorSalesPerProductTypeProportion($investorId: uuid!) {
+  investor_sales_per_product_type_report(args: { investor_id: $investorId }) {
+    product_type_id
+    product_type_name
+    total_sales
+    total_quantity_sold
+  }
+}

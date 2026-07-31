@@ -1,0 +1,6 @@
+query getCompanies($limit: Int, $offset: Int, $filter: companies_bool_exp) {
+  companies(where: $filter, limit: $limit, offset: $offset) {
+    id
+    name
+  }
+}

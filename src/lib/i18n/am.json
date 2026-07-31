@@ -159,6 +159,7 @@
   "totalOrders": "ጠቅላላ ትዕዛዞች",
   "totalTransaction": "ጠቅላላ ግብይቶች",
   "unitsSold": "የተሸጡ ክፍሎች",
+  "totalOutstanding": "ጠቅላላ የሚከፈል",
   "fromLastMonth": "ካለፈው ወር",
   "salesReport": "የሽያጭ ሪፖርት",
   "paymentReport": "የክፍያ ሪፖርት",
@@ -173,5 +174,19 @@
   "custom": "ብጁ",
   "selectPeriod": "ጊዜ ይምረጡ",
   "sessionExpired": "የእርስዎ ክፍለ ጊዜ አልቋል። እባክዎ እንደገና ይግቡ።",
-  "somethingWentWrong": "የሆነ ችግር ተፈጥሯል"
+  "somethingWentWrong": "የሆነ ችግር ተፈጥሯል",
+  "stockMovementReport": "የክምችት እንቅስቃሴ ሪፖርት",
+  "noStockMovementsFound": "ምንም የክምችት እንቅስቃሴ አልተገኘም",
+  "movementType": "የእንቅስቃሴ አይነት",
+  "batchNumber": "የቡድን ቁጥር",
+  "lowStockProducts": "ዝቅተኛ ክምችት ያላቸው ምርቶች",
+  "noLowStockFound": "ዝቅተኛ ክምችት ያላቸው ምርቶች አልተገኙም",
+  "oldPassword": "የድሮ የይለፍ ቃል",
+  "newPassword": "አዲስ የይለፍ ቃል",
+  "cancel": "ሰርዝ",
+  "bothFieldsRequired": "ሁለቱም መስኮች ያስፈልጋሉ።",
+  "passwordChangedSuccessfully": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
+  "failedToChangePassword": "የይለፍ ቃል መቀየር አልተቻለም",
+  "oldPasswordPlaceholder": "የአሁኑን የይለፍ ቃልዎን ያስገቡ",
+  "newPasswordPlaceholder": "አዲስ የይለፍ ቃልዎን ያስገቡ"
 }

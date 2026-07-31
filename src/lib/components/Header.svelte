@@ -4,8 +4,11 @@
   import Logo from "$lib/components/investor/Logo.svelte";
   import { themeStore } from "$lib/stores/theme.svelte.js";
   import { authStore } from "$lib/stores/auth.svelte.js";
+  import { useProfile } from "$lib/stores/profile.svelte.js";
   import { _, locale } from "svelte-i18n";
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
+
+  const profile = useProfile();
 
   let showLangDropdown = $state(false);
   let showUserDropdown = $state(false);
@@ -80,21 +83,23 @@
               class="flex flex-none items-center gap-2 rounded-full hover:bg-muted bg-gray-50 cursor-pointer dark:bg-gray-900 transition-colors px-2.5 py-1"
               aria-label="User menu"
             >
-              <span class="text-sm font-medium text-foreground max-w-[120px] truncate">{authStore.user?.name}</span>
-              {#if authStore.user?.avatar}
+              <span class="text-sm font-medium text-foreground max-w-[120px] truncate">{profile.name || authStore.user?.name}</span>
+              {#if profile.avatar}
+                <img src={profile.avatar} alt={profile.name} class="w-8 h-8 rounded-full object-cover" />
+              {:else if authStore.user?.avatar}
                 <img src={authStore.user.avatar} alt={authStore.user.name} class="w-8 h-8 rounded-full object-cover" />
               {:else}
                 <span class="w-8 h-8 rounded-full bg-info flex items-center justify-center text-xs font-bold text-info-foreground">
-                  {authStore.user?.name?.charAt(0).toUpperCase()}
+                  {(profile.name || authStore.user?.name || 'U').charAt(0).toUpperCase()}
                 </span>
               {/if}
             </button>
             {#if showUserDropdown}
-              <div class="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden" onblur={() => (showUserDropdown = false)}>
+              <div class="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                 <button
                   type="button"
                   class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
-                  onclick={() => { showUserDropdown = false; goto("/dashboard"); }}
+                  onmousedown={() => { showUserDropdown = false; goto("/dashboard"); }}
                 >
                   {$_('goToDashboard')}
                 </button>
@@ -102,7 +107,7 @@
                 <button
                   type="button"
                   class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-muted transition-colors cursor-pointer"
-                  onclick={() => { showUserDropdown = false; authStore.logout(); goto("/"); }}
+                  onmousedown={() => { showUserDropdown = false; authStore.logout(); goto("/"); }}
                 >
                   {$_('logout')}
                 </button>

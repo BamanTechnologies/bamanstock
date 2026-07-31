@@ -1,0 +1,28 @@
+query getDashboardSalesTrend(
+  $investorId: uuid!
+  $year: Int
+  $lastTwelveMonth: timestamptz!
+) {
+  overall_orders: orders_aggregate {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  last_twelve_month: orders_aggregate(
+    where: { created_at: { _gte: $lastTwelveMonth } }
+  ) {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  investor_sales_trend_global_report(
+    args: { investor_id: $investorId, year: $year }
+  ) {
+    month
+    total_sales
+  }
+}

@@ -1,0 +1,39 @@
+query ($id: uuid!, $limit: Int, $offset: Int) {
+  products(
+    where: {
+      _and: [
+        {
+          _or: [
+            { merchantByCreatedBy: { branch: { _eq: $id } } }
+            { branch_id: { _eq: $id } }
+          ]
+        }
+        { is_low_stock: { _eq: true } }
+      ]
+    }
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    name
+    treshold_quantity
+    current_available_stock
+  }
+  total: products_aggregate(
+    where: {
+      _and: [
+        {
+          _or: [
+            { merchantByCreatedBy: { branch: { _eq: $id } } }
+            { branch_id: { _eq: $id } }
+          ]
+        }
+        { is_low_stock: { _eq: true } }
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}

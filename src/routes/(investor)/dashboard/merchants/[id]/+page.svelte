@@ -5,248 +5,602 @@
   import { goto } from "$app/navigation";
   import AssignStockModal from "$lib/components/investor/AssignStockModal.svelte";
   import EditLocationModal from "$lib/components/investor/EditLocationModal.svelte";
-  import ToggleSwitch from "$lib/components/investor/ToggleSwitch.svelte";
-  import { Dropdown } from "$lib/components/ui/dropdown/index.js";
+  import { getAuthClient } from "$graphql/client.js";
+  import { authStore } from "$lib/stores/auth.svelte.js";
+  import { browser } from "$app/environment";
+  import { jwtDecode } from "jwt-decode";
+  import SearchSelect from "$lib/components/investor/search-select/SearchSelect.svelte";
+  import CATEGORY_QUERY from "$graphql/queries/selector/product_category.gql";
+  import MERCHANT_DETAIL_QUERY from "$graphql/queries/merchants/detail/id.gql";
+  import SALES_TREND_QUERY from "$graphql/queries/merchants/detail/sales_trend.gql";
+  import MERCHANT_STOCKS_QUERY from "$graphql/queries/merchants/detail/merchant_stocks.gql";
+  import STOCK_MOVEMENT_QUERY from "$graphql/queries/reports/stock_movement/stock_movement.gql";
+  import MERCHANT_REPORTS_QUERY from "$graphql/queries/merchants/detail/reports.gql";
 
-  // Get merchant ID from route params
   const merchantId = $derived($page.params.id);
 
-  // Mock merchant data - replace with API call later
-  const merchant = {
-    id: merchantId,
-    name: "Richard Wilson",
-    location: "Branch 1",
-    status: "Active",
-    email: "contact@capitalflow.com",
-    phone: "(555) 123-4567",
-    joinedDate: "Capital Flow Partners",
-    lastActivity: "Approved",
-  };
+  function getInvestorIdFromToken(): string {
+    if (!browser) return "";
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) return "";
+      const payload = jwtDecode<Record<string, any>>(token);
+      return payload?.metadata?.["x-hasura-investor-id"] ?? payload?.investorId ?? "";
+    } catch {
+      return "";
+    }
+  }
 
-  // KPI Cards data
-  const kpiCards = [
-    {
-      label: "Total Revenue",
-      value: "$48,988.78",
-      change: "-19% vs Last Month",
-      changeType: "negative",
-      icon: "icon/bar-chart" as const,
-      iconColor: "bg-green-100 dark:bg-green-900/40",
-    },
-    {
-      label: "Total Transaction",
-      value: "$8,458.798",
-      change: "+35% vs Last Month",
-      changeType: "positive",
-      icon: "icon/trending-up" as const,
-      iconColor: "bg-blue-100 dark:bg-blue-900/40",
-    },
-    {
-      label: "Products Assigned",
-      value: "84",
-      change: "+41% vs Last Month",
-      changeType: "positive",
-      icon: "icon/package" as const,
-      iconColor: "bg-orange-100 dark:bg-orange-900/40",
-    },
-    {
-      label: "Current Stock Value",
-      value: "$850K",
-      change: "-20% vs Last Month",
-      changeType: "negative",
-      icon: "icon/trending-up" as const,
-      iconColor: "bg-purple-100 dark:bg-purple-900/40",
-    },
-  ];
+  let investorId = $state(getInvestorIdFromToken());
 
+  // ===================== General State =====================
   let activeTab = $state("Overview");
+  const tabs = ["Overview", "Assigned Stock", "Stock Movement", "Reports"];
+
   let isAssignStockModalOpen = $state(false);
   let isEditLocationModalOpen = $state(false);
-
-  const tabs = ["Overview", "Assigned Stock", "Activity", "Permissions"];
-
-  // Mock stock items data
-  const stockItems = [
-    {
-      id: 1,
-      name: "Lenovo IdeaPad 3",
-      category: "Electronics",
-      unitPrice: "$3,506",
-      qty: 100,
-      status: "Adequate",
-      statusColor: "text-green-600",
-      statusDot: "bg-green-500",
-      icon: "icon/laptop",
-    },
-    {
-      id: 2,
-      name: "Beats Pro",
-      category: "Electronics",
-      unitPrice: "$7,981",
-      qty: 140,
-      status: "Low",
-      statusColor: "text-yellow-600",
-      statusDot: "bg-yellow-500",
-      icon: "icon/headphones",
-    },
-    {
-      id: 3,
-      name: "Nike Jordan",
-      category: "Cloth",
-      unitPrice: "$450",
-      qty: 300,
-      status: "Out",
-      statusColor: "text-red-600",
-      statusDot: "bg-red-500",
-      icon: "icon/shoe",
-    },
-    {
-      id: 4,
-      name: "Apple Series 5 Watch",
-      category: "Electronics",
-      unitPrice: "$902",
-      qty: 450,
-      status: "Adequate",
-      statusColor: "text-green-600",
-      statusDot: "bg-green-500",
-      icon: "icon/watch",
-    },
-    {
-      id: 5,
-      name: "Amazon Echo Dot",
-      category: "Electronics",
-      unitPrice: "$3,506",
-      qty: 320,
-      status: "Low",
-      statusColor: "text-yellow-600",
-      statusDot: "bg-yellow-500",
-      icon: "icon/package",
-    },
-    {
-      id: 6,
-      name: "Sanford Chair Sofa",
-      category: "Furniture",
-      unitPrice: "$7,981",
-      qty: 650,
-      status: "Out",
-      statusColor: "text-red-600",
-      statusDot: "bg-red-500",
-      icon: "icon/chair",
-    },
-    {
-      id: 7,
-      name: "Red Premium Satchel",
-      category: "Accessories",
-      unitPrice: "$450",
-      qty: 700,
-      status: "Adequate",
-      statusColor: "text-green-600",
-      statusDot: "bg-green-500",
-      icon: "icon/briefcase",
-    },
-    {
-      id: 8,
-      name: "Iphone 14 Pro",
-      category: "Electronics",
-      unitPrice: "$3,506",
-      qty: 630,
-      status: "Low",
-      statusColor: "text-yellow-600",
-      statusDot: "bg-yellow-500",
-      icon: "icon/package",
-    },
-    {
-      id: 9,
-      name: "Gaming Chair",
-      category: "Furniture",
-      unitPrice: "$7,981",
-      qty: 410,
-      status: "Out",
-      statusColor: "text-red-600",
-      statusDot: "bg-red-500",
-      icon: "icon/chair",
-    },
-    {
-      id: 10,
-      name: "Borealis Backpack",
-      category: "Accessories",
-      unitPrice: "$450",
-      qty: 550,
-      status: "Low",
-      statusColor: "text-yellow-600",
-      statusDot: "bg-yellow-500",
-      icon: "icon/briefcase",
-    },
-  ];
-
-  let currentStockPage = $state(1);
-  const rowsPerStockPage = 10;
-  const totalStockPages = $derived(
-    Math.ceil(stockItems.length / rowsPerStockPage)
-  );
-
-  // Activity log data
-  const activityLog = [
-    {
-      id: 1,
-      type: "stock-assigned",
-      description:
-        "1,200 units of stock were assigned to the merchant account.",
-      timestamp: "Jul 12, 2024, 10:30 AM",
-      icon: "icon/box",
-      iconBg: "bg-blue-100 dark:bg-blue-900/40",
-      iconColor: "text-blue-600 dark:text-blue-400",
-    },
-    {
-      id: 2,
-      type: "stock-sold",
-      description: "50 units sold to investor John Doe.",
-      timestamp: "Jul 11, 2024, 02:45 PM",
-      icon: "icon/tag",
-      iconBg: "bg-green-100 dark:bg-green-900/40",
-      iconColor: "text-green-600 dark:text-green-400",
-    },
-    {
-      id: 3,
-      type: "payment-generated",
-      description: "Payment of $1,500.00 generated. Status: Completed.",
-      timestamp: "Jul 10, 2024, 09:00 AM",
-      icon: "icon/dollar-sign",
-      iconBg: "bg-purple-100 dark:bg-purple-900/40",
-      iconColor: "text-purple-600 dark:text-purple-400",
-    },
-    {
-      id: 4,
-      type: "profile-updated",
-      description: "Contact information was updated by admin.",
-      timestamp: "Jul 09, 2024, 05:15 PM",
-      icon: "icon/edit",
-      iconBg: "bg-orange-100 dark:bg-orange-900/40",
-      iconColor: "text-orange-600 dark:text-orange-400",
-    },
-    {
-      id: 5,
-      type: "location-reassigned",
-      description: "Merchant location was reassigned to 'Downtown Branch'.",
-      timestamp: "Jul 08, 2024, 11:20 AM",
-      icon: "icon/map-pin",
-      iconBg: "bg-cyan-100 dark:bg-cyan-900/40",
-      iconColor: "text-cyan-600 dark:text-cyan-400",
-    },
-  ];
-
-  // Permissions state
-  let createProducts = $state(true);
-  let assignStock = $state(true);
-  let updateStockLevels = $state(true);
-  let salesAnalytics = $state("Read-only");
-  let investorActivity = $state("No Access");
-
-  const accessOptions = ["No Access", "Read-only", "Full Access"];
+  let detailRefetchTrigger = $state(0);
 
   function handleBack() {
     goto("/dashboard/merchants");
   }
+
+  function handleEditLocationSuccess() {
+    detailRefetchTrigger++;
+  }
+
+  // ===================== Overview Tab =====================
+  let merchantDetail = $state<any>(null);
+  let productsAggregate = $state<any>(null);
+  let detailLoading = $state(true);
+  let salesTrendData = $state<any[]>([]);
+  let chartYear = $state(new Date().getFullYear());
+  let trendLoading = $state(false);
+
+  $effect(() => {
+    if (activeTab !== "Overview") return;
+    void detailRefetchTrigger;
+    detailLoading = true;
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const detailRes = await client.query({ query: MERCHANT_DETAIL_QUERY, variables: { id: merchantId } });
+        const data = detailRes.data as any;
+        merchantDetail = data?.merchant_by_pk ?? null;
+        productsAggregate = data?.products_aggregate ?? null;
+      } catch {
+        merchantDetail = null;
+        productsAggregate = null;
+      } finally {
+        detailLoading = false;
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  });
+
+  $effect(() => {
+    if (activeTab !== "Overview") return;
+    void chartYear;
+    trendLoading = true;
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const trendRes = investorId ? await client.query({
+          query: SALES_TREND_QUERY,
+          variables: { year: chartYear, merchantId, investorId },
+        }) : null;
+        salesTrendData = (trendRes?.data as any)?.investor_merchant_sales_trend_report ?? [];
+      } catch {
+        salesTrendData = [];
+      } finally {
+        trendLoading = false;
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  });
+
+  const overviewKpiCards = $derived.by(() => {
+    if (!merchantDetail) return [];
+    const d = merchantDetail;
+    return [
+      {
+        label: "Total Revenue",
+        value: fmtCurrency(d.total_revenue?.aggregate?.sum?.amount),
+        change: "",
+        changeType: "positive" as const,
+        icon: "icon/bar-chart" as const,
+        iconColor: "bg-green-100 dark:bg-green-900/40",
+      },
+      {
+        label: "Total Transactions",
+        value: fmtCurrency(d.total_transactions?.aggregate?.sum?.amount),
+        change: "",
+        changeType: "positive" as const,
+        icon: "icon/trending-up" as const,
+        iconColor: "bg-blue-100 dark:bg-blue-900/40",
+      },
+      {
+        label: "Products Assigned",
+        value: String(productsAggregate?.aggregate?.count ?? 0),
+        change: "",
+        changeType: "positive" as const,
+        icon: "icon/package" as const,
+        iconColor: "bg-orange-100 dark:bg-orange-900/40",
+      },
+      {
+        label: "Stock Value",
+        value: fmtCurrency(d.stocks_aggregate?.aggregate?.sum?.purchased_price),
+        change: "",
+        changeType: "positive" as const,
+        icon: "icon/trending-up" as const,
+        iconColor: "bg-purple-100 dark:bg-purple-900/40",
+      },
+    ];
+  });
+
+  // Overview chart — ApexCharts
+  import ApexCharts from "apexcharts";
+
+  const CHART_MONTHS = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+
+  const yearOptions = $derived.by(() => {
+    const current = new Date().getFullYear();
+    const years: number[] = [];
+    for (let y = 2024; y <= current; y++) years.push(y);
+    return years;
+  });
+
+  const chartData = $derived.by(() => {
+    const values: number[] = new Array(12).fill(0);
+    for (const item of salesTrendData) {
+      const monthDate = new Date(item.month);
+      const idx = monthDate.getMonth();
+      values[idx] = Number(item.total_sales) || 0;
+    }
+    return values;
+  });
+
+  const totalSales = $derived(chartData.reduce((a, b) => a + b, 0));
+
+  let chartInstance: any = null;
+
+  function chartAction(node: HTMLDivElement) {
+    const options = {
+      chart: { type: "area", height: 280, toolbar: { show: false }, fontFamily: "inherit" },
+      animations: { enabled: true, dynamicAnimation: { enabled: true, speed: 500 } },
+      series: [{ name: "Sales", data: chartData }],
+      xaxis: { categories: CHART_MONTHS, labels: { style: { colors: "#9ca3af", fontSize: "11px" } } },
+      yaxis: {
+        labels: {
+          style: { colors: "#9ca3af", fontSize: "11px" },
+          formatter: (v: number) => v >= 1000 ? `ETB ${(v / 1000).toFixed(1)}K` : `ETB ${v}`,
+        },
+      },
+      colors: ["#4DA0E6"],
+      fill: {
+        type: "gradient",
+        gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] },
+      },
+      stroke: { curve: "smooth", width: 2.5 },
+      dataLabels: { enabled: false },
+      grid: { show: true, borderColor: "rgba(156,163,175,0.12)", strokeDashArray: 4 },
+      tooltip: {
+        y: { formatter: (v: number) => `ETB ${v.toLocaleString("en-US", { minimumFractionDigits: 2 })}` },
+      },
+    };
+    chartInstance = new ApexCharts(node, options);
+    chartInstance.render();
+    return {
+      destroy() {
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      },
+    };
+  }
+
+  $effect(() => {
+    void chartData;
+    void salesTrendData;
+    if (!chartInstance || !salesTrendData.length) return;
+    chartInstance.updateSeries([{ data: chartData }]);
+  });
+
+  // ===================== Assigned Stock Tab =====================
+  let stockSearchQuery = $state("");
+  let stockCurrentPage = $state(1);
+  let stockRowsPerPage = $state(10);
+  let stockSortColumn = $state("created_at");
+  let stockSortDirection = $state<"asc" | "desc">("desc");
+  let stockCategoryId = $state("");
+
+  let stockData = $state<any[]>([]);
+  let stockTotalCount = $state(0);
+  let stockLoading = $state(false);
+
+  let stockDebouncedSearch = $state(stockSearchQuery);
+  let stockDebounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(stockDebounceTimer);
+    if (stockSearchQuery === stockDebouncedSearch) return;
+    stockDebounceTimer = setTimeout(() => {
+      stockDebouncedSearch = stockSearchQuery;
+      stockCurrentPage = 1;
+    }, 400);
+    return () => clearTimeout(stockDebounceTimer);
+  });
+
+  const stockTotalPages = $derived(Math.max(1, Math.ceil(stockTotalCount / stockRowsPerPage)));
+
+  function stockBuildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [{ created_by: { _eq: merchantId } }];
+    if (stockDebouncedSearch) {
+      conditions.push({
+        _or: [
+          { product: { name: { _ilike: `%${stockDebouncedSearch}%` } } },
+          { batch_number: { _ilike: `%${stockDebouncedSearch}%` } },
+          { product: { product_type: { name: { _ilike: `%${stockDebouncedSearch}%` } } } },
+        ],
+      });
+    }
+    if (stockCategoryId) {
+      conditions.push({ product: { product_type_id: { _eq: stockCategoryId } } });
+    }
+    return conditions.length ? { _and: conditions } : {};
+  }
+
+  function stockBuildOrder(): Record<string, unknown>[] {
+    switch (stockSortColumn) {
+      case "product":
+        return [{ product: { name: stockSortDirection } }];
+      case "category":
+        return [{ product: { product_type: { name: stockSortDirection } } }];
+      case "quantity":
+        return [{ quantity: stockSortDirection }];
+      case "price":
+        return [{ purchased_price: stockSortDirection }];
+      case "created_at":
+        return [{ created_at: stockSortDirection }];
+      default:
+        return [{ created_at: stockSortDirection }];
+    }
+  }
+
+  $effect(() => {
+    void activeTab;
+    void stockDebouncedSearch;
+    void stockCurrentPage;
+    void stockRowsPerPage;
+    void stockSortColumn;
+    void stockSortDirection;
+    void stockCategoryId;
+
+    if (activeTab !== "Assigned Stock") return;
+    stockLoading = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          stock: any[];
+          stock_aggregate: { aggregate: { count: number } };
+        }>({
+          query: MERCHANT_STOCKS_QUERY,
+          variables: {
+            limit: stockRowsPerPage,
+            offset: (stockCurrentPage - 1) * stockRowsPerPage,
+            filter: stockBuildFilter(),
+            order: stockBuildOrder(),
+          },
+        });
+        stockData = result.data?.stock ?? [];
+        stockTotalCount = result.data?.stock_aggregate?.aggregate?.count ?? 0;
+      } catch {
+        stockData = [];
+        stockTotalCount = 0;
+      } finally {
+        stockLoading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function stockHandleSort(column: string) {
+    if (stockSortColumn === column) {
+      stockSortDirection = stockSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      stockSortColumn = column;
+      stockSortDirection = "asc";
+    }
+    stockCurrentPage = 1;
+  }
+
+  // ===================== Stock Movement Tab =====================
+  let smDateFrom = $state("");
+  let smDateTo = $state("");
+
+  let smSearchQuery = $state("");
+  let smCurrentPage = $state(1);
+  let smRowsPerPage = $state(10);
+  let smSortColumn = $state("created_at");
+  let smSortDirection = $state<"asc" | "desc">("desc");
+
+  let smData = $state<any[]>([]);
+  let smTotalCount = $state(0);
+  let smLoading = $state(false);
+
+  let smDebouncedSearch = $state(smSearchQuery);
+  let smDebounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(smDebounceTimer);
+    if (smSearchQuery === smDebouncedSearch) return;
+    smDebounceTimer = setTimeout(() => {
+      smDebouncedSearch = smSearchQuery;
+      smCurrentPage = 1;
+    }, 400);
+    return () => clearTimeout(smDebounceTimer);
+  });
+
+  const smTotalPages = $derived(Math.max(1, Math.ceil(smTotalCount / smRowsPerPage)));
+
+  function smBuildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [{ merchant: { id: { _eq: merchantId } } }];
+    if (smDateFrom) {
+      conditions.push({ created_at: { _gte: smDateFrom } });
+    }
+    if (smDateTo) {
+      conditions.push({ created_at: { _lte: smDateTo } });
+    }
+    if (smDebouncedSearch) {
+      conditions.push({
+        _or: [
+          { stock: { product: { name: { _ilike: `%${smDebouncedSearch}%` } } } },
+          { stock: { batch_number: { _ilike: `%${smDebouncedSearch}%` } } },
+          { reference_type: { _ilike: `%${smDebouncedSearch}%` } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
+  }
+
+  function smBuildOrder(): Record<string, unknown>[] {
+    switch (smSortColumn) {
+      case "movement_type":
+        return [{ movement_type: smSortDirection }];
+      case "product":
+        return [{ stock: { product: { name: smSortDirection } } }];
+      case "branch":
+        return [{ branch: { name: smSortDirection } }];
+      case "quantity":
+        return [{ quantity_delta: smSortDirection }];
+      case "created_at":
+        return [{ created_at: smSortDirection }];
+      default:
+        return [{ created_at: smSortDirection }];
+    }
+  }
+
+  $effect(() => {
+    void activeTab;
+    void smDebouncedSearch;
+    void smCurrentPage;
+    void smRowsPerPage;
+    void smSortColumn;
+    void smSortDirection;
+    void smDateFrom;
+    void smDateTo;
+
+    if (activeTab !== "Stock Movement") return;
+    smLoading = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          stock_movements: any[];
+          stock_movements_aggregate: { aggregate: { count: number } };
+        }>({
+          query: STOCK_MOVEMENT_QUERY,
+          variables: {
+            limit: smRowsPerPage,
+            offset: (smCurrentPage - 1) * smRowsPerPage,
+            filter: smBuildFilter(),
+            order: smBuildOrder(),
+          },
+        });
+        smData = result.data?.stock_movements ?? [];
+        smTotalCount = result.data?.stock_movements_aggregate?.aggregate?.count ?? 0;
+      } catch {
+        smData = [];
+        smTotalCount = 0;
+      } finally {
+        smLoading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function smHandleSort(column: string) {
+    if (smSortColumn === column) {
+      smSortDirection = smSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      smSortColumn = column;
+      smSortDirection = "asc";
+    }
+    smCurrentPage = 1;
+  }
+
+  function movementTypeClass(type: string): string {
+    switch (type) {
+      case "PURCHASE": return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
+      case "SALE": return "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300";
+      case "TRANSFER_IN": return "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300";
+      case "TRANSFER_OUT": return "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300";
+      default: return "bg-gray-100 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300";
+    }
+  }
+
+  function smMerchantLabel(item: any): string {
+    if (!item?.merchant) return "-";
+    return [item.merchant.first_name, item.merchant.last_name].filter(Boolean).join(" ");
+  }
+
+  // ===================== Reports Tab =====================
+  let rptSearchQuery = $state("");
+  let rptCurrentPage = $state(1);
+  let rptRowsPerPage = $state(10);
+  let rptSortColumn = $state("created_at");
+  let rptSortDirection = $state<"asc" | "desc">("desc");
+
+  let rptData = $state<any[]>([]);
+  let rptTotalCount = $state(0);
+  let rptLoading = $state(false);
+
+  let rptDebouncedSearch = $state(rptSearchQuery);
+  let rptDebounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(rptDebounceTimer);
+    if (rptSearchQuery === rptDebouncedSearch) return;
+    rptDebounceTimer = setTimeout(() => {
+      rptDebouncedSearch = rptSearchQuery;
+      rptCurrentPage = 1;
+    }, 400);
+    return () => clearTimeout(rptDebounceTimer);
+  });
+
+  const rptTotalPages = $derived(Math.max(1, Math.ceil(rptTotalCount / rptRowsPerPage)));
+
+  function rptBuildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [{ merchant_id: { _eq: merchantId } }];
+    if (rptDebouncedSearch) {
+      conditions.push({
+        _or: [
+          { message: { _ilike: `%${rptDebouncedSearch}%` } },
+          { sms_status: { _ilike: `%${rptDebouncedSearch}%` } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
+  }
+
+  function rptBuildOrder(): Record<string, unknown>[] {
+    switch (rptSortColumn) {
+      case "message":
+        return [{ message: rptSortDirection }];
+      case "status":
+        return [{ sms_status: rptSortDirection }];
+      case "created_at":
+        return [{ created_at: rptSortDirection }];
+      default:
+        return [{ created_at: rptSortDirection }];
+    }
+  }
+
+  $effect(() => {
+    void activeTab;
+    void rptDebouncedSearch;
+    void rptCurrentPage;
+    void rptRowsPerPage;
+    void rptSortColumn;
+    void rptSortDirection;
+
+    if (activeTab !== "Reports") return;
+    rptLoading = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          reports: any[];
+          reports_aggregate: { aggregate: { count: number } };
+        }>({
+          query: MERCHANT_REPORTS_QUERY,
+          variables: {
+            limit: rptRowsPerPage,
+            offset: (rptCurrentPage - 1) * rptRowsPerPage,
+            filter: rptBuildFilter(),
+            order: rptBuildOrder(),
+          },
+        });
+        rptData = result.data?.reports ?? [];
+        rptTotalCount = result.data?.reports_aggregate?.aggregate?.count ?? 0;
+      } catch {
+        rptData = [];
+        rptTotalCount = 0;
+      } finally {
+        rptLoading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function rptHandleSort(column: string) {
+    if (rptSortColumn === column) {
+      rptSortDirection = rptSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      rptSortColumn = column;
+      rptSortDirection = "asc";
+    }
+    rptCurrentPage = 1;
+  }
+
+  // ===================== Shared Utilities =====================
+  const AVATAR_COLORS = [
+    "#4DA0E6", "#D15B7A", "#34A853", "#FBBC05",
+    "#FF6B6B", "#6B5B95", "#88B04B", "#F7CAC9",
+    "#92A8D1", "#955251", "#B565A7", "#009B77",
+  ];
+
+  function avatarColor(name: string): string {
+    return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+  }
+
+  function initials(first_name: string, last_name: string): string {
+    return (first_name?.charAt(0) ?? "") + (last_name?.charAt(0) ?? "");
+  }
+
+  function fmtCurrency(val: unknown): string {
+    if (val == null) return "ETB 0";
+    const num = Number(val);
+    if (isNaN(num)) return String(val);
+    return `ETB ${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function formatBranch(name: string | null | undefined): string {
+    if (!name) return "-";
+    return name.split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  }
+
+  function getVisiblePages(current: number, total: number): (number | string)[] {
+    const pages: (number | string)[] = [];
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else if (current <= 3) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    } else if (current >= total - 2) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push("...");
+      for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    }
+    return pages;
+  }
+
+
 </script>
 
 <div class="flex-1 p-6 space-y-6">
@@ -264,25 +618,33 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
         <div
-          class="w-16 h-16 rounded-full bg-muted flex items-center justify-center"
+          class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold shrink-0"
+          style="background-color: {avatarColor(merchantDetail?.first_name ?? 'M')}"
         >
-          <Icon iconName="icon/user" size={32} />
+          {merchantDetail ? initials(merchantDetail.first_name, merchantDetail.last_name) : 'M'}
         </div>
         <div>
-          <h2 class="text-2xl font-semibold text-foreground">
-            {merchant.name}
-          </h2>
-          <div class="flex items-center gap-4 mt-1">
-            <span class="text-sm text-muted-foreground"
-              >{merchant.location}</span
-            >
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-              {merchant.status}
-            </span>
-          </div>
+          {#if detailLoading}
+            <div class="h-6 w-48 bg-muted rounded animate-pulse mb-2" />
+            <div class="h-4 w-32 bg-muted/60 rounded animate-pulse" />
+          {:else if merchantDetail}
+            <h2 class="text-2xl font-semibold text-foreground">
+              {merchantDetail.first_name} {merchantDetail.last_name}
+            </h2>
+            <div class="flex items-center gap-4 mt-1">
+              <span class="text-sm text-muted-foreground">
+                {formatBranch(merchantDetail.branch?.name)}
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                Active
+              </span>
+            </div>
+          {:else}
+            <h2 class="text-2xl font-semibold text-foreground">Merchant</h2>
+          {/if}
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -319,31 +681,34 @@
     </div>
   </div>
 
-  <!-- Tab Content -->
+  <!-- ==================== Tab: Overview ==================== -->
   {#if activeTab === "Overview"}
     <div class="space-y-6">
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {#each kpiCards as kpi}
-          <div class="bg-card border border-border rounded-lg p-6">
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-sm text-muted-foreground">{kpi.label}</span>
-              <div
-                class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center"
-              >
-                <Icon iconName={kpi.icon} size={20} class="text-foreground" />
-              </div>
+        {#if detailLoading}
+          {#each [1,2,3,4] as _}
+            <div class="bg-card border border-border rounded-lg p-5 animate-pulse">
+              <div class="h-4 bg-muted rounded w-24 mb-3" />
+              <div class="h-8 bg-muted rounded w-32 mb-3" />
+              <div class="h-5 bg-muted rounded w-36" />
             </div>
-            <p class="text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
-            <p
-              class="text-sm {kpi.changeType === 'positive'
-                ? 'text-green-600'
-                : 'text-red-600'}"
-            >
-              {kpi.change}
-            </p>
-          </div>
-        {/each}
+          {/each}
+        {:else}
+          {#each overviewKpiCards as kpi}
+            <div class="bg-card border border-border rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm text-muted-foreground">{kpi.label}</span>
+                <div
+                  class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center"
+                >
+                  <Icon iconName={kpi.icon} size={20} class="text-foreground" />
+                </div>
+              </div>
+              <p class="text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
+            </div>
+          {/each}
+        {/if}
       </div>
 
       <!-- Charts and Info Section -->
@@ -355,27 +720,36 @@
               <h3 class="text-lg font-semibold text-foreground mb-1">
                 Revenue Over Time
               </h3>
-              <p class="text-2xl font-bold text-foreground">$690,237.90</p>
-              <p class="text-sm text-green-600">Last 12 Months +15.2%</p>
+              <p class="text-2xl font-bold text-foreground">{fmtCurrency(totalSales)}</p>
+              {#if chartYear}
+                <p class="text-sm text-muted-foreground">Year {chartYear}</p>
+              {/if}
             </div>
-            <div class="flex gap-2">
-              {#each ["1D", "1W", "1M", "3M", "6M", "1Y"] as period}
-                <button
-                  class="px-3 py-1 text-xs rounded {period === '1Y'
-                    ? 'bg-info text-info-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'}"
-                >
-                  {period}
-                </button>
+            <select
+              class="px-3 py-1.5 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={chartYear}
+            >
+              {#each yearOptions as year}
+                <option value={year}>{year}</option>
               {/each}
+            </select>
+          </div>
+          {#if salesTrendData.length > 0}
+            <div class="relative">
+              <div use:chartAction class="w-full" />
+              {#if trendLoading}
+                <div class="absolute inset-0 bg-background/50 flex items-center justify-center rounded">
+                  <div class="animate-spin h-8 w-8 border-2 border-info border-t-transparent rounded-full" />
+                </div>
+              {/if}
             </div>
-          </div>
-          <!-- Chart placeholder - replace with actual chart component -->
-          <div
-            class="h-64 bg-muted/30 rounded flex items-center justify-center"
-          >
-            <p class="text-muted-foreground">Chart will be rendered here</p>
-          </div>
+          {:else if trendLoading}
+            <div class="h-[280px] bg-muted/30 rounded animate-pulse" />
+          {:else}
+            <div class="h-[280px] bg-muted/30 rounded flex items-center justify-center">
+              <p class="text-muted-foreground">No sales data available</p>
+            </div>
+          {/if}
         </div>
 
         <!-- Merchant Information -->
@@ -383,497 +757,542 @@
           <h3 class="text-lg font-semibold text-foreground mb-6">
             Merchant Information
           </h3>
-          <div class="space-y-4">
-            <div>
-              <p class="text-sm text-muted-foreground mb-1">Contact Email</p>
-              <p class="text-sm text-foreground">{merchant.email}</p>
+          {#if detailLoading}
+            <div class="space-y-4">
+              {#each [1,2,3,4] as _}
+                <div>
+                  <div class="h-3 w-24 bg-muted rounded mb-1 animate-pulse" />
+                  <div class="h-4 w-48 bg-muted/60 rounded animate-pulse" />
+                </div>
+              {/each}
             </div>
-            <div>
-              <p class="text-sm text-muted-foreground mb-1">Contact Phone</p>
-              <p class="text-sm text-foreground">{merchant.phone}</p>
+          {:else if merchantDetail}
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm text-muted-foreground mb-1">Contact Phone</p>
+                <p class="text-sm text-foreground">{merchantDetail.phone_number ?? "-"}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground mb-1">Address</p>
+                <p class="text-sm text-foreground">{merchantDetail.address ?? "-"}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground mb-1">Location</p>
+                <p class="text-sm text-foreground">{formatBranch(merchantDetail.branch?.name)}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground mb-1">Company</p>
+                <p class="text-sm text-foreground">{merchantDetail.branch?.company?.name ?? "-"}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground mb-1">Joined</p>
+                <p class="text-sm text-foreground">
+                  {merchantDetail.created_at ? new Date(merchantDetail.created_at).toLocaleDateString() : "-"}
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="text-sm text-muted-foreground mb-1">Joined Date</p>
-              <p class="text-sm text-foreground">{merchant.joinedDate}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground mb-1">Last Activity</p>
-              <p class="text-sm text-foreground">{merchant.lastActivity}</p>
-            </div>
-          </div>
+          {/if}
         </div>
       </div>
     </div>
+
+  <!-- ==================== Tab: Assigned Stock ==================== -->
   {:else if activeTab === "Assigned Stock"}
     <div class="space-y-6">
-      <!-- KPI Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-card border border-border rounded-lg p-6">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm text-muted-foreground">Total Stock Value</span>
-            <div
-              class="bg-purple-100 dark:bg-purple-900/40 w-10 h-10 rounded-lg flex items-center justify-center"
-            >
-              <Icon
-                iconName="icon/line-chart"
-                size={20}
-                class="text-purple-600"
-              />
-            </div>
-          </div>
-          <p class="text-2xl font-bold text-foreground mb-1">$1.45M</p>
-          <p class="text-sm text-red-600">-20% vs Last Month</p>
-        </div>
-        <div class="bg-card border border-border rounded-lg p-6">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm text-muted-foreground">Unique Stock Items</span
-            >
-            <div
-              class="bg-orange-100 dark:bg-orange-900/40 w-10 h-10 rounded-lg flex items-center justify-center"
-            >
-              <Icon iconName="icon/box" size={20} class="text-orange-600" />
-            </div>
-          </div>
-          <p class="text-2xl font-bold text-foreground mb-1">147</p>
-          <p class="text-sm text-green-600">+41% vs Last Month</p>
-        </div>
-      </div>
-
-      <!-- Search and Filters -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex flex-col sm:flex-row gap-4 mb-6">
-          <div class="flex-1">
-            <div class="relative">
-              <Icon
-                iconName="icon/search"
-                size={20}
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <input
-                type="text"
-                placeholder="Search by stock name..."
-                class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-1"
-              />
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <Dropdown
-              options={[
-                { value: "", label: "All Categories" },
-                { value: "electronics", label: "Electronics" },
-                { value: "cloth", label: "Cloth" },
-                { value: "furniture", label: "Furniture" },
-                { value: "accessories", label: "Accessories" },
-              ]}
-              placeholder="All Categories"
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+          <div class="relative w-72 shrink-0">
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             />
-            <Dropdown
-              options={[
-                { value: "", label: "All Status" },
-                { value: "adequate", label: "Adequate" },
-                { value: "low", label: "Low" },
-                { value: "out", label: "Out" },
-              ]}
-              placeholder="All Status"
+            <input
+              type="text"
+              placeholder="Search by stock name, batch..."
+              class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={stockSearchQuery}
             />
           </div>
+          <SearchSelect
+            query={CATEGORY_QUERY}
+            dataKey="product_types"
+            filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
+            displayLabel={(item) => item.name}
+            placeholder="All Categories"
+            initialValue={stockCategoryId}
+            onSelect={(item) => { stockCategoryId = item?.id ?? ""; stockCurrentPage = 1; }}
+          />
         </div>
 
-        <!-- Stock Items Table -->
+        {#if stockLoading}
+          <div class="h-1 bg-muted/30 w-full overflow-hidden">
+            <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+          </div>
+        {/if}
+
         <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-muted/50">
-              <tr>
-                <th class="px-4 py-3 text-left">
-                  <input type="checkbox" class="rounded" />
+          <table class="w-full text-sm">
+            <thead class="bg-muted/30 border-b border-border">
+              <tr class="text-left text-xs text-muted-foreground uppercase">
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("product")}>
+                    Product
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'product' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'product' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
                 </th>
-                <th
-                  class="px-4 py-3 text-left text-sm font-medium text-foreground"
-                >
-                  Stock Item
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("category")}>
+                    Category
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'category' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'category' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
                 </th>
-                <th
-                  class="px-4 py-3 text-left text-sm font-medium text-foreground"
-                >
-                  Category
+                <th class="px-4 py-3 font-medium">Batch #</th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("quantity")}>
+                    Qty
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'quantity' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'quantity' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
                 </th>
-                <th
-                  class="px-4 py-3 text-left text-sm font-medium text-foreground"
-                >
-                  Unit Price
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("price")}>
+                    Unit Price
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'price' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'price' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
                 </th>
-                <th
-                  class="px-4 py-3 text-left text-sm font-medium text-foreground"
-                >
-                  Qty
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-sm font-medium text-foreground"
-                >
-                  Status
-                </th>
-                <th
-                  class="px-4 py-3 text-left text-sm font-medium text-foreground"
-                >
-                  Actions
+                <th class="px-4 py-3 font-medium">Branch</th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("created_at")}>
+                    Date Added
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'created_at' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={stockSortColumn === 'created_at' && stockSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
                 </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
-              {#each stockItems as item}
-                <tr class="hover:bg-muted/30">
-                  <td class="px-4 py-4">
-                    <input type="checkbox" class="rounded" />
-                  </td>
-                  <td class="px-4 py-4">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"
-                      >
-                        <Icon
-                          iconName={item.icon as
-                            | "icon/laptop"
-                            | "icon/headphones"
-                            | "icon/watch"
-                            | "icon/shoe"
-                            | "icon/chair"
-                            | "icon/briefcase"
-                            | "icon/package"}
-                          size={20}
-                          class="text-muted-foreground"
-                        />
-                      </div>
-                      <span class="text-sm font-medium text-foreground"
-                        >{item.name}</span
-                      >
-                    </div>
-                  </td>
-                  <td class="px-4 py-4">
-                    <span class="text-sm text-muted-foreground"
-                      >{item.category}</span
-                    >
-                  </td>
-                  <td class="px-4 py-4">
-                    <span class="text-sm font-medium text-foreground"
-                      >{item.unitPrice}</span
-                    >
-                  </td>
-                  <td class="px-4 py-4">
-                    <span class="text-sm text-foreground">{item.qty}</span>
-                  </td>
-                  <td class="px-4 py-4">
-                    <span
-                      class="inline-flex items-center gap-1.5 {item.statusColor}"
-                    >
-                      <span class="w-1.5 h-1.5 rounded-full {item.statusDot}"
-                      ></span>
-                      <span class="text-sm">{item.status}</span>
-                    </span>
-                  </td>
-                  <td class="px-4 py-4">
-                    <div class="flex items-center gap-2">
-                      <button
-                        type="button"
-                        class="p-2 hover:bg-muted rounded transition-colors"
-                        aria-label="Edit"
-                      >
-                        <Icon
-                          iconName="icon/edit"
-                          size={16}
-                          class="text-muted-foreground"
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        class="p-2 hover:bg-muted rounded transition-colors"
-                        aria-label="Refresh"
-                      >
-                        <Icon
-                          iconName="icon/refresh-cw"
-                          size={16}
-                          class="text-muted-foreground"
-                        />
-                      </button>
+              {#if stockData.length === 0 && !stockLoading}
+                <tr>
+                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
+                      <p>No stock assigned to this merchant</p>
                     </div>
                   </td>
                 </tr>
-              {/each}
+              {:else}
+                {#each stockData as item}
+                  <tr class="hover:bg-muted/20 transition-colors">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                          <Icon iconName="icon/package" size={16} class="text-muted-foreground" />
+                        </div>
+                        <span class="text-sm font-medium text-foreground">{item.product?.name ?? "-"}</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-foreground">{item.product?.type?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">{item.batch_number ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{item.quantity ?? 0}</td>
+                    <td class="px-4 py-3 text-foreground font-medium">{fmtCurrency(item.purchased_price)}</td>
+                    <td class="px-4 py-3 text-foreground">{item.branch?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">
+                      {item.created_at ? new Date(item.created_at).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
             </tbody>
           </table>
         </div>
 
-        <!-- Pagination -->
-        <div
-          class="flex items-center justify-between mt-6 pt-4 border-t border-border"
-        >
+        <div class="p-4 border-t border-border flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted-foreground">Row Per Page</span>
-            <Dropdown
-              options={[
-                { value: "10", label: "10" },
-                { value: "20", label: "20" },
-                { value: "50", label: "50" },
-              ]}
-              value="10"
-              onchange={(value) => {
-                // TODO: Handle rows per page change
-                console.log("Rows per page changed:", value);
-              }}
-              class="min-w-[80px]"
-            />
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="text-sm text-muted-foreground">Entries</span>
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="p-2 hover:bg-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={currentStockPage === 1}
-                onclick={() => currentStockPage > 1 && currentStockPage--}
-              >
-                <Icon iconName="icon/chevron-left" size={16} />
-              </button>
-              {#each Array(Math.min(5, totalStockPages)) as _, i}
-                {@const pageNum = i + 1}
-                <button
-                  type="button"
-                  class="px-3 py-1 text-sm rounded transition-colors {currentStockPage ===
-                  pageNum
-                    ? 'bg-info text-info-foreground'
-                    : 'hover:bg-muted'}"
-                  onclick={() => (currentStockPage = pageNum)}
-                >
-                  {pageNum}
-                </button>
-              {/each}
-              {#if totalStockPages > 5}
-                <span class="text-sm text-muted-foreground">...</span>
-                <button
-                  type="button"
-                  class="px-3 py-1 text-sm rounded hover:bg-muted transition-colors"
-                  onclick={() => (currentStockPage = totalStockPages)}
-                >
-                  {totalStockPages}
-                </button>
-              {/if}
-              <button
-                type="button"
-                class="p-2 hover:bg-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={currentStockPage === totalStockPages}
-                onclick={() =>
-                  currentStockPage < totalStockPages && currentStockPage++}
-              >
-                <Icon iconName="icon/chevron-right" size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  {:else if activeTab === "Activity"}
-    <div class="space-y-6">
-      <!-- Date Filter -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-foreground">Activity Log</h3>
-          <div class="relative">
-            <button
-              type="button"
-              class="flex items-center gap-2 px-4 py-2 border border-input rounded-md bg-background hover:bg-muted transition-colors"
+            <select
+              class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+              bind:value={stockRowsPerPage}
+              onchange={() => { stockCurrentPage = 1; }}
             >
-              <Icon
-                iconName="icon/calendar"
-                size={16}
-                class="text-muted-foreground"
-              />
-              <span class="text-sm text-foreground">Date</span>
-              <Icon
-                iconName="icon/chevron-down"
-                size={16}
-                class="text-muted-foreground"
-              />
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span class="text-sm text-muted-foreground">Entries</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={stockCurrentPage === 1}
+              onclick={() => stockCurrentPage = stockCurrentPage - 1}
+            >
+              <Icon iconName="icon/chevron-left" size={16} />
+            </button>
+            {#each getVisiblePages(stockCurrentPage, stockTotalPages) as p}
+              {#if typeof p === "number"}
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === stockCurrentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                  style={p === stockCurrentPage ? 'background-color:#4DA0E6;' : ''}
+                  onclick={() => stockCurrentPage = p}
+                >
+                  {p}
+                </button>
+              {:else}
+                <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+              {/if}
+            {/each}
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={stockCurrentPage === stockTotalPages}
+              onclick={() => stockCurrentPage = stockCurrentPage + 1}
+            >
+              <Icon iconName="icon/chevron-right" size={16} />
             </button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Activity Entries -->
-        <div class="space-y-6">
-          {#each activityLog as activity}
-            <div
-              class="flex items-start gap-4 pb-6 border-b border-border last:border-b-0 last:pb-0"
+  <!-- ==================== Tab: Stock Movement ==================== -->
+  {:else if activeTab === "Stock Movement"}
+    <div class="space-y-6">
+      <div class="bg-card border border-border rounded-lg px-4 py-3">
+        <div class="flex items-end gap-3 flex-wrap">
+          <div class="flex-1 min-w-0 max-w-[200px]">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">From</label>
+            <input
+              type="date"
+              bind:value={smDateFrom}
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+            />
+          </div>
+          <div class="flex-1 min-w-0 max-w-[200px]">
+            <label class="text-xs font-medium text-muted-foreground mb-1 block">To</label>
+            <input
+              type="date"
+              bind:value={smDateTo}
+              class="w-full h-7 px-2 border border-border rounded-md bg-background text-xs text-foreground focus:outline-none focus:ring-0 focus:border-border"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+          <div class="relative w-72 shrink-0">
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search by product, batch..."
+              class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={smSearchQuery}
+            />
+          </div>
+        </div>
+
+        {#if smLoading}
+          <div class="h-1 bg-muted/30 w-full overflow-hidden">
+            <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+          </div>
+        {/if}
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-muted/30 border-b border-border">
+              <tr class="text-left text-xs text-muted-foreground uppercase">
+                <th class="px-4 py-3 font-medium">Reference</th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("movement_type")}>
+                    Type
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'movement_type' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={smSortColumn === 'movement_type' && smSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("product")}>
+                    Product
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'product' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={smSortColumn === 'product' && smSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">Batch #</th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("branch")}>
+                    Location
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'branch' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={smSortColumn === 'branch' && smSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("quantity")}>
+                    Qty
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'quantity' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={smSortColumn === 'quantity' && smSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("created_at")}>
+                    Date
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'created_at' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={smSortColumn === 'created_at' && smSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {#if smData.length === 0 && !smLoading}
+                <tr>
+                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
+                      <p>No stock movements found</p>
+                    </div>
+                  </td>
+                </tr>
+              {:else}
+                {#each smData as movement}
+                  <tr class="hover:bg-muted/20 transition-colors">
+                    <td class="px-4 py-3 text-foreground text-xs">{movement.reference_type ?? "-"}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {movementTypeClass(movement.movement_type)}">
+                        {movement.movement_type}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-foreground">{movement.stock?.product?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">{movement.stock?.batch_number ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground">{movement.branch?.name ?? "-"}</td>
+                    <td class="px-4 py-3 text-foreground font-medium">{movement.quantity_delta ?? 0}</td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">
+                      {movement.created_at ? new Date(movement.created_at).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-4 border-t border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <select
+              class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+              bind:value={smRowsPerPage}
+              onchange={() => { smCurrentPage = 1; }}
             >
-              <div
-                class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 {activity.iconBg}"
-              >
-                <Icon
-                  iconName={activity.icon as any}
-                  size={20}
-                  class={activity.iconColor}
-                />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm text-foreground leading-relaxed">
-                  {activity.description}
-                </p>
-              </div>
-              <div class="shrink-0">
-                <p class="text-sm text-muted-foreground whitespace-nowrap">
-                  {activity.timestamp}
-                </p>
-              </div>
-            </div>
-          {/each}
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span class="text-sm text-muted-foreground">Entries</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={smCurrentPage === 1}
+              onclick={() => smCurrentPage = smCurrentPage - 1}
+            >
+              <Icon iconName="icon/chevron-left" size={16} />
+            </button>
+            {#each getVisiblePages(smCurrentPage, smTotalPages) as p}
+              {#if typeof p === "number"}
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === smCurrentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                  style={p === smCurrentPage ? 'background-color:#4DA0E6;' : ''}
+                  onclick={() => smCurrentPage = p}
+                >
+                  {p}
+                </button>
+              {:else}
+                <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+              {/if}
+            {/each}
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={smCurrentPage === smTotalPages}
+              onclick={() => smCurrentPage = smCurrentPage + 1}
+            >
+              <Icon iconName="icon/chevron-right" size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  {:else if activeTab === "Permissions"}
+
+  <!-- ==================== Tab: Reports ==================== -->
+  {:else if activeTab === "Reports"}
     <div class="space-y-6">
-      <!-- Stock Management Section -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-foreground mb-6">
-          Stock Management
-        </h3>
-        <div class="space-y-6">
-          <!-- Create Products -->
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <h4 class="text-sm font-medium text-foreground mb-1">
-                Create Products
-              </h4>
-              <p class="text-sm text-muted-foreground">
-                Permission to add new stocks
-              </p>
-            </div>
-            <div class="shrink-0 pt-1">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={createProducts}
-                aria-label="Create Products"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-2 {createProducts
-                  ? 'bg-info'
-                  : 'bg-muted'}"
-                onclick={() => (createProducts = !createProducts)}
-              >
-                <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {createProducts
-                    ? 'translate-x-6'
-                    : 'translate-x-1'}"
-                ></span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Assign Stock -->
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <h4 class="text-sm font-medium text-foreground mb-1">
-                Assign Stock
-              </h4>
-              <p class="text-sm text-muted-foreground">
-                Permission to assign new stocks
-              </p>
-            </div>
-            <div class="shrink-0 pt-1">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={assignStock}
-                aria-label="Assign Stock"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-2 {assignStock
-                  ? 'bg-info'
-                  : 'bg-muted'}"
-                onclick={() => (assignStock = !assignStock)}
-              >
-                <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {assignStock
-                    ? 'translate-x-6'
-                    : 'translate-x-1'}"
-                ></span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Update Stock Levels -->
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <h4 class="text-sm font-medium text-foreground mb-1">
-                Update Stock Levels
-              </h4>
-              <p class="text-sm text-muted-foreground">
-                Ability to modify existing stock quantities
-              </p>
-            </div>
-            <div class="shrink-0 pt-1">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={updateStockLevels}
-                aria-label="Update Stock Levels"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-2 {updateStockLevels
-                  ? 'bg-info'
-                  : 'bg-muted'}"
-                onclick={() => (updateStockLevels = !updateStockLevels)}
-              >
-                <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {updateStockLevels
-                    ? 'translate-x-6'
-                    : 'translate-x-1'}"
-                ></span>
-              </button>
-            </div>
+      <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+          <div class="relative w-72 shrink-0">
+            <Icon
+              iconName="icon/search"
+              size={16}
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search reports..."
+              class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+              bind:value={rptSearchQuery}
+            />
           </div>
         </div>
-      </div>
 
-      <!-- Reports Access Section -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-foreground mb-6">
-          Reports Access
-        </h3>
-        <div class="space-y-6">
-          <!-- Sales Analytics -->
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <h4 class="text-sm font-medium text-foreground mb-1">
-                Sales Analytics
-              </h4>
-              <p class="text-sm text-muted-foreground">
-                Access to view and export sales reports
-              </p>
-            </div>
-            <div class="shrink-0">
-              <Dropdown
-                bind:value={salesAnalytics}
-                options={accessOptions.map((opt) => ({
-                  value: opt,
-                  label: opt,
-                }))}
-                class="min-w-[140px]"
-              />
-            </div>
+        {#if rptLoading}
+          <div class="h-1 bg-muted/30 w-full overflow-hidden">
+            <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
           </div>
+        {/if}
 
-          <!-- Investor Activity -->
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <h4 class="text-sm font-medium text-foreground mb-1">
-                Investor Activity
-              </h4>
-              <p class="text-sm text-muted-foreground">
-                View logs of investor interactions and activities
-              </p>
-            </div>
-            <div class="shrink-0">
-              <Dropdown
-                bind:value={investorActivity}
-                options={accessOptions.map((opt) => ({
-                  value: opt,
-                  label: opt,
-                }))}
-                class="min-w-[140px]"
-              />
-            </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-muted/30 border-b border-border">
+              <tr class="text-left text-xs text-muted-foreground uppercase">
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => rptHandleSort("message")}>
+                    Message
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={rptSortColumn === 'message' && rptSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={rptSortColumn === 'message' && rptSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => rptHandleSort("status")}>
+                    Status
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={rptSortColumn === 'status' && rptSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={rptSortColumn === 'status' && rptSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+                <th class="px-4 py-3 font-medium">
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => rptHandleSort("created_at")}>
+                    Date
+                    <span class="flex flex-col ml-0.5">
+                      <Icon iconName="icon/chevron-up" size={10} class={rptSortColumn === 'created_at' && rptSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
+                      <Icon iconName="icon/chevron-down" size={10} class={rptSortColumn === 'created_at' && rptSortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'} />
+                    </span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              {#if rptData.length === 0 && !rptLoading}
+                <tr>
+                  <td colspan="3" class="px-4 py-12 text-center text-muted-foreground">
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon iconName="icon/file-text" size={32} class="text-muted-foreground" />
+                      <p>No reports found</p>
+                    </div>
+                  </td>
+                </tr>
+              {:else}
+                {#each rptData as report}
+                  <tr class="hover:bg-muted/20 transition-colors">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                          <Icon iconName="icon/file-text" size={16} class="text-muted-foreground" />
+                        </div>
+                        <span class="text-sm text-foreground">{report.message ?? "-"}</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {report.sms_status === 'sent' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : report.sms_status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300'}">
+                        {report.sms_status ?? "-"}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-muted-foreground text-xs">
+                      {report.created_at ? new Date(report.created_at).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-4 border-t border-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <select
+              class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+              bind:value={rptRowsPerPage}
+              onchange={() => { rptCurrentPage = 1; }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span class="text-sm text-muted-foreground">Entries</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={rptCurrentPage === 1}
+              onclick={() => rptCurrentPage = rptCurrentPage - 1}
+            >
+              <Icon iconName="icon/chevron-left" size={16} />
+            </button>
+            {#each getVisiblePages(rptCurrentPage, rptTotalPages) as p}
+              {#if typeof p === "number"}
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === rptCurrentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                  style={p === rptCurrentPage ? 'background-color:#4DA0E6;' : ''}
+                  onclick={() => rptCurrentPage = p}
+                >
+                  {p}
+                </button>
+              {:else}
+                <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+              {/if}
+            {/each}
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+              style="background-color:#4DA0E620; color:#4DA0E6;"
+              disabled={rptCurrentPage === rptTotalPages}
+              onclick={() => rptCurrentPage = rptCurrentPage + 1}
+            >
+              <Icon iconName="icon/chevron-right" size={16} />
+            </button>
           </div>
         </div>
       </div>
@@ -883,22 +1302,27 @@
   <!-- Assign Stock Modal -->
   <AssignStockModal
     bind:isOpen={isAssignStockModalOpen}
-    merchantName={merchant.name}
+    merchantName={merchantDetail ? `${merchantDetail.first_name} ${merchantDetail.last_name}` : "Merchant"}
     onAssign={(data) => {
       console.log("Assigning stock:", data);
-      // TODO: Implement API call to assign stock
     }}
   />
 
   <!-- Edit Location Modal -->
   <EditLocationModal
     bind:isOpen={isEditLocationModalOpen}
-    merchantName={merchant.name}
-    currentLocation={merchant.location}
-    onConfirm={(location) => {
-      console.log("Changing location to:", location);
-      // TODO: Implement API call to update location
-      merchant.location = location;
-    }}
+    merchantId={merchantId}
+    currentBranchId={merchantDetail?.branch?.id ?? ""}
+    onSuccess={handleEditLocationSuccess}
   />
 </div>
+
+<style>
+  :global(.loading-slide) {
+    animation: loading-slide 1.5s infinite linear;
+  }
+  @keyframes loading-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+</style>

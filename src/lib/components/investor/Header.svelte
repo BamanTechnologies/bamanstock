@@ -3,20 +3,15 @@
   import { goto } from "$app/navigation";
   import Logo from "./Logo.svelte";
   import { themeStore } from "$lib/stores/theme.svelte.js";
+  import { authStore } from "$lib/stores/auth.svelte.js";
+  import { useProfile } from "$lib/stores/profile.svelte.js";
   import { _, locale } from "svelte-i18n";
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
 
-  interface HeaderProps {
-    userAvatar?: string;
-    userName?: string;
-  }
-
-  let {
-    userAvatar = "/profileheader.png",
-    userName = "User",
-  }: HeaderProps = $props();
+  const profile = useProfile();
 
   let showLangDropdown = $state(false);
+  let showUserDropdown = $state(false);
 
   const langOptions = [
     { value: "en", label: "English",      abbr: "ENG" },
@@ -35,20 +30,70 @@
       <Logo />
 
       <div class="flex items-center gap-4">
-        <a
-          href="/onboarding/signin"
-          class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {$_('signIn')}
-        </a>
+        {#if authStore.isAuthenticated}
+          <button
+            type="button"
+            class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
+            aria-label="Notifications"
+          >
+            <Icon iconName="icon/bell" size={20} class="text-muted-foreground" />
+          </button>
 
-        <button
-          type="button"
-          class="px-4 py-2 text-white font-bold text-sm rounded-md transition-colors flex items-center justify-center min-w-40 h-10 hover:opacity-90 bg-(--primary-blue)"
-          onclick={() => goto("/dashboard")}
-        >
-          {$_('goToDashboard')}
-        </button>
+          <div class="relative">
+            <button
+              type="button"
+              onclick={() => (showUserDropdown = !showUserDropdown)}
+              onblur={() => setTimeout(() => (showUserDropdown = false), 150)}
+              class="flex flex-none items-center gap-2 rounded-full hover:bg-muted bg-gray-50 cursor-pointer dark:bg-gray-900 transition-colors px-2.5 py-1"
+              aria-label="User menu"
+            >
+              <span class="text-sm font-medium text-foreground max-w-[120px] truncate">{profile.name || authStore.user?.name}</span>
+              {#if profile.avatar}
+                <img src={profile.avatar} alt={profile.name} class="w-8 h-8 rounded-full object-cover" />
+              {:else if authStore.user?.avatar}
+                <img src={authStore.user.avatar} alt={authStore.user.name} class="w-8 h-8 rounded-full object-cover" />
+              {:else}
+                <span class="w-8 h-8 rounded-full bg-info flex items-center justify-center text-xs font-bold text-info-foreground">
+                  {(profile.name || authStore.user?.name || 'U').charAt(0).toUpperCase()}
+                </span>
+              {/if}
+            </button>
+            {#if showUserDropdown}
+              <div class="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                <button
+                  type="button"
+                  class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  onmousedown={() => { showUserDropdown = false; goto("/dashboard"); }}
+                >
+                  {$_('goToDashboard')}
+                </button>
+                <hr class="border-border">
+                <button
+                  type="button"
+                  class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-muted transition-colors cursor-pointer"
+                  onmousedown={() => { showUserDropdown = false; authStore.logout(); goto("/"); }}
+                >
+                  {$_('logout')}
+                </button>
+              </div>
+            {/if}
+          </div>
+        {:else}
+          <a
+            href="/onboarding/signin"
+            class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {$_('signIn')}
+          </a>
+
+          <button
+            type="button"
+            class="px-4 py-2 text-white font-bold text-sm rounded-md transition-colors flex items-center justify-center min-w-40 h-10 hover:opacity-90 bg-(--primary-blue)"
+            onclick={() => goto("/dashboard")}
+          >
+            {$_('goToDashboard')}
+          </button>
+        {/if}
 
         <div class="h-10 w-px bg-border"></div>
 
@@ -95,20 +140,6 @@
           aria-label="Notifications"
         >
           <Icon iconName="icon/bell" size={20} class="text-muted-foreground" />
-        </button>
-
-        <button
-          type="button"
-          class="flex-none rounded-full overflow-hidden w-8 h-8"
-          aria-label="User menu"
-        >
-          {#if userAvatar}
-            <img src={userAvatar} alt={userName} class="w-full h-full object-cover rounded-full" />
-          {:else}
-            <span class="text-sm font-semibold text-foreground">
-              {userName.charAt(0).toUpperCase()}
-            </span>
-          {/if}
         </button>
       </div>
     </div>

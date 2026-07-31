@@ -159,6 +159,7 @@
   "totalOrders": "Waliigala Ajajaalee",
   "totalTransaction": "Waliigala Daldalaalee",
   "unitsSold": "Waraabbii Gurguraman",
+  "totalOutstanding": "Waliigala Ha'ee Kaffaluu",
   "fromLastMonth": "Ji'a Darbe Irraa",
   "salesReport": "Gabaasa Gurgurtaa",
   "paymentReport": "Gabaasa Kaffaluu",
@@ -173,5 +174,19 @@
   "custom": "Filannoowwan",
   "selectPeriod": "Yeroo Filadhu",
   "sessionExpired": "Seessaa kee kan dhumateera. Mee ashiin deebi'ii seeni.",
-  "somethingWentWrong": "Wanta tokko dogoggoraa"
+  "somethingWentWrong": "Wanta tokko dogoggoraa",
+  "stockMovementReport": "Gabaasa Sochiinsa Kuusaa",
+  "noStockMovementsFound": "Sochiin kuusaa tokkollee hin argamne",
+  "movementType": "Gosa Sochii",
+  "batchNumber": "Lakkoofsa Garee",
+  "lowStockProducts": "Oomishaawwan Kuusaa Gadi Aanaa",
+  "noLowStockFound": "Oomishni kuusaa gadi aanaa tokkollee hin argamne",
+  "oldPassword": "Jecha Darbii Dura",
+  "newPassword": "Jecha Darbii Haala",
+  "cancel": "Sorri",
+  "bothFieldsRequired": "Hawaan qorichaa barbaachisaa",
+  "passwordChangedSuccessfully": "Jecha darbii teessuu garaa",
+  "failedToChangePassword": "Jecha darbii teessuu hin dandeenye",
+  "oldPasswordPlaceholder": "Enter your current password",
+  "newPasswordPlaceholder": "Enter your new password"
 }

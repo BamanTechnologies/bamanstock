@@ -1,0 +1,25 @@
+query lowStockPropertiesStats {
+  low_stock_products: products_aggregate(
+    where: { is_low_stock: { _eq: true } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  critical_low_stock_products: products_aggregate(
+    where: { is_low_stock: { _eq: true }, current_available_stock: { _lte: 0 } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  low_stock_properties_prices: stock_aggregate(
+    where: { product: { is_low_stock: { _eq: true } } }
+  ) {
+    aggregate {
+      sum {
+        purchased_price
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+query GetBranchSalesTrend($branchId: uuid!, $investorId: uuid!, $year: Int) {
+  overall_orders: orders_aggregate(
+    where: { merchant: { branch: { _eq: $branchId } } }
+  ) {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  investor_branch_sales_trend_report(
+    args: { year: $year, branch_id: $branchId, investor_id: $investorId }
+  ) {
+    total_sales
+    month
+  }
+}

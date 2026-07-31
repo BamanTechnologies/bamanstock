@@ -1,167 +1,180 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
-  import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { goto } from "$app/navigation";
-  import InviteMerchantModal from "$lib/components/investor/InviteMerchantModal.svelte";
+  import { page } from "$app/stores";
+  import CreateMerchantModal from "$lib/components/investor/CreateMerchantModal.svelte";
+  import UpdateMerchantModal from "$lib/components/investor/UpdateMerchantModal.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
+  import { getAuthClient } from "$graphql/client.ts";
+  import INVESTOR_MERCHANTS_QUERY from "$graphql/queries/merchants/investor_merchants.gql";
+  import DELETE_MERCHANT from "$graphql/mutation/merchant/delete.gql";
   import { _ } from "svelte-i18n";
 
-  let isInviteModalOpen = $state(false);
+  let isCreateModalOpen = $state(false);
+  let isEditModalOpen = $state(false);
+  let isDeleteModalOpen = $state(false);
+  let deletingMerchant = $state<any>(null);
+  let editingMerchant = $state<any>(null);
+  let deleteLoading = $state(false);
 
-  const summaryCards = $derived([
-    { label: $_('totalMerchants'),      value: "20", icon: "icon/user",     color: "bg-green-100 dark:bg-green-900/40" },
-    { label: $_('activeMerchants'),     value: "13", icon: "icon/users",    color: "bg-blue-100 dark:bg-blue-900/40"  },
-    { label: $_('merchantsPerLocation'), value: "4",  icon: "icon/building", color: "bg-purple-100 dark:bg-purple-900/40" },
-  ]);
+  let searchQuery = $state($page.url.searchParams.get("search") ?? "");
+  let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
+  let rowsPerPage = $state(Number($page.url.searchParams.get("limit")) || 10);
+  let sortColumn = $state($page.url.searchParams.get("sort") || "orders");
+  let sortDirection = $state<"asc" | "desc">(
+    ($page.url.searchParams.get("dir") as "asc" | "desc") || "desc"
+  );
 
-  const merchants = [
-    { name: "Richard Wilson",   revenue: "$156,900", transactions: "785", location: "Branch #1", status: "Active" },
-    { name: "Stan Gaunter",     revenue: "$98,450",  transactions: "521", location: "Branch #2", status: "Active" },
-    { name: "Carlos Curran",    revenue: "$74,200",  transactions: "390", location: "Branch #3", status: "Invited" },
-    { name: "Beth Noah",        revenue: "$62,300",  transactions: "318", location: "Branch #1", status: "Active" },
-    { name: "Yohannes Abayneh", revenue: "$48,760",  transactions: "241", location: "Branch #4", status: "Active" },
-    { name: "Emma Collins",     revenue: "$38,900",  transactions: "198", location: "Branch #2", status: "Invited" },
-    { name: "James Morgan",     revenue: "$29,500",  transactions: "154", location: "Branch #5", status: "Active" },
-    { name: "Olivia Chen",      revenue: "$24,780",  transactions: "132", location: "Branch #3", status: "Declined" },
-    { name: "Marcus Davis",     revenue: "$21,340",  transactions: "110", location: "Branch #1", status: "Active" },
-    { name: "Sarah Johnson",    revenue: "$19,800",  transactions: "97",  location: "Branch #2", status: "Active" },
-    { name: "Daniel Park",      revenue: "$17,200",  transactions: "88",  location: "Branch #4", status: "Invited" },
-    { name: "Fatima Hassan",    revenue: "$15,600",  transactions: "79",  location: "Branch #5", status: "Active" },
-    { name: "Lucas Ferreira",   revenue: "$13,900",  transactions: "71",  location: "Branch #3", status: "Active" },
-    { name: "Nina Patel",       revenue: "$12,400",  transactions: "64",  location: "Branch #1", status: "Declined" },
-    { name: "Kwame Asante",     revenue: "$10,890",  transactions: "58",  location: "Branch #2", status: "Active" },
-    { name: "Priya Sharma",     revenue: "$9,750",   transactions: "51",  location: "Branch #4", status: "Invited" },
-    { name: "Thomas Green",     revenue: "$8,620",   transactions: "45",  location: "Branch #5", status: "Active" },
-    { name: "Amara Obi",        revenue: "$7,480",   transactions: "39",  location: "Branch #3", status: "Active" },
-    { name: "Lena Müller",      revenue: "$6,340",   transactions: "33",  location: "Branch #1", status: "Declined" },
-    { name: "Ravi Kumar",       revenue: "$5,200",   transactions: "27",  location: "Branch #2", status: "Active" },
-    { name: "Aisha Mwangi",     revenue: "$4,800",   transactions: "24",  location: "Branch #3", status: "Active" },
-    { name: "Diego Herrera",    revenue: "$4,350",   transactions: "22",  location: "Branch #4", status: "Invited" },
-    { name: "Yuki Tanaka",      revenue: "$3,920",   transactions: "19",  location: "Branch #5", status: "Active" },
-    { name: "Chloe Dupont",     revenue: "$3,540",   transactions: "17",  location: "Branch #1", status: "Active" },
-    { name: "Omar Farouk",      revenue: "$3,100",   transactions: "15",  location: "Branch #2", status: "Declined" },
-    { name: "Ingrid Larsen",    revenue: "$2,780",   transactions: "13",  location: "Branch #3", status: "Active" },
-    { name: "Tunde Adeyemi",    revenue: "$2,460",   transactions: "11",  location: "Branch #4", status: "Active" },
-    { name: "Mei-Lin Zhang",    revenue: "$2,150",   transactions: "9",   location: "Branch #5", status: "Invited" },
-    { name: "Pedro Alves",      revenue: "$1,840",   transactions: "8",   location: "Branch #1", status: "Active" },
-    { name: "Nadia Petrov",     revenue: "$1,620",   transactions: "7",   location: "Branch #2", status: "Active" },
-    { name: "Kofi Mensah",      revenue: "$1,390",   transactions: "6",   location: "Branch #3", status: "Declined" },
-    { name: "Hana Yoshida",     revenue: "$1,170",   transactions: "5",   location: "Branch #4", status: "Active" },
-    { name: "Arjun Bose",       revenue: "$950",     transactions: "4",   location: "Branch #5", status: "Invited" },
-    { name: "Lila Andersen",    revenue: "$730",     transactions: "3",   location: "Branch #1", status: "Active" },
+  let merchants = $state<any[]>([]);
+  let totalCount = $state(0);
+  let totalMerchants = $state(0);
+  let activeMerchants = $state(0);
+  let locationCount = $state(0);
+  let loading = $state(true);
+  let fetchError = $state<string | null>(null);
+
+  let debouncedSearch = $state($page.url.searchParams.get("search") ?? "");
+  let debounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(debounceTimer);
+    if (searchQuery === debouncedSearch) return;
+    debounceTimer = setTimeout(() => {
+      debouncedSearch = searchQuery;
+      currentPage = 1;
+    }, 400);
+    return () => clearTimeout(debounceTimer);
+  });
+
+  const totalPages = $derived(Math.max(1, Math.ceil(totalCount / rowsPerPage)));
+
+  function buildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [];
+    if (debouncedSearch) {
+      conditions.push({
+        _or: [
+          { first_name: { _ilike: `%${debouncedSearch}%` } },
+          { last_name: { _ilike: `%${debouncedSearch}%` } },
+          { phone_number: { _ilike: `%${debouncedSearch}%` } },
+          { branchByBranch: { name: { _ilike: `%${debouncedSearch}%` } } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
+  }
+
+  const AVATAR_COLORS = [
+    "#4DA0E6", "#D15B7A", "#34A853", "#FBBC05",
+    "#FF6B6B", "#6B5B95", "#88B04B", "#F7CAC9",
+    "#92A8D1", "#955251", "#B565A7", "#009B77",
   ];
 
-  function getStatusClass(status: string) {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700";
-      case "Invited":
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600";
-      case "Declined":
-        return "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700";
+  function avatarColor(name: string): string {
+    return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+  }
+
+  function initials(first_name: string, last_name: string): string {
+    return (first_name?.charAt(0) ?? "") + (last_name?.charAt(0) ?? "");
+  }
+
+  function fmt(val: unknown): string {
+    if (val == null) return "0";
+    return String(val).replace(/^\$/, "ETB ");
+  }
+
+  function formatBranch(name: string | null | undefined): string {
+    if (!name) return "-";
+    return name
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }
+
+  function buildOrder(): Record<string, unknown>[] {
+    switch (sortColumn) {
+      case "name":
+        return [{ first_name: sortDirection }];
+      case "sales":
+        return [{ orders_aggregate: { sum: { total_amount: sortDirection } } }];
+      case "total_outstanding":
+        return [{ orders_aggregate: { sum: { outstanding_amount: sortDirection } } }];
+      case "orders":
+        return [{ orders_aggregate: { count: sortDirection } }];
+      case "location":
+        return [{ branchByBranch: { name: sortDirection } }];
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600";
+        return [{ orders_aggregate: { count: "desc" } }];
     }
   }
 
-  function getStatusDot(status: string) {
-    switch (status) {
-      case "Active":
-        return "bg-green-500";
-      case "Invited":
-        return "bg-gray-500";
-      case "Declined":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (currentPage > 1) params.set("page", String(currentPage));
+    if (rowsPerPage !== 10) params.set("limit", String(rowsPerPage));
+    if (sortColumn !== "orders") params.set("sort", sortColumn);
+    if (sortDirection !== "desc") params.set("dir", sortDirection);
+    const qs = params.toString();
+    goto(qs ? `?${qs}` : $page.url.pathname, { replaceState: true, keepFocus: true, noScroll: true });
   }
 
-  const columns = $derived([
-    {
-      key: "name",
-      label: $_('merchant'),
-      sortable: true,
-      render: (row: (typeof merchants)[0]) => {
-        return `
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-              <svg class="w-4 h-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <span class="text-sm text-foreground">${row.name}</span>
-          </div>
-        `;
-      },
-    },
-    { key: "revenue",      label: $_('revenue'),       sortable: true },
-    { key: "transactions", label: $_('transactions') },
-    { key: "location",     label: $_('navLocation') },
-    {
-      key: "status",
-      label: $_('filterStatus'),
-      sortable: true,
-      render: (row: (typeof merchants)[0]) => {
-        const label = row.status === "Active"   ? $_('statusActive')
-                    : row.status === "Invited"  ? $_('statusInvited')
-                    : row.status === "Declined" ? $_('statusDeclined')
-                    : row.status;
-        return `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(row.status)}">
-            <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
-            ${label}
-          </span>
-        `;
-      },
-    },
-  ]);
+  $effect(() => {
+    void debouncedSearch;
+    void currentPage;
+    void rowsPerPage;
+    void sortColumn;
+    void sortDirection;
+    void refetchTrigger;
 
-  const filters = $derived([
-    {
-      key: "location",
-      label: $_('navLocation'),
-      options: [
-        { value: "", label: $_('allLocations') },
-        { value: "Branch #1", label: "Branch #1" },
-        { value: "Branch #2", label: "Branch #2" },
-        { value: "Branch #3", label: "Branch #3" },
-        { value: "Branch #4", label: "Branch #4" },
-        { value: "Branch #5", label: "Branch #5" },
-      ],
-    },
-    {
-      key: "status",
-      label: $_('filterStatus'),
-      options: [
-        { value: "",         label: $_('allStatus') },
-        { value: "active",   label: $_('statusActive') },
-        { value: "invited",  label: $_('statusInvited') },
-        { value: "declined", label: $_('statusDeclined') },
-      ],
-    },
-  ]);
+    loading = true;
+    fetchError = null;
 
-  let searchQuery = $state("");
-  let locationFilter = $state("");
-  let statusFilter = $state("");
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          merchant: any[];
+          total: { aggregate: { count: number } };
+          total_merchants: { aggregate: { count: number } };
+          active_merchants: { aggregate: { count: number } };
+          merchants_location: { aggregate: { count: number } };
+        }>({
+          query: INVESTOR_MERCHANTS_QUERY,
+          variables: {
+            limit: rowsPerPage,
+            offset: (currentPage - 1) * rowsPerPage,
+            filter: buildFilter(),
+            order: buildOrder(),
+          },
+        });
+        merchants = result.data?.merchant ?? [];
+        totalCount = result.data?.total?.aggregate?.count ?? 0;
+        totalMerchants = result.data?.total_merchants?.aggregate?.count ?? 0;
+        activeMerchants = result.data?.active_merchants?.aggregate?.count ?? 0;
+        locationCount = result.data?.merchants_location?.aggregate?.count ?? 0;
+        syncUrl();
+      } catch (err) {
+        fetchError = (err as Error).message;
+        merchants = [];
+        totalCount = 0;
+      } finally {
+        loading = false;
+      }
+    }, 300);
 
-  const filteredMerchants = $derived(
-    merchants.filter((m) => {
-      if (searchQuery && !m.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      if (locationFilter && m.location !== locationFilter) return false;
-      if (statusFilter && m.status.toLowerCase() !== statusFilter) return false;
-      return true;
-    })
-  );
+    return () => clearTimeout(timer);
+  });
 
-  let currentPage = $state(1);
-  let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(filteredMerchants.length / rowsPerPage));
-
-  const paginatedMerchants = $derived(
-    filteredMerchants.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
-  );
+  function handleSort(column: string) {
+    if (sortColumn === column) {
+      sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      sortColumn = column;
+      sortDirection = "asc";
+    }
+    currentPage = 1;
+  }
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -172,90 +185,401 @@
     currentPage = 1;
   }
 
-  function handleSearch(query: string) {
-    searchQuery = query;
-    currentPage = 1;
+  function handleView(merchant: any) {
+    goto(`/dashboard/merchants/${merchant.id}`);
   }
 
-  function handleFilterChange(key: string, value: string) {
-    if (key === "location") locationFilter = value;
-    if (key === "status") statusFilter = value;
-    currentPage = 1;
+  function handleEdit(merchant: any) {
+    editingMerchant = merchant;
+    isEditModalOpen = true;
   }
 
-  function handleView(merchant: (typeof merchants)[0]) {
-    const merchantId = merchant.name.toLowerCase().replace(/\s+/g, "-");
-    goto(`/dashboard/merchants/${merchantId}`);
+  function handleDeleteClick(merchant: any) {
+    deletingMerchant = merchant;
+    isDeleteModalOpen = true;
   }
 
-  function handleDelete(merchant: (typeof merchants)[0]) {
-    console.log("Delete merchant:", merchant);
+  async function handleDeleteConfirm() {
+    if (!deletingMerchant) return;
+    deleteLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: DELETE_MERCHANT,
+        variables: { id: deletingMerchant.id },
+      });
+      isDeleteModalOpen = false;
+      deletingMerchant = null;
+      fetchError = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      fetchError = (err as Error).message;
+    } finally {
+      deleteLoading = false;
+    }
+  }
+
+  function handleDeleteCancel() {
+    isDeleteModalOpen = false;
+    deletingMerchant = null;
+  }
+
+  let refetchTrigger = $state(0);
+
+  function handleCreateSuccess() {
+    refetchTrigger++;
+  }
+
+  function handleEditSuccess() {
+    refetchTrigger++;
+  }
+
+  const summaryCards = $derived([
+    { label: $_('totalMerchants'),      value: String(totalMerchants), icon: "icon/user",     color: "bg-green-100 dark:bg-green-900/40" },
+    { label: $_('activeMerchants'),     value: String(activeMerchants), icon: "icon/users",    color: "bg-blue-100 dark:bg-blue-900/40"  },
+    { label: $_('merchantsPerLocation'), value: String(locationCount),  icon: "icon/building", color: "bg-purple-100 dark:bg-purple-900/40" },
+  ]);
+
+  function getVisiblePages(current: number, total: number): (number | string)[] {
+    const pages: (number | string)[] = [];
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else if (current <= 3) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    } else if (current >= total - 2) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push("...");
+      for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    }
+    return pages;
   }
 </script>
 
 <div class="flex-1 p-6 space-y-6">
-  <!-- Action Buttons - PDF and Invite Merchant -->
   <div class="flex items-center justify-end gap-4">
     <Icon
       iconName="icon/file-text"
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isInviteModalOpen = true)}>
+    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isCreateModalOpen = true)}>
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       {$_('inviteMerchant')}
     </Button>
   </div>
 
-  <!-- Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     {#each summaryCards as card}
       <div class="bg-card border border-border rounded-lg p-6">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-3xl font-bold text-foreground mb-1">{card.value}</p>
-            <p class="text-sm text-muted-foreground">{card.label}</p>
+          <div class="flex-1 min-w-0">
+            {#if loading}
+              <div class="h-8 w-24 rounded bg-muted/60 dark:bg-muted/30 animate-pulse mb-2" />
+              <div class="h-4 w-32 rounded bg-muted/40 dark:bg-muted/20 animate-pulse" />
+            {:else}
+              <p class="text-3xl font-bold text-foreground mb-1">{card.value}</p>
+              <p class="text-sm text-muted-foreground">{card.label}</p>
+            {/if}
           </div>
-          <div
-            class="{card.color} w-12 h-12 rounded-lg flex items-center justify-center"
-          >
-            <Icon
-              iconName={card.icon as any}
-              size={24}
-              class="text-foreground"
-            />
+          <div class="{card.color} w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+            <Icon iconName={card.icon as any} size={24} class="text-foreground" />
           </div>
         </div>
       </div>
     {/each}
   </div>
 
-  <!-- Table Section -->
-  <DataTable
-    {columns}
-    data={paginatedMerchants}
-    searchable={true}
-    searchPlaceholder={$_('search')}
-    {filters}
-    onSearch={handleSearch}
-    onFilterChange={handleFilterChange}
-    onRowClick={handleView}
-    actions={[
-      {
-        icon: "icon/trash",
-        label: $_('delete'),
-        onClick: handleDelete,
-        variant: "destructive",
-      },
-    ]}
-    pagination={{
-      currentPage,
-      totalPages,
-      rowsPerPage,
-      onPageChange: handlePageChange,
-      onRowsPerPageChange: handleRowsPerPageChange,
-    }}
-  />
+  {#if fetchError}
+    <div class="flex flex-col items-center justify-center py-16 bg-card border border-border rounded-lg">
+      <Icon iconName="icon/alert-circle" size={48} class="text-destructive mb-4" />
+      <p class="text-destructive font-medium">{$_('somethingWentWrong')}</p>
+      <p class="text-muted-foreground text-sm mt-1">{fetchError}</p>
+      <Button
+        variant="outline"
+        onclick={() => refetchTrigger++}
+        class="mt-4 border-border text-foreground hover:bg-muted"
+      >
+        <Icon iconName="icon/refresh-cw" size={16} class="mr-2" />
+        Try Again
+      </Button>
+    </div>
+  {:else if merchants.length === 0 && !loading}
+    <div class="bg-card border border-border rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-border">
+        <div class="relative w-72">
+          <Icon
+            iconName="icon/search"
+            size={16}
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder={$_('search')}
+            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+            bind:value={searchQuery}
+          />
+        </div>
+      </div>
+      <div class="flex flex-col items-center justify-center py-16">
+        <Icon iconName="icon/users" size={48} class="text-muted-foreground mb-4" />
+        <p class="text-foreground font-medium">{$_('pageSubtitle')}</p>
+      </div>
+    </div>
+  {:else}
+    <div class="bg-card border border-border rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+        <div class="relative w-72 shrink-0">
+          <Icon
+            iconName="icon/search"
+            size={16}
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder={$_('search')}
+            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+            bind:value={searchQuery}
+          />
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-muted/30 border-b border-border">
+            <tr class="text-left text-xs text-muted-foreground uppercase">
+              <th class="px-4 py-3 w-10">
+                <input type="checkbox" class="rounded" />
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("name")}
+                >
+                  {$_('merchant')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'name' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'name' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("sales")}
+                >
+                  {$_('sales')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'sales' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'sales' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("total_outstanding")}
+                >
+                  {$_('totalOutstanding')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'total_outstanding' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'total_outstanding' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("orders")}
+                >
+                  {$_('transactions')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'orders' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'orders' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("location")}
+                >
+                  {$_('navLocation')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'location' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'location' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-right font-medium">Actions</th>
+            </tr>
+            {#if loading}
+              <tr>
+                <td colspan="7" class="p-0">
+                  <div class="h-1 bg-muted/30 w-full overflow-hidden">
+                    <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+                  </div>
+                </td>
+              </tr>
+            {/if}
+          </thead>
+          <tbody class="divide-y divide-border">
+            {#each merchants as row}
+              <tr
+                class="hover:bg-muted/20 transition-colors cursor-pointer"
+                onclick={() => handleView(row)}
+              >
+                <td class="px-4 py-4" onclick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" class="rounded" />
+                </td>
+                <td class="px-4 py-4 text-foreground">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0" style="background-color: {avatarColor(row.first_name)}">
+                      {initials(row.first_name, row.last_name)}
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <span class="text-sm text-foreground font-medium truncate">{row.first_name} {row.last_name}</span>
+                      <span class="text-xs text-muted-foreground truncate">{row.phone_number ?? "-"}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-4 text-foreground">{fmt(row.sales?.aggregate?.sum?.total_amount)}</td>
+                <td class="px-4 py-4 text-foreground">{fmt(row.total_outstanding?.aggregate?.sum?.outstanding_amount)}</td>
+                <td class="px-4 py-4 text-foreground">{row.total_orders?.aggregate?.count ?? 0}</td>
+                <td class="px-4 py-4 text-foreground">{formatBranch(row.branch?.name)}</td>
+                <td class="px-4 py-4 text-right" onclick={(e) => e.stopPropagation()}>
+                  <button
+                    onclick={() => handleEdit(row)}
+                    class="p-1.5 rounded hover:bg-muted transition-colors"
+                    aria-label="Edit"
+                  >
+                    <!-- <Icon iconName="icon/pencil" size={16} class="text-muted-foreground hover:text-info" /> -->
+                    <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
+
+                  </button>
+                  <button
+                    onclick={() => handleDeleteClick(row)}
+                    class="p-1.5 rounded hover:bg-muted transition-colors"
+                    aria-label={$_('delete')}
+                  >
+                    <Icon iconName="icon/trash" size={16} class="text-muted-foreground hover:text-destructive" />
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-muted-foreground">Row Per Page</span>
+          <select
+            class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+            onchange={(e) => {
+              rowsPerPage = Number(e.currentTarget.value);
+              currentPage = 1;
+            }}
+          >
+            <option value="10" selected={rowsPerPage === 10}>10</option>
+            <option value="20" selected={rowsPerPage === 20}>20</option>
+            <option value="50" selected={rowsPerPage === 50}>50</option>
+            <option value="100" selected={rowsPerPage === 100}>100</option>
+          </select>
+          <span class="text-sm text-muted-foreground">Entries</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+            style="background-color:#4DA0E620; color:#4DA0E6;"
+            disabled={currentPage === 1}
+            onclick={() => handlePageChange(currentPage - 1)}
+          >
+            <Icon iconName="icon/chevron-left" size={16} />
+          </button>
+          {#each getVisiblePages(currentPage, totalPages) as p}
+            {#if typeof p === "number"}
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === currentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                style={p === currentPage ? 'background-color:#4DA0E6;' : ''}
+                onclick={() => handlePageChange(p)}
+              >
+                {p}
+              </button>
+            {:else}
+              <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+            {/if}
+          {/each}
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+            style="background-color:#4DA0E620; color:#4DA0E6;"
+            disabled={currentPage === totalPages}
+            onclick={() => handlePageChange(currentPage + 1)}
+          >
+            <Icon iconName="icon/chevron-right" size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>
 
-<InviteMerchantModal bind:isOpen={isInviteModalOpen} />
+<CreateMerchantModal bind:isOpen={isCreateModalOpen} onSuccess={handleCreateSuccess} />
+
+<UpdateMerchantModal
+  bind:isOpen={isEditModalOpen}
+  merchant={editingMerchant}
+  onSuccess={handleEditSuccess}
+/>
+
+<ConfirmModal
+  bind:isOpen={isDeleteModalOpen}
+  title="Remove Merchant"
+  message={deletingMerchant ? `Are you sure you want to remove <strong>${deletingMerchant.first_name} ${deletingMerchant.last_name}</strong>? This action will revoke their access to all assigned stocks and cannot be undone.` : ""}
+  confirmText="Remove Merchant"
+  loading={deleteLoading}
+  onConfirm={handleDeleteConfirm}
+  onClose={handleDeleteCancel}
+/>
+
+<style>
+  :global(.loading-slide) {
+    animation: loading-slide 1.5s infinite linear;
+  }
+  @keyframes loading-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+</style>

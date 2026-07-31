@@ -1,0 +1,20 @@
+mutation (
+  $firstName: String!
+  $lastName: String!
+  $phone: String!
+  $address: String!
+  $password: String!
+  $branchId: String!
+) {
+  register_merchant(
+    first_name: $firstName
+    last_name: $lastName
+    phone: $phone
+    address: $address
+    password: $password
+    branch_id: $branchId
+  ) {
+    message
+    status_code
+  }
+}

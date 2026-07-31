@@ -14,6 +14,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.0(jiti@2.6.1)(lightningcss@1.30.2))
+      apexcharts:
+        specifier: ^6.2.0
+        version: 6.2.0
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
@@ -729,6 +732,9 @@ packages:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  apexcharts@6.2.0:
+    resolution: {integrity: sha512-rfBlhVfqm74eQsGsl03MA5mysYoyZEUn13+OUKyGu9vZnCVf7x8qW+Am8sI7LMkdpAczb96BemzAh8DXJcMfNQ==}
 
   aria-query@5.3.2:
     resolution: {integrity: sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==}
@@ -1637,6 +1643,8 @@ snapshots:
       tslib: 2.8.1
 
   acorn@8.15.0: {}
+
+  apexcharts@6.2.0: {}
 
   aria-query@5.3.2: {}
 

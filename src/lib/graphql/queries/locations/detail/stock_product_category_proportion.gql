@@ -1,0 +1,11 @@
+query getStockProductsCategoryProportionPie(
+  $branchId: uuid!
+  $investorId: uuid!
+) {
+  merchant_branch_stock_product_category_proportion_report(
+    args: { branch_id: $branchId, investor_id: $investorId }
+  ) {
+    total_products
+    category
+  }
+}

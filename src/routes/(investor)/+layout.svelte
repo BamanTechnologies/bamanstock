@@ -15,6 +15,9 @@
   import { _, locale } from "svelte-i18n";
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
   import { authStore } from "$lib/stores/auth.svelte.js";
+  import { useProfile } from "$lib/stores/profile.svelte.js";
+
+  const profile = useProfile();
 
   let { children } = $props();
 
@@ -188,26 +191,30 @@
                 onclick={() => (showProfileDropdown = !showProfileDropdown)}
                 class="w-8 h-8 rounded-full overflow-hidden cursor-pointer border border-border focus:outline-none"
               >
-                {#if authStore.user?.avatar}
+                {#if profile.avatar}
+                  <img src={profile.avatar} alt={profile.name} class="w-full h-full object-cover" />
+                {:else if authStore.user?.avatar}
                   <img src={authStore.user.avatar} alt={authStore.user.name} class="w-full h-full object-cover" />
                 {:else}
                   <span class="w-full h-full bg-info flex items-center justify-center text-xs font-bold text-info-foreground">
-                    {authStore.user?.name?.charAt(0).toUpperCase()}
+                    {(profile.name || authStore.user?.name || 'U').charAt(0).toUpperCase()}
                   </span>
                 {/if}
               </button>
               {#if showProfileDropdown}
                 <div class="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                   <div class="flex items-center gap-3 px-4 py-3 border-b border-border">
-                    {#if authStore.user?.avatar}
+                    {#if profile.avatar}
+                      <img src={profile.avatar} alt={profile.name} class="w-9 h-9 rounded-full object-cover shrink-0" />
+                    {:else if authStore.user?.avatar}
                       <img src={authStore.user.avatar} alt={authStore.user.name} class="w-9 h-9 rounded-full object-cover shrink-0" />
                     {:else}
                       <span class="w-9 h-9 rounded-full bg-info flex items-center justify-center text-xs font-bold text-info-foreground shrink-0">
-                        {authStore.user?.name?.charAt(0).toUpperCase()}
+                        {(profile.name || authStore.user?.name || 'U').charAt(0).toUpperCase()}
                       </span>
                     {/if}
                     <div>
-                      <p class="text-xs font-semibold text-foreground">{authStore.user?.name}</p>
+                      <p class="text-xs font-semibold text-foreground">{profile.name || authStore.user?.name}</p>
                       <a href="/dashboard/profile" class="text-xs text-info hover:underline" onclick={() => (showProfileDropdown = false)}>
                         {$_('viewProfile')}
                       </a>
