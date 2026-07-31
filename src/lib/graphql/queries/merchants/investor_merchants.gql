@@ -1,0 +1,64 @@
+query getLandingMerchants(
+  $limit: Int
+  $offset: Int
+  $filter: merchant_bool_exp
+  $order: [merchant_order_by!]!
+) {
+  merchant(limit: $limit, offset: $offset, where: $filter, order_by: $order) {
+    id
+    first_name
+    last_name
+    address
+    phone_number
+    branch: branchByBranch {
+      id
+      name
+      address
+      company
+      created_at
+    }
+    total_orders: orders_aggregate {
+      aggregate {
+        count
+      }
+    }
+    sales: orders_aggregate {
+      aggregate {
+        sum {
+          total_amount
+        }
+      }
+    }
+    total_outstanding: orders_aggregate {
+      aggregate {
+        sum {
+          outstanding_amount
+        }
+      }
+    }
+  }
+  total: merchant_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+  total_merchants: merchant_aggregate {
+    aggregate {
+      count
+    }
+  }
+  active_merchants: merchant_aggregate(
+    where: { orders_aggregate: { count: { predicate: { _gt: 0 } } } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  merchants_location: branches_aggregate(
+    where: { merchants: { id: { _is_null: false } } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}

@@ -1,0 +1,7 @@
+query getMerchant($limit: Int, $offset: Int, $filter: merchant_bool_exp) {
+  merchant(limit: $limit, offset: $offset, where: $filter) {
+    id
+    first_name
+    last_name
+  }
+}

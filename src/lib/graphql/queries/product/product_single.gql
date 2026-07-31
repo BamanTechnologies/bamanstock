@@ -1,0 +1,7 @@
+query getProductOne($id: uuid!) {
+  products_by_pk(id: $id) {
+    id
+    default_unit
+    investors
+  }
+}

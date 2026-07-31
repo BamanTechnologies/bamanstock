@@ -1,0 +1,60 @@
+query getMerchantDetail($id: uuid!) {
+  merchant_by_pk(id: $id) {
+    id
+    first_name
+    last_name
+    phone_number
+    address
+    created_at
+    total_transactions: payments_aggregate {
+      aggregate {
+        sum {
+          amount
+        }
+      }
+    }
+    total_revenue: payments_aggregate(
+      where: { order: { status: { _eq: "paid" } } }
+    ) {
+      aggregate {
+        sum {
+          amount
+        }
+      }
+    }
+    stocks_aggregate {
+      aggregate {
+        sum {
+          purchased_price
+        }
+      }
+    }
+    branch: branchByBranch {
+      id
+      name
+      company: companyByCompany {
+        id
+        name
+      }
+    }
+  }
+  stock_movements_aggregate(
+    where: {
+      _or: [
+        { created_by: { _eq: $id } }
+        { branch: { merchants: { id: { _eq: $id } } } }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        quantity_delta
+      }
+    }
+  }
+  products_aggregate(where: { created_by: { _eq: $id } }) {
+    aggregate {
+      count
+    }
+  }
+}

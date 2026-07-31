@@ -28,8 +28,13 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
+		"@apollo/client": "^4.2.6",
 		"@tailwindcss/vite": "^4.1.18",
+		"apexcharts": "^6.2.0",
+		"graphql": "^17.0.2",
+		"jwt-decode": "^4.0.0",
 		"svelte-i18n": "^4.0.1",
+		"svelte-sonner": "^1.1.1",
 		"tailwindcss": "^4.1.18"
 	}
 }

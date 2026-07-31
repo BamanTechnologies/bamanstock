@@ -2,12 +2,18 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { _ } from "svelte-i18n";
 
+  const AVATAR_COLORS = [
+    "#4DA0E6", "#D15B7A", "#34A853", "#FBBC05",
+    "#FF6B6B", "#6B5B95", "#88B04B", "#F7CAC9",
+    "#92A8D1", "#955251", "#B565A7", "#009B77",
+  ];
+
   interface MerchantCardProps {
     name: string;
     avatar?: string;
     status: "active" | "declined" | "invited";
     productsSold: number;
-    category: string;
+    location: string;
     onHire?: () => void;
   }
 
@@ -16,11 +22,23 @@
     avatar,
     status,
     productsSold,
-    category,
+    location,
     onHire,
   }: MerchantCardProps = $props();
 
   const PRIMARY_BLUE = "var(--primary-blue)";
+
+  const initials = $derived(
+    (() => {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+      }
+      return name.charAt(0).toUpperCase();
+    })()
+  );
+
+  const avatarColor = $derived(AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]);
 
   const statusConfig = $derived({
     active: {
@@ -51,7 +69,7 @@
   >
     <div
       class="flex-none"
-      style="display: flex; flex-direction: row; justify-content: center; align-items: center; padding: 8px; gap: 10.22px; width: 55px; height: 55px; border-radius: 1.13536e+06px; flex: none; order: 0; flex-grow: 0;"
+      style="display: flex; flex-direction: row; justify-content: center; align-items: center; width: 55px; height: 55px; border-radius: 50%; background: {avatarColor}; flex: none; order: 0; flex-grow: 0;"
     >
       {#if avatar}
         <img
@@ -60,8 +78,8 @@
           style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;"
         />
       {:else}
-        <span class="text-foreground" style="font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 20px;">
-          {name.charAt(0).toUpperCase()}
+        <span style="font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 16px; color: #FFFFFF;">
+          {initials}
         </span>
       {/if}
     </div>
@@ -120,16 +138,16 @@
   >
     <div
       class="flex flex-row items-center flex-none"
-      style="padding: 0px; gap: 4.9px; width: 144.62px; height: 20px; flex-grow: 0;"
+      style="padding: 0px; gap: 4.9px; width: 287px; height: 20px; flex-grow: 0;"
     >
       <div class="flex-none flex items-center justify-center" style="width: 14.71px; height: 20px;">
-        <Icon iconName="icon/shopping-bag" size={14.71} class="text-foreground" />
+        <Icon iconName="icon/map-pin" size={14.71} class="text-foreground" />
       </div>
       <div
         class="flex-none flex items-center text-foreground"
-        style="width: 125px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; flex-grow: 0;"
+        style="max-width: 260px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; flex-grow: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
       >
-        {category}
+        {location}
       </div>
     </div>
 

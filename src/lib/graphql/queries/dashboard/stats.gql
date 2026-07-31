@@ -1,0 +1,66 @@
+query GetDashboardStats($pastMonthEndDate: timestamptz!) {
+  total_sales: payment_aggregate(
+    where: { order: { status: { _neq: "cancelled" } } }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+  previous_month_sales: payment_aggregate(
+    where: {
+      created_at: { _lte: $pastMonthEndDate }
+      order: { status: { _neq: "cancelled" } }
+    }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+  total_orders: orders_aggregate {
+    aggregate {
+      count
+    }
+  }
+  previous_month_orders: orders_aggregate(
+    where: { created_at: { _lte: $pastMonthEndDate } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  total_merchants: merchant_aggregate {
+    aggregate {
+      count
+    }
+  }
+  previous_month_merchants: merchant_aggregate(
+    where: { created_at: { _lte: $pastMonthEndDate } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  total_units_sold: orders_aggregate(where: { status: { _neq: "cancelled" } }) {
+    aggregate {
+      sum {
+        order_quantity
+      }
+    }
+  }
+  previous_month_units: orders_aggregate(
+    where: {
+      created_at: { _lte: $pastMonthEndDate }
+      status: { _neq: "cancelled" }
+    }
+  ) {
+    aggregate {
+      sum {
+        order_quantity
+      }
+    }
+  }
+}

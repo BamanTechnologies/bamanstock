@@ -1,133 +1,152 @@
 <script lang="ts">
+  import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
-  import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { goto } from "$app/navigation";
-  import DeleteLocationModal from "$lib/components/investor/DeleteLocationModal.svelte";
+  import { page } from "$app/stores";
   import AddLocationModal from "$lib/components/investor/AddLocationModal.svelte";
-  import EmptyState from "$lib/components/investor/EmptyState.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
+  import { getAuthClient } from "$graphql/client.ts";
+  import INVESTOR_BRANCHES_QUERY from "$graphql/queries/locations/branches.gql";
+  import DELETE_BRANCH from "$graphql/mutation/locations/delete.gql";
   import { _ } from "svelte-i18n";
 
-  // Mock location data - replace with real data later
-  let locations = $state([
-    { id: 1,  name: "Santa Clara Area #1",   totalStockValue: "$156,900", merchants: "24", lowStockItems: "8",  status: "Active"   },
-    { id: 2,  name: "Downtown Branch #2",    totalStockValue: "$98,450",  merchants: "18", lowStockItems: "3",  status: "Active"   },
-    { id: 3,  name: "Eastside Warehouse #3", totalStockValue: "$74,200",  merchants: "15", lowStockItems: "12", status: "Active"   },
-    { id: 4,  name: "Northpark Plaza #4",    totalStockValue: "$62,300",  merchants: "11", lowStockItems: "5",  status: "Active"   },
-    { id: 5,  name: "Westfield Center #5",   totalStockValue: "$48,760",  merchants: "9",  lowStockItems: "2",  status: "Active"   },
-    { id: 6,  name: "Lakeside Hub #6",       totalStockValue: "$38,900",  merchants: "7",  lowStockItems: "0",  status: "Inactive" },
-    { id: 7,  name: "Riverside Depot #7",    totalStockValue: "$29,500",  merchants: "6",  lowStockItems: "4",  status: "Active"   },
-    { id: 8,  name: "Hilltop Store #8",      totalStockValue: "$24,780",  merchants: "5",  lowStockItems: "1",  status: "Active"   },
-    { id: 9,  name: "Harbor Point #9",       totalStockValue: "$21,340",  merchants: "4",  lowStockItems: "0",  status: "Inactive" },
-    { id: 10, name: "Midtown Market #10",    totalStockValue: "$19,800",  merchants: "3",  lowStockItems: "6",  status: "Active"   },
-    { id: 11, name: "Southgate Storage #11",totalStockValue: "$17,500",  merchants: "3",  lowStockItems: "2",  status: "Active"   },
-    { id: 12, name: "Uptown Centre #12",    totalStockValue: "$15,900",  merchants: "2",  lowStockItems: "0",  status: "Inactive" },
-    { id: 13, name: "Metro Depot #13",      totalStockValue: "$14,200",  merchants: "4",  lowStockItems: "7",  status: "Active"   },
-    { id: 14, name: "Greenview Hub #14",    totalStockValue: "$12,600",  merchants: "3",  lowStockItems: "1",  status: "Active"   },
-    { id: 15, name: "Bayfront Point #15",   totalStockValue: "$11,300",  merchants: "2",  lowStockItems: "4",  status: "Active"   },
-    { id: 16, name: "Valley Store #16",     totalStockValue: "$9,800",   merchants: "2",  lowStockItems: "0",  status: "Inactive" },
-    { id: 17, name: "Pinecrest Depot #17",  totalStockValue: "$8,750",   merchants: "1",  lowStockItems: "3",  status: "Active"   },
-    { id: 18, name: "Cedarwood Hub #18",    totalStockValue: "$7,400",   merchants: "2",  lowStockItems: "0",  status: "Active"   },
-    { id: 19, name: "Sunrise Warehouse #19",totalStockValue: "$6,200",   merchants: "1",  lowStockItems: "5",  status: "Active"   },
-    { id: 20, name: "Oakdale Branch #20",   totalStockValue: "$5,100",   merchants: "1",  lowStockItems: "0",  status: "Inactive" },
-    { id: 21, name: "Ironwood Center #21",  totalStockValue: "$4,300",   merchants: "2",  lowStockItems: "1",  status: "Active"   },
-    { id: 22, name: "Maple Leaf Hub #22",   totalStockValue: "$3,600",   merchants: "1",  lowStockItems: "2",  status: "Active"   },
-    { id: 23, name: "Clearwater Depot #23", totalStockValue: "$2,900",   merchants: "1",  lowStockItems: "0",  status: "Active"   },
-    { id: 24, name: "Stonegate Branch #24", totalStockValue: "$2,200",   merchants: "1",  lowStockItems: "4",  status: "Inactive" },
-    { id: 25, name: "Crestview Point #25",  totalStockValue: "$1,600",   merchants: "1",  lowStockItems: "0",  status: "Active"   },
-  ]);
-
-  let searchQuery = $state("");
-  let statusFilter = $state("");
-
-  const filteredLocations = $derived(
-    locations.filter((l) => {
-      if (searchQuery && !l.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      if (statusFilter && l.status.toLowerCase() !== statusFilter) return false;
-      return true;
-    })
-  );
-
-  let isDeleteLocationModalOpen = $state(false);
-  let locationToDelete = $state<(typeof locations)[0] | null>(null);
   let isAddLocationModalOpen = $state(false);
   let locationToEdit = $state<{
+    id?: string;
     name: string;
     address: string;
-    description: string;
-    status: boolean;
+    company?: string;
+    companyName?: string;
   } | null>(null);
 
-  function getStatusClass(status: string) {
-    switch (status) {
-      case "Active":
-        return "bg-success/70 text-success-foreground px-3 py-1 rounded-md font-medium";
-      case "Inactive":
-        return "bg-muted text-muted-foreground px-3 py-1 rounded-md font-medium";
+  let isDeleteModalOpen = $state(false);
+  let deletingLocation = $state<{ id: string; name: string } | null>(null);
+  let deleteLoading = $state(false);
+
+  let refetchTrigger = $state(0);
+
+  let searchQuery = $state($page.url.searchParams.get("search") ?? "");
+  let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
+  let rowsPerPage = $state(Number($page.url.searchParams.get("limit")) || 10);
+  let sortColumn = $state($page.url.searchParams.get("sort") || "name");
+  let sortDirection = $state<"asc" | "desc">(
+    ($page.url.searchParams.get("dir") as "asc" | "desc") || "asc"
+  );
+
+  let locations = $state<any[]>([]);
+  let totalCount = $state(0);
+  let loading = $state(true);
+  let fetchError = $state<string | null>(null);
+
+  let debouncedSearch = $state($page.url.searchParams.get("search") ?? "");
+  let debounceTimer: ReturnType<typeof setTimeout>;
+
+  $effect(() => {
+    clearTimeout(debounceTimer);
+    if (searchQuery === debouncedSearch) return;
+    debounceTimer = setTimeout(() => {
+      debouncedSearch = searchQuery;
+      currentPage = 1;
+    }, 400);
+    return () => clearTimeout(debounceTimer);
+  });
+
+  const totalPages = $derived(Math.max(1, Math.ceil(totalCount / rowsPerPage)));
+
+  function buildFilter(): Record<string, unknown> {
+    const conditions: Record<string, unknown>[] = [];
+    if (debouncedSearch) {
+      conditions.push({
+        _or: [
+          { name: { _ilike: `%${debouncedSearch}%` } },
+          { address: { _ilike: `%${debouncedSearch}%` } },
+          { companyByCompany: { name: { _ilike: `%${debouncedSearch}%` } } },
+        ],
+      });
+    }
+    return conditions.length ? { _and: conditions } : {};
+  }
+
+  function buildOrder(): Record<string, unknown>[] {
+    switch (sortColumn) {
+      case "name":
+        return [{ name: sortDirection }];
+      case "address":
+        return [{ address: sortDirection }];
+      case "company":
+        return [{ companyByCompany: { name: sortDirection } }];
+      case "stock_value":
+        return [{ stocks_aggregate: { sum: { selling_price: sortDirection } } }];
+      case "merchants":
+        return [{ merchants_aggregate: { count: sortDirection } }];
+      case "customers":
+        return [{ company_customers_aggregate: { count: sortDirection } }];
       default:
-        return "bg-muted text-muted-foreground px-3 py-1 rounded-md font-medium";
+        return [{ name: sortDirection }];
     }
   }
 
-  function getStatusDot(status: string) {
-    switch (status) {
-      case "Active":
-        return "bg-current";
-      case "Inactive":
-        return "bg-current";
-      default:
-        return "bg-current";
-    }
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (currentPage > 1) params.set("page", String(currentPage));
+    if (rowsPerPage !== 10) params.set("limit", String(rowsPerPage));
+    if (sortColumn !== "name") params.set("sort", sortColumn);
+    if (sortDirection !== "asc") params.set("dir", sortDirection);
+    const qs = params.toString();
+    goto(qs ? `?${qs}` : $page.url.pathname, { replaceState: true, keepFocus: true, noScroll: true });
   }
 
-  const columns = $derived([
-    { key: "name",            label: $_('navLocation'), sortable: true },
-    { key: "totalStockValue", label: "Total Stock Value", sortable: true },
-    { key: "merchants",       label: $_('navMerchants') },
-    {
-      key: "lowStockItems",
-      label: $_('tabLowStock'),
-      render: (row: (typeof locations)[0]) => {
-        return `
-          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700">
-            ${row.lowStockItems}
-          </span>
-        `;
-      },
-    },
-    {
-      key: "status",
-      label: $_('filterStatus'),
-      sortable: true,
-      render: (row: (typeof locations)[0]) => {
-        const label = row.status === "Active"   ? $_('statusActive')
-                    : row.status === "Inactive" ? $_('inactive')
-                    : row.status;
-        return `
-          <span class="inline-flex items-center gap-1.5 ${getStatusClass(row.status)}">
-            <span class="w-1.5 h-1.5 rounded-full ${getStatusDot(row.status)}"></span>
-            ${label}
-          </span>
-        `;
-      },
-    },
-  ]);
+  $effect(() => {
+    void debouncedSearch;
+    void currentPage;
+    void rowsPerPage;
+    void sortColumn;
+    void sortDirection;
+    void refetchTrigger;
 
-  const filters = $derived([
-    {
-      key: "status",
-      label: $_('filterStatus'),
-      options: [
-        { value: "",         label: $_('allStatus') },
-        { value: "active",   label: $_('statusActive') },
-        { value: "inactive", label: $_('inactive') },
-      ],
-    },
-  ]);
+    loading = true;
+    fetchError = null;
 
-  let currentPage = $state(1);
-  let rowsPerPage = $state(10);
-  const totalPages = $derived(Math.ceil(filteredLocations.length / rowsPerPage));
-  const paginatedLocations = $derived(filteredLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+    const timer = setTimeout(async () => {
+      try {
+        const client = getAuthClient("investor");
+        const result = await client.query<{
+          branches: any[];
+          total: { aggregate: { count: number } };
+        }>({
+          query: INVESTOR_BRANCHES_QUERY,
+          variables: {
+            limit: rowsPerPage,
+            offset: (currentPage - 1) * rowsPerPage,
+            filter: buildFilter(),
+            order: buildOrder(),
+          },
+        });
+        locations = result.data?.branches ?? [];
+        totalCount = result.data?.total?.aggregate?.count ?? 0;
+        syncUrl();
+      } catch (err) {
+        fetchError = (err as Error).message;
+        locations = [];
+        totalCount = 0;
+      } finally {
+        loading = false;
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  });
+
+  function handleSort(column: string) {
+    if (sortColumn === column) {
+      sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      sortColumn = column;
+      sortDirection = "asc";
+    }
+    currentPage = 1;
+  }
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -138,156 +157,407 @@
     currentPage = 1;
   }
 
-  function handleSearch(query: string) {
-    searchQuery = query;
-    currentPage = 1;
+  function handleView(location: any) {
+    goto(`/dashboard/location/${location.id}`);
   }
 
-  function handleFilterChange(key: string, value: string) {
-    if (key === "status") statusFilter = value;
-    currentPage = 1;
+  function handleAddLocation() {
+    locationToEdit = null;
+    isAddLocationModalOpen = true;
   }
 
-  function handleView(location: (typeof locations)[0]) {
-    const locationId = location.name.toLowerCase().replace(/\s+/g, "-");
-    goto(`/dashboard/location/${locationId}`);
-  }
-
-  function handleEdit(location: (typeof locations)[0]) {
+  function handleEdit(loc: any) {
     locationToEdit = {
-      name: location.name,
-      address: "123 Industrial Way, Suite 400, Anytown, ST 12345", // Mock address
-      description: "", // Mock description
-      status: location.status === "Active",
+      id: loc.id,
+      name: loc.name,
+      address: loc.address ?? "",
+      company: loc.company?.id ?? "",
+      companyName: loc.company?.name ?? "",
     };
     isAddLocationModalOpen = true;
   }
 
-  function handleAddLocation() {
-    locationToEdit = null; // Clear edit data for new location
-    isAddLocationModalOpen = true;
-  }
-
-  function handleLocationSubmit(data: {
-    name: string;
-    address: string;
-    description: string;
-    status: boolean;
-  }) {
-    if (locationToEdit) {
-      // Edit mode - update existing location
-      console.log("Updating location:", data);
-      // TODO: Implement API call to update location
-      const index = locations.findIndex((l) => l.name === locationToEdit?.name);
-      if (index > -1) {
-        locations[index] = {
-          ...locations[index],
-          name: data.name,
-          status: data.status ? "Active" : "Inactive",
-        };
-      }
-    } else {
-      // Create mode - add new location
-      console.log("Creating location:", data);
-      // TODO: Implement API call to create location
-      const newId = locations.length > 0 ? Math.max(...locations.map(l => l.id)) + 1 : 1;
-      locations.push({
-        id: newId,
-        name: data.name,
-        totalStockValue: "$0",
-        merchants: "0",
-        lowStockItems: "0",
-        status: data.status ? "Active" : "Inactive",
-      });
-    }
+  function handleLocationSuccess() {
     locationToEdit = null;
+    refetchTrigger++;
   }
 
-  function handleDelete(location: (typeof locations)[0]) {
-    locationToDelete = location;
-    isDeleteLocationModalOpen = true;
+  function handleDeleteClick(loc: any) {
+    deletingLocation = { id: loc.id, name: loc.name };
+    isDeleteModalOpen = true;
   }
 
-  function handleConfirmDelete() {
-    if (locationToDelete) {
-      console.log("Deleting location:", locationToDelete);
-      // TODO: Implement API call to delete location
-      const index = locations.findIndex((l) => l === locationToDelete);
-      if (index > -1) {
-        locations.splice(index, 1);
-      }
-      locationToDelete = null;
+  async function handleDeleteConfirm() {
+    if (!deletingLocation) return;
+    deleteLoading = true;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: DELETE_BRANCH,
+        variables: { id: deletingLocation.id },
+      });
+      isDeleteModalOpen = false;
+      deletingLocation = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      console.error("Delete failed:", err);
+    } finally {
+      deleteLoading = false;
     }
+  }
+
+  const AVATAR_COLORS = [
+    "#4DA0E6", "#D15B7A", "#34A853", "#FBBC05",
+    "#FF6B6B", "#6B5B95", "#88B04B", "#F7CAC9",
+    "#92A8D1", "#955251", "#B565A7", "#009B77",
+  ];
+
+  function avatarColor(name: string): string {
+    return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+  }
+
+  function formatName(name: string | null | undefined): string {
+    if (!name) return "-";
+    return name
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  }
+
+  function fmtCurrency(val: unknown): string {
+    if (val == null || val === 0) return "ETB 0";
+    const cleaned = String(val).replace(/[^0-9.\-]/g, "");
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return String(val);
+    return `ETB ${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function getVisiblePages(current: number, total: number): (number | string)[] {
+    const pages: (number | string)[] = [];
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else if (current <= 3) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    } else if (current >= total - 2) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push("...");
+      for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    }
+    return pages;
   }
 </script>
 
 <div class="flex-1 p-6 space-y-6">
-  <!-- Header with Add Location Button -->
-  <div class="flex items-center justify-end">
-    <button
-      type="button"
-      onclick={handleAddLocation}
-      class="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold rounded-lg hover:bg-[#3d8fd4] active:scale-95 transition-all"
-      style="background-color: #4DA0E6;"
-    >
-      <Icon iconName="icon/plus" size={16} />
+  <div class="flex items-center justify-end gap-4">
+    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={handleAddLocation}>
+      <Icon iconName="icon/plus" size={16} class="mr-2" />
       {$_('addLocation')}
-    </button>
+    </Button>
   </div>
 
-  <!-- Empty State or Table Section -->
-  {#if locations.length === 0}
-    <EmptyState
-      illustration="location"
-      title="No Locations Added Yet"
-      description="Start by creating your first location. Once added, you can assign stock, invite merchants, and track performance across branches."
-      actionLabel="Create Location"
-      onAction={handleAddLocation}
-    />
+  {#if fetchError}
+    <div class="flex flex-col items-center justify-center py-16 bg-card border border-border rounded-lg">
+      <Icon iconName="icon/alert-circle" size={48} class="text-destructive mb-4" />
+      <p class="text-destructive font-medium">{$_('somethingWentWrong')}</p>
+      <p class="text-muted-foreground text-sm mt-1">{fetchError}</p>
+    </div>
+  {:else if locations.length === 0 && !loading}
+    <div class="bg-card border border-border rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-border">
+        <div class="relative w-72">
+          <Icon
+            iconName="icon/search"
+            size={16}
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder={$_('search')}
+            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+            bind:value={searchQuery}
+          />
+        </div>
+      </div>
+      <div class="flex flex-col items-center justify-center py-16">
+        <Icon iconName="icon/building" size={48} class="text-muted-foreground mb-4" />
+        <p class="text-foreground font-medium">{$_('noLocationsFound')}</p>
+      </div>
+    </div>
   {:else}
-    <DataTable
-      {columns}
-      data={paginatedLocations}
-      searchable={true}
-      searchPlaceholder={$_('search')}
-      {filters}
-      onSearch={handleSearch}
-      onFilterChange={handleFilterChange}
-      onRowClick={handleView}
-      actions={[
-        {
-          icon: "icon/edit",
-          label: $_('edit'),
-          onClick: handleEdit,
-        },
-        {
-          icon: "icon/trash",
-          label: $_('delete'),
-          onClick: handleDelete,
-          variant: "destructive",
-        },
-      ]}
-      pagination={{
-        currentPage,
-        totalPages,
-        rowsPerPage,
-        onPageChange: handlePageChange,
-        onRowsPerPageChange: handleRowsPerPageChange,
-      }}
-    />
+    <div class="bg-card border border-border rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
+        <div class="relative w-72 shrink-0">
+          <Icon
+            iconName="icon/search"
+            size={16}
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder={$_('search')}
+            class="w-full pl-9 pr-4 py-2 bg-muted/20 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-border"
+            bind:value={searchQuery}
+          />
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-muted/30 border-b border-border">
+            <tr class="text-left text-xs text-muted-foreground uppercase">
+              <th class="px-4 py-3 w-10">
+                <input type="checkbox" class="rounded" />
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("name")}
+                >
+                  {$_('navLocation')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'name' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'name' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("address")}
+                >
+                  {$_('address')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'address' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'address' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("company")}
+                >
+                  {$_('company')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'company' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'company' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("stock_value")}
+                >
+                  {$_('totalStockValue')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'stock_value' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'stock_value' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("merchants")}
+                >
+                  {$_('navMerchants')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'merchants' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'merchants' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 font-medium">
+                <button
+                  type="button"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  onclick={() => handleSort("customers")}
+                >
+                  {$_('customers')}
+                  <span class="flex flex-col ml-0.5">
+                    <Icon iconName="icon/chevron-up" size={10}
+                      class={sortColumn === 'customers' && sortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'}
+                    />
+                    <Icon iconName="icon/chevron-down" size={10}
+                      class={sortColumn === 'customers' && sortDirection === 'desc' ? 'text-info' : 'text-muted-foreground/50'}
+                    />
+                  </span>
+                </button>
+              </th>
+              <th class="px-4 py-3 text-right font-medium">Actions</th>
+            </tr>
+            {#if loading}
+              <tr>
+                <td colspan="8" class="p-0">
+                  <div class="h-1 bg-muted/30 w-full overflow-hidden">
+                    <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
+                  </div>
+                </td>
+              </tr>
+            {/if}
+          </thead>
+          <tbody class="divide-y divide-border">
+            {#each locations as row}
+              <tr
+                class="hover:bg-muted/20 transition-colors cursor-pointer"
+                onclick={() => handleView(row)}
+              >
+                <td class="px-4 py-4" onclick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" class="rounded" />
+                </td>
+                <td class="px-4 py-4 text-foreground">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0" style="background-color: {avatarColor(row.name)}">
+                      {row.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <span class="text-sm text-foreground font-medium truncate">{formatName(row.name)}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-4 text-foreground max-w-[200px] truncate">{row.address ?? "-"}</td>
+                <td class="px-4 py-4 text-foreground">{row.company?.name ?? "-"}</td>
+                <td class="px-4 py-4 text-foreground">
+                  {#if row.stock_value?.aggregate?.sum?.selling_price}
+                    {fmtCurrency(row.stock_value.aggregate.sum.selling_price)}
+                  {:else}
+                    $0
+                  {/if}
+                </td>
+                <td class="px-4 py-4 text-foreground">{row.merchants?.aggregate?.count ?? 0}</td>
+                <td class="px-4 py-4 text-foreground">{row.total_customers?.aggregate?.count ?? 0}</td>
+                <td class="px-4 py-4 text-right" onclick={(e) => e.stopPropagation()}>
+                  <button
+                    onclick={() => handleEdit(row)}
+                    class="p-1.5 rounded hover:bg-muted transition-colors"
+                    aria-label={$_('edit')}
+                  >
+                    <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
+                  </button>
+                  <button
+                    onclick={() => handleDeleteClick(row)}
+                    class="p-1.5 rounded hover:bg-muted transition-colors"
+                    aria-label={$_('delete')}
+                  >
+                    <Icon iconName="icon/trash" size={16} class="text-muted-foreground hover:text-destructive" />
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-muted-foreground">Row Per Page</span>
+          <select
+            class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
+            onchange={(e) => {
+              rowsPerPage = Number(e.currentTarget.value);
+              currentPage = 1;
+            }}
+          >
+            <option value="10" selected={rowsPerPage === 10}>10</option>
+            <option value="20" selected={rowsPerPage === 20}>20</option>
+            <option value="50" selected={rowsPerPage === 50}>50</option>
+            <option value="100" selected={rowsPerPage === 100}>100</option>
+          </select>
+          <span class="text-sm text-muted-foreground">Entries</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+            style="background-color:#4DA0E620; color:#4DA0E6;"
+            disabled={currentPage === 1}
+            onclick={() => handlePageChange(currentPage - 1)}
+          >
+            <Icon iconName="icon/chevron-left" size={16} />
+          </button>
+          {#each getVisiblePages(currentPage, totalPages) as p}
+            {#if typeof p === "number"}
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors {p === currentPage ? 'text-white' : 'text-foreground border border-border hover:bg-muted'}"
+                style={p === currentPage ? 'background-color:#4DA0E6;' : ''}
+                onclick={() => handlePageChange(p)}
+              >
+                {p}
+              </button>
+            {:else}
+              <span class="w-8 h-8 flex items-center justify-center text-muted-foreground text-sm">…</span>
+            {/if}
+          {/each}
+          <button
+            class="w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
+            style="background-color:#4DA0E620; color:#4DA0E6;"
+            disabled={currentPage === totalPages}
+            onclick={() => handlePageChange(currentPage + 1)}
+          >
+            <Icon iconName="icon/chevron-right" size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
   {/if}
-
-  <!-- Delete Location Modal -->
-  <DeleteLocationModal
-    bind:isOpen={isDeleteLocationModalOpen}
-    locationName={locationToDelete?.name || ""}
-    onConfirm={handleConfirmDelete}
-  />
-
-  <!-- Add/Edit Location Modal -->
-  <AddLocationModal
-    bind:isOpen={isAddLocationModalOpen}
-    location={locationToEdit}
-    onSubmit={handleLocationSubmit}
-  />
 </div>
+
+<AddLocationModal
+  bind:isOpen={isAddLocationModalOpen}
+  location={locationToEdit}
+  onSuccess={handleLocationSuccess}
+  onClose={() => { locationToEdit = null; }}
+/>
+
+<ConfirmModal
+  bind:isOpen={isDeleteModalOpen}
+  title="Remove Location"
+  message="Are you sure you want to remove <strong>{deletingLocation?.name ?? ""}</strong>? All merchants and stocks assigned to this location will need to be reassigned or will become unassigned."
+  confirmText="Remove Location"
+  loading={deleteLoading}
+  onConfirm={handleDeleteConfirm}
+  onClose={() => { deletingLocation = null; }}
+/>
+
+<style>
+  :global(.loading-slide) {
+    animation: loading-slide 1.5s infinite linear;
+  }
+  @keyframes loading-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+</style>

@@ -1,50 +1,269 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
+  import { jwtDecode } from 'jwt-decode';
+  import { goto } from '$app/navigation';
+  import { getAuthClient } from '$lib/graphql/client';
+  import ApexCharts from "apexcharts";
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { Skeleton } from "$lib/components/ui/skeleton/index.js";
   import { _ } from "svelte-i18n";
+  import STATS_QUERY from '$graphql/queries/dashboard/stats.gql';
+  import SALES_TREND_QUERY from '$graphql/queries/dashboard/sales_trend.gql';
+  import TOP_MERCHANTS_QUERY from '$graphql/queries/dashboard/top_merchants.gql';
+  import TOP_CUSTOMERS_QUERY from '$graphql/queries/dashboard/top_customers.gql';
+  import PRODUCT_PROPORTION_QUERY from '$graphql/queries/dashboard/sales_per_product_proportion.gql';
 
-  let chartPeriod = $state("1Y");
-
-  const periodData = $derived.by(() => {
-    return {
-      "1D": { labels: ["6am","9am","12pm","3pm","6pm","9pm"], values: [12,38,58,44,62,30], revenue: "$4,280", change: $_('today'), changePct: "+3.2%", positive: true, yLabels: ["70","60","50","40","30","10"] },
-      "1W": { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], values: [38,54,46,68,55,74,42], revenue: "$28,450", change: $_('last7Days'), changePct: "+8.5%", positive: true, yLabels: ["80k","70k","60k","50k","30k","10k"] },
-      "1M": { labels: ["Wk1","Wk2","Wk3","Wk4"], values: [48,65,52,80], revenue: "$98,200", change: $_('last30Days'), changePct: "+12.1%", positive: true, yLabels: ["100k","80k","60k","40k","20k","10k"] },
-      "3M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [50,62,58,75,85,70], revenue: "$285,600", change: $_('last3Months'), changePct: "+18.7%", positive: true, yLabels: ["300k","250k","200k","150k","100k","50k"] },
-      "6M": { labels: ["Jan","Feb","Mar","Apr","May","Jun"], values: [35,52,65,78,92,68], revenue: "$620,800", change: $_('last6Months'), changePct: "+14.3%", positive: true, yLabels: ["600k","500k","400k","300k","200k","100k"] },
-      "1Y": { labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"], values: [45,35,55,80,38,25,38,22,30], revenue: "$1.25M", change: $_('last12Months'), changePct: "+15.2%", positive: true, yLabels: ["60k","50k","40k","30k","20k","10k"] },
-    };
-  });
-
-  function toSvgPath(values: number[], w = 860, h = 170, topPad = 18, botPad = 8) {
-    const n = values.length;
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    const range = max - min || 1;
-    const pts = values.map((v, i) => ({
-      x: Math.round((i / Math.max(n - 1, 1)) * w),
-      y: Math.round(topPad + ((max - v) / range) * (h - topPad - botPad)),
-    }));
-    let line = `M${pts[0].x},${pts[0].y}`;
-    for (let i = 1; i < pts.length; i++) {
-      const p = pts[i - 1], c = pts[i];
-      const cpx = (p.x + c.x) / 2;
-      line += ` C${cpx},${p.y} ${cpx},${c.y} ${c.x},${c.y}`;
+  function parseMoney(val: unknown): number {
+    if (val == null) return 0;
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      const cleaned = val.replace(/[^0-9.\-]/g, '');
+      return parseFloat(cleaned) || 0;
     }
-    return { line, fill: `${line} L${pts[pts.length - 1].x},${h} L0,${h} Z`, pts };
+    return 0;
   }
 
-  const activeChart = $derived(periodData[chartPeriod] ?? periodData["1Y"]);
-  const svgChart = $derived(toSvgPath(activeChart.values));
+  function extractFromToken<T>(extractor: (payload: Record<string, unknown>) => T): T | null {
+    if (!browser) return null;
+    const token = localStorage.getItem('auth_token');
+    if (!token) return null;
+    try {
+      const payload = jwtDecode<Record<string, unknown>>(token);
+      return extractor(payload);
+    } catch {
+      return null;
+    }
+  }
 
+  const investorId = extractFromToken((p) => (p.metadata as Record<string, unknown>)?.['x-hasura-investor-id'] as string) ?? '';
+
+  function fmtCurrency(val: unknown): string {
+    const n = parseMoney(val);
+    if (n >= 1_000_000) return `ETB ${(n / 1_000_000).toFixed(1)}M`;
+    return `ETB ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function fmtInt(n: number): string {
+    return n.toLocaleString('en-US');
+  }
+
+  function computeChange(current: number, previous: number): { pct: string; type: 'positive' | 'negative' } | null {
+    if (previous === 0) return null;
+    const change = ((current - previous) / previous) * 100;
+    if (Math.abs(change) < 0.01) return null;
+    const sign = change >= 0 ? '+' : '';
+    return { pct: `${sign}${change.toFixed(1)}%`, type: change >= 0 ? 'positive' : 'negative' };
+  }
+
+  let chartInstance: any = null;
+
+  function chartAction(node: HTMLDivElement) {
+    const options = {
+      chart: { type: "area", height: 280, toolbar: { show: false }, fontFamily: "inherit" },
+      animations: { enabled: true, dynamicAnimation: { enabled: true, speed: 500 } },
+      series: [{ name: "Sales", data: chartMonthData.values }],
+      xaxis: { categories: chartMonthData.labels, labels: { style: { colors: "#9ca3af", fontSize: "11px" } } },
+      yaxis: {
+        labels: {
+          style: { colors: "#9ca3af", fontSize: "11px" },
+          formatter: (v: number) => v >= 1000 ? `ETB ${(v / 1000).toFixed(1)}K` : `ETB ${v}`,
+        },
+      },
+      colors: ["#4DA0E6"],
+      fill: {
+        type: "gradient",
+        gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.05, stops: [0, 100] },
+      },
+      stroke: { curve: "smooth", width: 2.5 },
+      dataLabels: { enabled: false },
+      grid: { show: true, borderColor: "rgba(156,163,175,0.12)", strokeDashArray: 4 },
+      tooltip: {
+        y: { formatter: (v: number) => `ETB ${v.toLocaleString("en-US", { minimumFractionDigits: 2 })}` },
+      },
+    };
+    chartInstance = new ApexCharts(node, options);
+    chartInstance.render();
+    return {
+      destroy() {
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      },
+    };
+  }
+
+  const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const COL = "grid grid-cols-1 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6";
+
+  // ---------- state ----------
+  let loading = $state(true);
+
+  let statsData: {
+    total_sales?: { aggregate?: { sum?: { amount?: number } } };
+    previous_month_sales?: { aggregate?: { sum?: { amount?: number } } };
+    total_orders?: { aggregate?: { count?: number } };
+    previous_month_orders?: { aggregate?: { count?: number } };
+    total_merchants?: { aggregate?: { count?: number } };
+    previous_month_merchants?: { aggregate?: { count?: number } };
+    total_units_sold?: { aggregate?: { sum?: { order_quantity?: number } } };
+    previous_month_units?: { aggregate?: { sum?: { order_quantity?: number } } };
+  } | null = $state(null);
+
+  let salesTrendData: {
+    overall_orders?: { aggregate?: { sum?: { total_amount?: number } } };
+    last_twelve_month?: { aggregate?: { sum?: { total_amount?: number } } };
+    investor_sales_trend_global_report?: Array<{ month: number; total_sales: number }>;
+  } | null = $state(null);
+
+  let topMerchantsData: {
+    merchant?: Array<{
+      id: string; first_name: string; last_name: string; phone_number: string; created_at: string;
+      total_orders: { aggregate: { count: number } };
+      total_sales: { aggregate: { sum: { total_amount: number } } };
+      total_outstanding: { aggregate: { sum: { outstanding_amount: number } } };
+    }>;
+    total?: { aggregate: { count: number } };
+  } | null = $state(null);
+
+  let topCustomersData: {
+    customers?: Array<{
+      id: string; first_name: string; last_name: string; address: string;
+      orders_aggregate: { aggregate: { count: number } };
+      revenue: { aggregate: { sum: { total_amount: number } } };
+    }>;
+    total?: { aggregate: { count: number } };
+  } | null = $state(null);
+
+  let productProportionData: {
+    investor_sales_per_product_type_report?: Array<{
+      product_type_id: string; product_type_name: string; total_sales: number; total_quantity_sold: number;
+    }>;
+  } | null = $state(null);
+
+  let chartYear = $state(new Date().getFullYear());
+  const yearOptions = $derived.by(() => {
+    const current = new Date().getFullYear();
+    const years: number[] = [];
+    for (let y = 2024; y <= current; y++) years.push(y);
+    return years;
+  });
+
+  // ---------- initial data fetch (stats, customers, product proportion, merchants) ----------
+  $effect(() => {
+    const client = getAuthClient('investor');
+    const now = new Date();
+    const pastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    Promise.all([
+      client.query({ query: STATS_QUERY, variables: { pastMonthEndDate: pastMonthEnd.toISOString() }, fetchPolicy: 'network-only' }),
+      client.query({ query: TOP_CUSTOMERS_QUERY, variables: { limit: 5, offset: 0, filter: {} }, fetchPolicy: 'network-only' }),
+      client.query({ query: PRODUCT_PROPORTION_QUERY, variables: { investorId }, fetchPolicy: 'network-only' }),
+      client.query({ query: TOP_MERCHANTS_QUERY, variables: { limit: 5, offset: 0, filter: {} }, fetchPolicy: 'network-only' }),
+    ]).then(([stats, customers, proportion, merchants]) => {
+      statsData = stats.data ?? null;
+      topCustomersData = customers.data ?? null;
+      productProportionData = proportion.data ?? null;
+      topMerchantsData = merchants.data ?? null;
+    }).catch((err: Error) => {
+      console.error('Dashboard data fetch failed', err);
+    }).finally(() => {
+      loading = false;
+    });
+  });
+
+  // ---------- refetch sales trend when year changes ----------
+  let trendLoading = $state(true);
+
+  $effect(() => {
+    const year = chartYear;
+    const client = getAuthClient('investor');
+    const now = new Date();
+    const lastTwelveMonth = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString();
+
+    trendLoading = true;
+
+    client.query({
+      query: SALES_TREND_QUERY,
+      variables: { investorId, year, lastTwelveMonth },
+      fetchPolicy: 'network-only',
+    }).then((result) => {
+      salesTrendData = result.data ?? null;
+    }).catch((err: Error) => {
+      console.error('Failed to fetch sales trend', err);
+    }).finally(() => {
+      trendLoading = false;
+    });
+  });
+
+  // ---------- derived: KPI cards ----------
   const kpiCards = $derived.by(() => {
+    if (!statsData) return [];
+
+    const totalSales = parseMoney(statsData.total_sales?.aggregate?.sum?.amount);
+    const prevSales = parseMoney(statsData.previous_month_sales?.aggregate?.sum?.amount);
+    const totalOrders = statsData.total_orders?.aggregate?.count ?? 0;
+    const prevOrders = statsData.previous_month_orders?.aggregate?.count ?? 0;
+    const totalMerchants = statsData.total_merchants?.aggregate?.count ?? 0;
+    const prevMerchants = statsData.previous_month_merchants?.aggregate?.count ?? 0;
+    const totalUnits = statsData.total_units_sold?.aggregate?.sum?.order_quantity ?? 0;
+    const prevUnits = statsData.previous_month_units?.aggregate?.sum?.order_quantity ?? 0;
+
+    const salesChange = prevSales ? computeChange(totalSales, prevSales) : null;
+    const ordersChange = prevOrders ? computeChange(totalOrders, prevOrders) : null;
+    const merchantsChange = prevMerchants ? computeChange(totalMerchants, prevMerchants) : null;
+    const unitsChange = prevUnits ? computeChange(totalUnits, prevUnits) : null;
+
     return [
-      { label: $_('totalRevenue'),   value: "$48,988.78", change: `-19% ${$_('vsLastMonth')}`, changeType: "negative", icon: "icon/bar-chart"   as const, iconColor: "bg-green-100 dark:bg-green-900/40" },
-      { label: $_('profit'),         value: "$8,458,798", change: `+35% ${$_('vsLastMonth')}`, changeType: "positive", icon: "icon/trending-up" as const, iconColor: "bg-blue-100 dark:bg-blue-900/40" },
-      { label: $_('totalMerchants'), value: "521",         change: `+41% ${$_('vsLastMonth')}`, changeType: "positive", icon: "icon/users"       as const, iconColor: "bg-orange-100 dark:bg-orange-900/40" },
-      { label: $_('totalStock'),     value: "1,284",       change: `-20% ${$_('vsLastMonth')}`, changeType: "negative", icon: "icon/box"         as const, iconColor: "bg-red-100 dark:bg-red-900/40" },
+      { label: $_('totalRevenue'),   value: fmtCurrency(totalSales), change: salesChange ? `${salesChange.pct} ${$_('vsLastMonth')}` : null, changeType: salesChange?.type ?? 'positive', icon: "icon/bar-chart" as const, iconColor: "bg-green-100 dark:bg-green-900/40" },
+      { label: $_('totalOrders'),    value: fmtInt(totalOrders),     change: ordersChange ? `${ordersChange.pct} ${$_('vsLastMonth')}` : null, changeType: ordersChange?.type ?? 'positive', icon: "icon/shopping-cart" as const, iconColor: "bg-blue-100 dark:bg-blue-900/40" },
+      { label: $_('totalMerchants'), value: fmtInt(totalMerchants),  change: merchantsChange ? `${merchantsChange.pct} ${$_('vsLastMonth')}` : null, changeType: merchantsChange?.type ?? 'positive', icon: "icon/users" as const, iconColor: "bg-orange-100 dark:bg-orange-900/40" },
+      { label: $_('totalStock'),     value: fmtInt(totalUnits),      change: unitsChange ? `${unitsChange.pct} ${$_('vsLastMonth')}` : null, changeType: unitsChange?.type ?? 'positive', icon: "icon/box" as const, iconColor: "bg-red-100 dark:bg-red-900/40" },
     ];
   });
 
+  // ---------- derived: revenue chart data ----------
+  const chartMonthData = $derived.by(() => {
+    const trend = salesTrendData?.investor_sales_trend_global_report;
+    if (!trend || trend.length === 0) return { labels: ['Jan'], values: [0], revenue: 'ETB 0', change: '', changePct: '', positive: true, yLabels: [] };
+
+    const sorted = [...trend].sort((a, b) => a.month - b.month);
+    const labels = sorted.map(d => MONTH_LABELS[d.month - 1] ?? `M${d.month}`);
+    const values = sorted.map(d => parseMoney(d.total_sales));
+    const totalRevenue = values.reduce((s, v) => s + v, 0);
+
+    const overall = parseMoney(salesTrendData?.overall_orders?.aggregate?.sum?.total_amount);
+    const lastTwelve = parseMoney(salesTrendData?.last_twelve_month?.aggregate?.sum?.total_amount);
+    const rawChange = lastTwelve ? ((overall - lastTwelve) / lastTwelve * 100) : null;
+    const changePct = (rawChange != null && Math.abs(rawChange) >= 0.01) ? `${rawChange >= 0 ? '+' : ''}${rawChange.toFixed(1)}%` : '';
+
+    const maxVal = Math.max(...values, 1);
+    const steps = 5;
+    const yLabels = Array.from({ length: steps + 1 }, (_, i) => {
+      const v = Math.round((maxVal / steps) * (steps - i));
+      return v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v);
+    });
+
+    return {
+      labels,
+      values,
+      revenue: fmtCurrency(totalRevenue),
+      change: $_('last12Months'),
+      changePct,
+      positive: rawChange != null && rawChange >= 0,
+      yLabels,
+    };
+  });
+
+  // ---------- update ApexCharts when data changes ----------
+  $effect(() => {
+    void chartMonthData.values;
+    void chartMonthData.labels;
+    if (!chartInstance || !chartMonthData.values.length) return;
+    chartInstance.updateSeries([{ data: chartMonthData.values }]);
+    chartInstance.updateOptions({
+      xaxis: { categories: chartMonthData.labels },
+    });
+  });
+
+  // ---------- mock: top merchants ----------
   const topMerchantsByPeriod: Record<string, Array<{ name: string; initials: string; avatarBg: string; avatar: string; branch: string; sales: string; revenue: string }>> = {
     "Today": [
       { name: "Richard Wilson", initials: "RW", avatarBg: "bg-indigo-500", avatar: "/21fba97ec5e7fbb8a86b53a3d54af05c22aa2a5f.jpg", branch: "Branch 1",  sales: "12+ Sales", revenue: "$420.00" },
@@ -90,12 +309,6 @@
     ],
   };
 
-  const stockDistribution = [
-    { label: "Electronics", color: "bg-blue-500",   dotColor: "#3b82f6", percent: "60%", value: "698 Sales" },
-    { label: "Clothing",    color: "bg-yellow-400", dotColor: "#facc15", percent: "24%", value: "545 Sales" },
-    { label: "Furniture",   color: "bg-green-500",  dotColor: "#22c55e", percent: "16%", value: "456 Sales" },
-  ];
-
   const tableRows = [
     { merchant: "Stan Gaunter", date: "24 Dec 2024", period: "Q2 2025", status: "Active" },
     { merchant: "Stan Gaunter", date: "10 Dec 2024", period: "Q2 2025", status: "Active" },
@@ -106,17 +319,6 @@
     { merchant: "Stan Gaunter", date: "14 Oct 2024", period: "Q2 2025", status: "Active" },
     { merchant: "Stan Gaunter", date: "03 Oct 2024", period: "Q2 2025", status: "Active" },
   ];
-
-  const COL = "grid grid-cols-1 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6";
-
-  let stockPeriod = $state("Weekly");
-  let showStockDropdown = $state(false);
-  const periodOptions = $derived([
-    { key: "Daily",   label: $_('daily') },
-    { key: "Weekly",  label: $_('weekly') },
-    { key: "Monthly", label: $_('monthly') },
-    { key: "Yearly",  label: $_('yearly') },
-  ]);
 
   let merchantsPeriod = $state("Today");
   let showMerchantsDropdown = $state(false);
@@ -131,256 +333,334 @@
 
   const activeTopMerchants = $derived(topMerchantsByPeriod[merchantsPeriod] ?? topMerchantsByPeriod["Last 7 Days"]);
 
-  const CIRC = 351.9;
-
-  const stockDistributionByPeriod = $derived.by(() => {
-    return {
-      "Daily":   [
-        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 55, value: `125 ${$_('sales')}` },
-        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 28, value: `63 ${$_('sales')}`  },
-        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 17, value: `38 ${$_('sales')}`  },
-      ],
-      "Weekly":  [
-        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 58, value: `870 ${$_('sales')}`  },
-        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 26, value: `390 ${$_('sales')}`  },
-        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: `240 ${$_('sales')}`  },
-      ],
-      "Monthly": [
-        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 60, value: `698 ${$_('sales')}`  },
-        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 24, value: `545 ${$_('sales')}`  },
-        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: `456 ${$_('sales')}`  },
-      ],
-      "Yearly":  [
-        { label: $_('electronics'), color: "bg-blue-500",   dotColor: "#3b82f6", stroke: "#3b82f6", percent: 62, value: `7,450 ${$_('sales')}` },
-        { label: $_('clothing'),    color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15", percent: 22, value: `2,640 ${$_('sales')}` },
-        { label: $_('furniture'),   color: "bg-green-500",  dotColor: "#22c55e", stroke: "#22c55e", percent: 16, value: `1,920 ${$_('sales')}` },
-      ],
-    };
+  // ---------- derived: customers table ----------
+  const customerRows = $derived.by(() => {
+    const customers = topCustomersData?.customers;
+    if (!customers) return [];
+    const avatarColors = ['bg-indigo-500', 'bg-rose-500', 'bg-teal-500', 'bg-orange-500', 'bg-purple-500', 'bg-amber-500', 'bg-blue-500'];
+    return customers.map(c => {
+      const firstName = c.first_name ?? '';
+      const lastName = c.last_name ?? '';
+      const name = `${firstName} ${lastName}`.trim() || 'Unknown';
+      const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || '?';
+      const avatarBg = avatarColors[Math.abs((c.id || '').split('').reduce((a, ch) => a + ch.charCodeAt(0), 0)) % avatarColors.length];
+      return {
+        name,
+        initials,
+        avatarBg,
+        address: c.address || '-',
+        orders: c.orders_aggregate?.aggregate?.count ?? 0,
+        revenue: c.revenue?.aggregate?.sum?.total_amount ?? 0,
+      };
+    });
   });
 
-  const categoryStatsByPeriod: Record<string, { categories: number; products: number }> = {
-    "Daily":   { categories: 89, products: 226  },
-    "Weekly":  { categories: 89, products: 415  },
-    "Monthly": { categories: 89, products: 613  },
-    "Yearly":  { categories: 89, products: 7350 },
-  };
-
-  const activeStockDist  = $derived(stockDistributionByPeriod[stockPeriod] ?? stockDistributionByPeriod["Monthly"]);
-  const activeCategoryStats = $derived(categoryStatsByPeriod[stockPeriod] ?? categoryStatsByPeriod["Monthly"]);
-
-  const donutSegments = $derived.by(() => {
-    let cum = 0;
-    return activeStockDist.map(item => {
-      const dash = (item.percent / 100) * CIRC;
-      const startAngle = -90 + (cum / 100) * 360;
-      const midAngle   = startAngle + (item.percent / 100) * 180;
-      const rad        = midAngle * Math.PI / 180;
-      const lx = Math.round(80 + 70 * Math.cos(rad));
-      const ly = Math.round(80 + 70 * Math.sin(rad));
-      const seg = { ...item, dashArray: `${dash.toFixed(1)} ${CIRC}`, dashOffset: -(cum / 100) * CIRC, lx, ly };
-      cum += item.percent;
-      return seg;
+  // ---------- derived: merchants list ----------
+  const merchantRows = $derived.by(() => {
+    const merchants = topMerchantsData?.merchant;
+    if (!merchants) return [];
+    const avatarColors = ['bg-indigo-500', 'bg-rose-500', 'bg-teal-500', 'bg-orange-500', 'bg-purple-500', 'bg-amber-500', 'bg-blue-500'];
+    return merchants.map(m => {
+      const firstName = m.first_name ?? '';
+      const lastName = m.last_name ?? '';
+      const name = `${firstName} ${lastName}`.trim() || 'Unknown';
+      const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || '?';
+      const avatarBg = avatarColors[Math.abs((m.id || '').split('').reduce((a, ch) => a + ch.charCodeAt(0), 0)) % avatarColors.length];
+      return {
+        id: m.id,
+        name,
+        initials,
+        avatarBg,
+        phone: m.phone_number ?? '',
+        salesCount: m.total_orders?.aggregate?.count ?? 0,
+        revenue: m.total_sales?.aggregate?.sum?.total_amount ?? 0,
+        outstanding: m.total_outstanding?.aggregate?.sum?.outstanding_amount ?? 0,
+      };
     });
+  });
+
+  // ---------- derived: stock distribution donut ----------
+  let donutChartInstance: any = null;
+
+  function donutChartAction(node: HTMLDivElement) {
+    const options = {
+      chart: { type: "donut", height: 280, toolbar: { show: false }, fontFamily: "inherit" },
+      labels: donutLabels,
+      series: donutSeries,
+      colors: ["#3b82f6", "#facc15", "#22c55e", "#a855f7", "#f43f5e", "#06b6d4"],
+      plotOptions: {
+        pie: {
+          donut: {
+            size: "55%",
+            labels: {
+              show: true,
+              total: { show: true, label: "Total", formatter: () => { const total = donutSeries.reduce((a: number, b: number) => a + b, 0); return total >= 1_000_000 ? `ETB ${(total / 1_000_000).toFixed(1)}M` : total >= 1_000 ? `ETB ${(total / 1_000).toFixed(1)}K` : `ETB ${total.toFixed(2)}`; } },
+            },
+          },
+        },
+      },
+      dataLabels: { enabled: true, style: { fontSize: "11px" }, dropShadow: { enabled: false } },
+      legend: { show: true, position: "bottom", fontSize: "12px", labels: { colors: "#9ca3af" } },
+      tooltip: { y: { formatter: (v: number) => `ETB ${v.toLocaleString("en-US", { minimumFractionDigits: 2 })}` } },
+      stroke: { width: 0 },
+      responsive: [{ breakpoint: 480, options: { chart: { height: 220 }, legend: { show: false } } }],
+    };
+    donutChartInstance = new ApexCharts(node, options);
+    donutChartInstance.render();
+    return {
+      destroy() { if (donutChartInstance) { donutChartInstance.destroy(); donutChartInstance = null; } },
+    };
+  }
+
+  const donutLabels = $derived.by(() => {
+    const report = productProportionData?.investor_sales_per_product_type_report;
+    if (!report) return [];
+    return report.map(r => r.product_type_name || `Type ${r.product_type_id}`);
+  });
+
+  const donutSeries = $derived.by(() => {
+    const report = productProportionData?.investor_sales_per_product_type_report;
+    if (!report) return [];
+    return report.map(r => parseMoney(r.total_sales));
+  });
+
+  $effect(() => {
+    void donutLabels;
+    void donutSeries;
+    if (!donutChartInstance || !donutSeries.length) return;
+    donutChartInstance.updateOptions({
+      labels: donutLabels,
+      series: donutSeries,
+    });
+  });
+
+  const stockDistributionData = $derived.by(() => {
+    const report = productProportionData?.investor_sales_per_product_type_report;
+    if (!report || report.length === 0) return [];
+    const total = report.reduce((s, r) => s + parseMoney(r.total_sales), 0) || 1;
+    const colors = [
+      { color: "bg-blue-500", dotColor: "#3b82f6", stroke: "#3b82f6" },
+      { color: "bg-yellow-400", dotColor: "#facc15", stroke: "#facc15" },
+      { color: "bg-green-500", dotColor: "#22c55e", stroke: "#22c55e" },
+      { color: "bg-purple-500", dotColor: "#a855f7", stroke: "#a855f7" },
+      { color: "bg-rose-500", dotColor: "#f43f5e", stroke: "#f43f5e" },
+      { color: "bg-cyan-500", dotColor: "#06b6d4", stroke: "#06b6d4" },
+    ];
+    return report.map((r, i) => {
+      const pct = Math.round((parseMoney(r.total_sales) / total) * 100);
+      return {
+        label: r.product_type_name || `Type ${r.product_type_id}`,
+        percent: pct,
+        value: `${r.total_quantity_sold} ${$_('sales')}`,
+        ...colors[i % colors.length],
+      };
+    });
+  });
+
+  const categoryStats = $derived.by(() => {
+    const report = productProportionData?.investor_sales_per_product_type_report;
+    const categories = report?.length ?? 0;
+    const products = report?.reduce((s, r) => s + r.total_quantity_sold, 0) ?? 0;
+    return { categories, products };
   });
 </script>
 
 <div class="flex-1 p-6 space-y-6">
 
   <!-- ── ROW 1: Welcome + KPI cards ── -->
-  <div class="bg-card  p-6 space-y-6">
+  <div class="bg-card p-6 space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-semibold text-foreground">{$_('welcome')}, Alex</h2>
-      <div class="hidden md:flex items-center gap-3">
-
-      </div>
+      <h2 class="text-2xl font-semibold text-foreground">{$_('welcome')}, Investor</h2>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      {#each kpiCards as kpi}
-        <div class="bg-background border border-border rounded-lg p-5 flex flex-col gap-2">
-          <div class="flex items-start justify-between">
-            <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
-            <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-              <Icon iconName={kpi.icon} size={20} class="text-foreground" />
+      {#if loading}
+        {#each [1,2,3,4] as _}
+          <div class="bg-background border border-border rounded-lg p-5 flex flex-col gap-2">
+            <Skeleton class="h-8 w-24" />
+            <Skeleton class="h-4 w-32" />
+            <div class="border-t border-border pt-2">
+              <Skeleton class="h-3 w-20" />
             </div>
           </div>
-          <p class="text-sm text-muted-foreground">{kpi.label}</p>
-          <div class="border-t border-border"></div>
-          <p class="text-xs font-medium {kpi.changeType === 'positive' ? 'text-green-600' : 'text-red-500'}">
-            {kpi.change}
-          </p>
-        </div>
-      {/each}
+        {/each}
+      {:else}
+        {#each kpiCards as kpi}
+          <div class="bg-background border border-border rounded-lg p-5 flex flex-col gap-2">
+            <div class="flex items-start justify-between">
+              <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
+              <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                <Icon iconName={kpi.icon} size={20} class="text-foreground" />
+              </div>
+            </div>
+            <p class="text-sm text-muted-foreground">{kpi.label}</p>
+            {#if kpi.change}
+              <div class="border-t border-border"></div>
+              <p class="text-xs font-medium {kpi.changeType === 'positive' ? 'text-green-600' : 'text-red-500'}">
+                {kpi.change}
+              </p>
+            {/if}
+          </div>
+        {/each}
+      {/if}
     </div>
   </div>
 
-  <!-- ── ROW 2: Revenue Over Time  |  Top Merchants (parallel) ── -->
+  <!-- ── ROW 2: Revenue Over Time  |  Top Merchants ── -->
   <div class={COL}>
 
     <div class="bg-card border border-border rounded-lg p-6 space-y-4">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-muted-foreground">{$_('revenueOverTime')}</p>
-          <p class="text-2xl font-bold text-foreground">{activeChart.revenue}</p>
-          <p class="text-sm {activeChart.positive ? 'text-green-600' : 'text-red-500'}">{activeChart.change} <span class="font-medium">{activeChart.changePct}</span></p>
+          <p class="text-2xl font-bold text-foreground">{chartMonthData.revenue}</p>
+          {#if chartMonthData.changePct}
+            <p class="text-sm {chartMonthData.positive ? 'text-green-600' : 'text-red-500'}">{chartMonthData.change} <span class="font-medium">{chartMonthData.changePct}</span></p>
+          {/if}
         </div>
-        <div class="flex gap-1.5">
-          {#each ["1D", "1W", "1M", "3M", "6M", "1Y"] as period}
-            <button
-              type="button"
-              onclick={() => (chartPeriod = period)}
-              class="px-2.5 py-1 text-xs rounded transition-colors {chartPeriod === period ? 'bg-info text-info-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}"
-            >
-              {period}
-            </button>
-          {/each}
+        <div>
+          <select
+            bind:value={chartYear}
+            class="text-xs border border-border rounded px-2 py-1 bg-background text-foreground"
+          >
+            {#each yearOptions as y}
+              <option value={y}>{y}</option>
+            {/each}
+          </select>
         </div>
       </div>
 
-      <div class="flex gap-3">
-        <div class="flex flex-col justify-between text-[10px] text-muted-foreground pb-5 w-7 shrink-0 text-right">
-          {#each activeChart.yLabels as label}
-            <span>{label}</span>
-          {/each}
+      {#if loading || trendLoading}
+        <div class="h-52 flex items-center justify-center">
+          <Skeleton class="h-44 w-full" />
         </div>
-
-        <div class="flex-1 relative h-52">
-          <svg viewBox="0 0 860 170" class="w-full h-full" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#60a5fa" stop-opacity="0.28" />
-                <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.02" />
-              </linearGradient>
-            </defs>
-            {#each [0, 34, 68, 102, 136, 170] as y}
-              <line x1="0" y1={y} x2="860" y2={y} stroke="currentColor" stroke-opacity="0.06" stroke-width="1" />
-            {/each}
-            <path d={svgChart.fill} fill="url(#revGrad)" />
-            <path d={svgChart.line} fill="none" stroke="#60a5fa" stroke-width="2" />
-            {#each svgChart.pts as pt}
-              <circle cx={pt.x} cy={pt.y} r="4" fill="#60a5fa" />
-            {/each}
-          </svg>
-          <div class="absolute bottom-0 left-0 right-0 flex justify-between">
-            {#each activeChart.labels as m}
-              <span class="text-[10px] text-muted-foreground">{m}</span>
-            {/each}
-          </div>
+      {:else if chartMonthData.values.length > 1}
+        <div class="relative">
+          <div use:chartAction class="w-full"></div>
         </div>
-      </div>
+      {:else}
+        <div class="h-52 flex flex-col items-center justify-center text-center">
+          <Icon iconName="icon/bar-chart" size={40} class="text-muted-foreground mb-3" />
+          <p class="text-foreground font-medium">No Revenue Data</p>
+          <p class="text-muted-foreground text-sm mt-1">There is no revenue data available for the selected period.</p>
+        </div>
+      {/if}
     </div>
 
-    <div class="bg-card border border-border rounded-lg p-6 space-y-4">
+    <div class="bg-card border border-border rounded-lg p-6 space-y-4" id="topCustomersSection">
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
           <Icon iconName="icon/users" size={15} class="text-orange-400" />
-          {$_('topMerchants')}
+          {$_('topCustomers')}
         </h3>
-        <div class="relative">
-          <button
-            type="button"
-            onclick={() => (showMerchantsDropdown = !showMerchantsDropdown)}
-            class="text-xs text-muted-foreground border border-border rounded px-2 py-1 flex items-center gap-1"
-          >
-            <Icon iconName="icon/calendar" size={12} />
-            {merchantsPeriodOptions.find(o => o.key === merchantsPeriod)?.label ?? merchantsPeriod}
-            <Icon iconName="icon/chevron-down" size={11} />
-          </button>
-          {#if showMerchantsDropdown}
-            <div class="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-md z-20 overflow-hidden min-w-36">
-              {#each merchantsPeriodOptions as opt}
-                <button
-                  type="button"
-                  onclick={() => { merchantsPeriod = opt.key; showMerchantsDropdown = false; }}
-                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt.key === merchantsPeriod ? 'text-info font-semibold' : 'text-foreground'}"
-                >{opt.label}</button>
-              {/each}
-            </div>
-          {/if}
-        </div>
+        <!-- <a href="/dashboard/merchants" class="text-xs text-info hover:underline">{$_('viewAll')}</a> -->
       </div>
 
       <div class="space-y-4">
-        {#each activeTopMerchants as merchant}
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              {#if merchant.avatar}
-                <img
-                  src={merchant.avatar}
-                  alt={merchant.name}
-                  class="w-9 h-9 rounded-full object-cover shrink-0"
-                />
-              {:else}
-                <div class="w-9 h-9 rounded-full {merchant.avatarBg} flex items-center justify-center shrink-0 text-white text-xs font-bold select-none">
-                  {merchant.initials}
+        {#if loading}
+          {#each [1,2,3,4] as _}
+            <div class="flex items-center justify-between animate-pulse">
+              <div class="flex items-center gap-3">
+                <Skeleton class="w-9 h-9 rounded-full" />
+                <div class="space-y-1.5">
+                  <Skeleton class="h-4 w-28" />
+                  <Skeleton class="h-3 w-20" />
                 </div>
-              {/if}
-              <div>
-                <p class="text-sm font-medium text-foreground">{merchant.name}</p>
-                <p class="text-xs text-muted-foreground flex items-center gap-1">
-                  <Icon iconName="icon/map-pin" size={10} />
-                  {merchant.branch} • {merchant.sales}
-                </p>
+              </div>
+              <div class="text-right space-y-1.5">
+                <Skeleton class="h-4 w-16 ml-auto" />
+                <Skeleton class="h-3 w-10 ml-auto" />
               </div>
             </div>
-            <div class="text-right">
-              <p class="text-sm font-semibold text-foreground">{merchant.revenue}</p>
-              <p class="text-[10px] text-muted-foreground">{$_('revenue')}</p>
+          {/each}
+        {:else}
+          {#each customerRows as row}
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full {row.avatarBg} flex items-center justify-center shrink-0 text-white text-xs font-bold select-none">
+                  {row.initials}
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-foreground">{row.name}</p>
+                  <p class="text-xs text-muted-foreground flex items-center gap-1">
+                    <Icon iconName="icon/map-pin" size={10} />
+                    {row.address} • {row.orders} {$_('totalOrders')}
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-semibold text-foreground">{fmtCurrency(row.revenue)}</p>
+                <p class="text-[10px] text-muted-foreground">{$_('revenue')}</p>
+              </div>
             </div>
-          </div>
-        {/each}
+          {/each}
+        {/if}
       </div>
     </div>
   </div>
 
-  <!-- ── ROW 3: Merchant Table  |  Stock Distribution + Category Stats (parallel) ── -->
-  <div class="{COL} items-stretch">
+    <!-- ── ROW 3: Customers Table  |  Stock Distribution ── -->
+    <div class="{COL} items-stretch" id="topMerchantsSection">
 
-    <div class="bg-card border border-border rounded-lg p-6 h-full">
+    <div class="bg-card border border-border rounded-lg p-4 h-full" id="topMerchantsSection">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-semibold text-foreground">{$_('merchant')}</h3>
+        <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+          <Icon iconName="icon/users" size={15} class="text-orange-400" />
+          {$_('topMerchants')}
+        </h3>
         <a href="/dashboard/merchants" class="text-xs text-info hover:underline">{$_('viewAll')}</a>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-border">
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{$_('merchant')}</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
-                {$_('date')} <span class="ml-0.5">↑</span>
-              </th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{$_('period')}</th>
-              <th class="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{$_('filterStatus')}</th>
-              <th class="px-3 py-2 text-right text-xs font-medium text-muted-foreground"></th>
+          <thead class="bg-muted/30 border-b border-border">
+            <tr class="text-left text-xs text-muted-foreground uppercase">
+              <th class="px-3 py-2 font-medium">{$_('merchant')}</th>
+              <th class="px-3 py-2 font-medium text-right">{$_('revenue')}</th>
+              <th class="px-3 py-2 font-medium text-right">{$_('totalOrders')}</th>
+              <th class="px-3 py-2 font-medium text-right">{$_('totalOutstanding')}</th>
+              <th class="px-3 py-2 font-medium text-center">{$_('actions')}</th>
             </tr>
           </thead>
-          <tbody>
-            {#each tableRows as row}
-              <tr class="border-b border-border hover:bg-muted/40">
-                <td class="px-3 py-2.5 text-foreground">
-                  <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <Icon iconName="icon/user" size={14} />
+          <tbody class="divide-y divide-border">
+            {#if loading}
+              {#each [1,2,3,4,5] as _}
+                <tr>
+                  <td class="px-3 py-2.5"><Skeleton class="h-4 w-28" /></td>
+                  <td class="px-3 py-2.5"><Skeleton class="h-4 w-16 ml-auto" /></td>
+                  <td class="px-3 py-2.5"><Skeleton class="h-4 w-10 ml-auto" /></td>
+                  <td class="px-3 py-2.5"><Skeleton class="h-4 w-16 ml-auto" /></td>
+                  <td class="px-3 py-2.5"><Skeleton class="h-4 w-8 mx-auto" /></td>
+                </tr>
+              {/each}
+            {:else}
+              {#each merchantRows as merchant}
+                <tr class="hover:bg-muted/20 transition-colors">
+                  <td class="px-3 py-2.5 text-foreground">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full {merchant.avatarBg} flex items-center justify-center shrink-0 text-white text-xs font-bold select-none">
+                        {merchant.initials}
+                      </div>
+                      <div class="flex flex-col min-w-0">
+                        <span class="text-sm text-foreground font-medium truncate">{merchant.name}</span>
+                        <span class="text-xs text-muted-foreground truncate">{merchant.phone}</span>
+                      </div>
                     </div>
-                    <span class="text-sm">{row.merchant}</span>
-                  </div>
-                </td>
-                <td class="px-3 py-2.5 text-muted-foreground text-sm">{row.date}</td>
-                <td class="px-3 py-2.5 text-muted-foreground text-sm">{row.period}</td>
-                <td class="px-3 py-2.5">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    {$_('statusActive')}
-                  </span>
-                </td>
-                <td class="px-3 py-2.5 text-right">
-                  <div class="inline-flex items-center gap-2 text-muted-foreground">
-                    <Icon iconName="icon/eye"      size={15} class="cursor-pointer hover:text-foreground" />
-                    <Icon iconName="icon/download" size={15} class="cursor-pointer hover:text-foreground" />
-                  </div>
-                </td>
-              </tr>
-            {/each}
+                  </td>
+                  <td class="px-3 py-2.5 text-foreground text-right font-semibold">{fmtCurrency(merchant.revenue)}</td>
+                  <td class="px-3 py-2.5 text-muted-foreground text-right">{merchant.salesCount}</td>
+                  <td class="px-3 py-2.5 text-muted-foreground text-right">{fmtCurrency(merchant.outstanding)}</td>
+                  <td class="px-3 py-2.5 text-center">
+                    <button
+                      onclick={() => goto(`/dashboard/merchants/${merchant.id}`)}
+                      class="p-1 rounded hover:bg-muted transition-colors"
+                      aria-label={$_('view')}
+                    >
+                      <Icon iconName="icon/eye" size={15} class="text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </td>
+                </tr>
+              {/each}
+            {/if}
           </tbody>
         </table>
       </div>
@@ -393,82 +673,64 @@
           <Icon iconName="icon/bar-chart" size={15} class="text-pink-400" />
           {$_('stockDistribution')}
         </h3>
-        <div class="relative">
-          <button
-            onclick={() => (showStockDropdown = !showStockDropdown)}
-            class="text-xs text-muted-foreground border border-border rounded px-2 py-1 flex items-center gap-1"
-          >
-            <Icon iconName="icon/calendar" size={12} />
-            {periodOptions.find(o => o.key === stockPeriod)?.label ?? stockPeriod}
-            <Icon iconName="icon/chevron-down" size={11} />
-          </button>
-          {#if showStockDropdown}
-            <div class="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-md z-20 overflow-hidden min-w-22.5">
-              {#each periodOptions as opt}
-                <button
-                  onclick={() => { stockPeriod = opt.key; showStockDropdown = false; }}
-                  class="block w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors {opt.key === stockPeriod ? 'text-info font-semibold' : 'text-foreground'}"
-                >
-                  {opt.label}
-                </button>
-              {/each}
-            </div>
-          {/if}
-        </div>
       </div>
 
+      <div class="w-full h-fit flex items-center gap-10 justify-center">
 
-      <div class="flex items-center gap-4">
-
-        <div class="shrink-0">
-          <svg viewBox="0 0 160 160" class="w-36 h-36">
-            {#each donutSegments as seg}
-              <circle cx="80" cy="80" r="56" fill="none" stroke={seg.stroke} stroke-width="28"
-                stroke-dasharray={seg.dashArray}
-                stroke-dashoffset={seg.dashOffset}
-                transform="rotate(-90 80 80)" />
-            {/each}
-            <circle cx="80" cy="80" r="42" class="fill-card" />
-            {#each donutSegments as seg}
-              <circle cx={seg.lx} cy={seg.ly} r="13" fill="white" stroke="#e5e7eb" stroke-width="1" />
-              <text x={seg.lx} y={seg.ly + 4} font-size="8.5" fill="#374151" text-anchor="middle" font-weight="600">{seg.percent}%</text>
-            {/each}
-          </svg>
-        </div>
-
-        <div class="flex flex-col gap-4 flex-1">
-          {#each activeStockDist as item}
-            <div class="flex items-start gap-2">
-              <span class="w-1.5 h-9 {item.color} rounded-full shrink-0 mt-0.5"></span>
-              <div>
-                <p class="text-xs text-muted-foreground">{item.label}</p>
-                <p class="text-sm font-bold text-foreground">{item.value}</p>
+        {#if loading}
+          <div class="flex items-center gap-4">
+            <Skeleton class="w-36 h-36 rounded-full" />
+            <div class="flex-1 space-y-3">
+              <Skeleton class="h-10 w-full" />
+              <Skeleton class="h-10 w-full" />
+              <Skeleton class="h-10 w-full" />
+            </div>
+          </div>
+        {:else if donutSeries.length > 0}
+          <div>
+            <div use:donutChartAction class="w-full"></div>
+          </div>
+          <div class="flex flex-col gap-4">
+            {#each stockDistributionData as item}
+              <div class="flex items-start gap-2">
+                <span class="w-1.5 h-9 {item.color} rounded-full shrink-0 mt-0.5"></span>
+                <div>
+                  <p class="text-xs text-muted-foreground">{item.label}</p>
+                  <p class="text-sm font-bold text-foreground">{item.value}</p>
+                </div>
               </div>
-            </div>
-          {/each}
-        </div>
+            {/each}
+          </div>
+        {:else}
+          <div class="flex flex-col items-center justify-center py-10 text-center w-full">
+            <Icon iconName="icon/activity" size={40} class="text-muted-foreground mb-3" />
+            <p class="text-foreground font-medium">No Stock Distribution Data</p>
+            <p class="text-muted-foreground text-xs mt-1">Stock distribution data will appear once products are added.</p>
+          </div>
+        {/if}
 
       </div>
-
-      <div class="mt-auto space-y-3">
+      <div class="mt-auto space-y-1">
         <h3 class="text-sm font-semibold text-foreground">{$_('categoryStatistics')}</h3>
-        <div class="border border-border rounded-lg divide-y divide-border">
-          <div class="flex items-center justify-between px-4 py-3 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-              <span class="text-muted-foreground">{$_('totalCategories')}</span>
-            </div>
-            <span class="font-bold text-foreground">{activeCategoryStats.categories}</span>
+      </div>
+      <div class="border border-border rounded-lg divide-y divide-border">
+        <div class="flex items-center justify-between px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            <span class="text-muted-foreground">{$_('totalCategories')}</span>
           </div>
-          <div class="flex items-center justify-between px-4 py-3 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-              <span class="text-muted-foreground">{$_('totalProducts')}</span>
-            </div>
-            <span class="font-bold text-foreground">{activeCategoryStats.products.toLocaleString()}</span>
+          <span class="font-bold text-foreground">{categoryStats.categories}</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            <span class="text-muted-foreground">{$_('totalProducts')} {$_('quantity')}</span>
           </div>
+          <span class="font-bold text-foreground">{categoryStats.products.toLocaleString()}</span>
         </div>
       </div>
+
+
 
     </div>
   </div>

@@ -1,0 +1,5 @@
+mutation deleteBranch($id: uuid!) {
+  delete_branches(where: { id: { _eq: $id } }) {
+    affected_rows
+  }
+}

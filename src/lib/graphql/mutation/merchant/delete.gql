@@ -1,0 +1,5 @@
+mutation deleteMerchant($id: uuid!) {
+  delete_merchant(where: { id: { _eq: $id } }) {
+    affected_rows
+  }
+}

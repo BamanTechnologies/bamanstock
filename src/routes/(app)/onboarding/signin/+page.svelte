@@ -4,10 +4,96 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
+  import { toast } from "svelte-sonner";
+  import { getAnonymousClient } from "$graphql/client.ts";
+  import { authStore } from "$lib/stores/auth.svelte.js";
+  import LOGIN from "$graphql/queries/auth/login.gql";
+  import type { ApolloError } from "@apollo/client";
+  import { jwtDecode } from "jwt-decode";
+  import type { JwtPayload } from "$lib/stores/auth.svelte.js";
 
-  let phone = $state("+2519********");
+  let credential = $state("");
   let password = $state("");
+  let credentialError = $state("");
+  let submitError = $state("");
+  let loading = $state(false);
   let currentSlide = $state(0);
+
+  function validateCredential(value: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[0-9]{7,15}$/;
+    if (!value.trim()) {
+      credentialError = "Please enter an email or phone number";
+      return false;
+    }
+    if (emailRegex.test(value) || phoneRegex.test(value)) {
+      credentialError = "";
+      return true;
+    }
+    credentialError = "Invalid email or phone number format";
+    return false;
+  }
+
+  function isEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  async function handleSubmit(e: Event) {
+    e.preventDefault();
+    if (!validateCredential(credential)) return;
+    submitError = "";
+    loading = true;
+    try {
+      const variables: { email?: string; phone?: string; password: string } = {
+        password,
+      };
+      if (isEmail(credential)) {
+        variables.email = credential;
+      } else {
+        variables.phone = credential;
+      }
+      const result = await getAnonymousClient().mutate<{
+        user_login: { token: string; status_code: number; message?: string };
+      }>({
+        mutation: LOGIN,
+        variables,
+      });
+      const data = result.data?.user_login;
+      if (data?.token && data?.status_code === 200) {
+        const payload = jwtDecode<JwtPayload>(data.token);
+        const allowedRoles = payload.metadata['x-hasura-allowed-roles'] ?? [];
+        if (!allowedRoles.includes('investor')) {
+          toast.error("You do not have investor permissions");
+          return;
+        }
+        toast.success("Login successful");
+        authStore.loginWithToken(data.token);
+        goto("/");
+      } else if (data?.message) {
+        toast.error(data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
+    } catch (err: unknown) {
+      const apolloErr = err as ApolloError;
+      if (apolloErr.graphQLErrors?.length) {
+        toast.error(apolloErr.graphQLErrors[0]?.message ?? "Something went wrong");
+      } else if (apolloErr.networkError) {
+        const netErr = apolloErr.networkError as { statusCode?: number; message?: string };
+        if (netErr.statusCode === 401 || netErr.statusCode === 403) {
+          toast.error("Invalid credentials");
+        } else if (netErr.message) {
+          toast.error(netErr.message);
+        } else {
+          toast.error("Something went wrong");
+        }
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      loading = false;
+    }
+  }
   let carouselContainer: HTMLDivElement;
   let isDragging = $state(false);
   let startX = $state(0);
@@ -129,7 +215,7 @@
   });
 </script>
 
-<div class="min-h-screen bg-white flex items-center justify-center p-4">
+<div class="min-h-screen bg-background flex items-center justify-center p-4">
   <div
     class="w-full max-w-6xl flex flex-col lg:flex-row rounded-2xl overflow-hidden"
   >
@@ -215,7 +301,7 @@
     </div>
 
     <div
-      class="w-full lg:w-1/2 bg-white flex items-center justify-center p-8 lg:p-16"
+      class="w-full lg:w-1/2 bg-background flex items-center justify-center p-8 lg:p-16"
     >
       <div class="w-full max-w-md space-y-8">
         <div class="space-y-2 text-center lg:text-left">
@@ -227,15 +313,19 @@
           </p>
         </div>
 
-        <form class="space-y-6" onsubmit={(e) => { e.preventDefault(); goto("/investor/landing"); }}>
+        <form class="space-y-6" onsubmit={handleSubmit}>
           <FormField
-            id="phone"
-            label="Phone Number"
-            type="tel"
-            placeholder="+2519********"
-            bind:value={phone}
+            id="credential"
+            label="Email or Phone Number"
+            type="text"
+            placeholder="Email or phone number"
+            bind:value={credential}
+            oninput={() => { if (credentialError) validateCredential(credential); }}
             required
           />
+          {#if credentialError}
+            <p class="text-sm text-destructive -mt-4">{credentialError}</p>
+          {/if}
 
           <div class="space-y-2">
             <FormField
@@ -260,9 +350,15 @@
           <Button
             type="submit"
             size="lg"
+            disabled={loading}
             class="w-full hover:cursor-pointer bg-info text-info-foreground rounded-full py-6 text-lg font-medium"
           >
-            Login
+            {#if loading}
+              <Icon iconName="icon/refresh-cw" size={18} class="animate-spin" />
+              Logging in...
+            {:else}
+              Login
+            {/if}
           </Button>
         </form>
 
