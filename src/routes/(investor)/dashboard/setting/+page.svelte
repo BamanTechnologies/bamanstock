@@ -107,7 +107,7 @@
   }
 </script>
 
-<div class="flex-1 px-12 py-15 space-y-8">
+<div class="flex-1 px-5 sm:px-12 py-8 sm:py-15 space-y-8">
   <!-- Application Preferences Section -->
   <div class="space-y-6">
     <div>

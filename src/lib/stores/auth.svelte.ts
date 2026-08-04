@@ -1,6 +1,9 @@
 import { browser } from '$app/environment';
 import { jwtDecode } from 'jwt-decode';
 
+const logoutListeners = new Set<() => void>();
+const loginListeners = new Set<() => void>();
+
 export type AuthUser = {
   id: string;
   name: string;
@@ -74,6 +77,7 @@ function createAuthStore() {
     if (!browser) return;
     localStorage.setItem('auth_token', token);
     decodeAndSetUser(token);
+    loginListeners.forEach((fn) => fn());
   }
 
   function logout() {
@@ -81,6 +85,17 @@ function createAuthStore() {
     if (browser) {
       localStorage.removeItem('auth_token');
     }
+    logoutListeners.forEach((fn) => fn());
+  }
+
+  function onLogout(listener: () => void) {
+    logoutListeners.add(listener);
+    return () => logoutListeners.delete(listener);
+  }
+
+  function onLogin(listener: () => void) {
+    loginListeners.add(listener);
+    return () => loginListeners.delete(listener);
   }
 
   return {
@@ -91,6 +106,8 @@ function createAuthStore() {
     init,
     loginWithToken,
     logout,
+    onLogout,
+    onLogin,
   };
 }
 

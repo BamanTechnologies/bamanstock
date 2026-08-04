@@ -20,6 +20,22 @@
 	} = $props();
 
 	const sidebar = useSidebar();
+
+	function handleMobileNavClick(e: MouseEvent) {
+		const target = e.target as HTMLElement | null;
+		if (target && target.closest("a[href]")) {
+			sidebar.setOpenMobile(false);
+		}
+	}
+
+	function closeMobileOnNav(node: HTMLElement) {
+		node.addEventListener("click", handleMobileNavClick);
+		return {
+			destroy() {
+				node.removeEventListener("click", handleMobileNavClick);
+			},
+		};
+	}
 </script>
 
 {#if collapsible === "none"}
@@ -50,7 +66,7 @@
 				<Sheet.Title>Sidebar</Sheet.Title>
 				<Sheet.Description>Displays the mobile sidebar.</Sheet.Description>
 			</Sheet.Header>
-			<div class="flex h-full w-full flex-col">
+			<div class="flex h-full w-full flex-col" use:closeMobileOnNav>
 				{@render children?.()}
 			</div>
 		</Sheet.Content>

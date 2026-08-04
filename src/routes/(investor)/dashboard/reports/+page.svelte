@@ -1156,14 +1156,14 @@
   }
 </script>
 
-<div class="flex-1 p-6 space-y-6">
+<div class="flex-1 p-3 sm:p-6 space-y-3 sm:space-y-6">
   <!-- Tabs -->
   <div class="border-b border-border">
-    <div class="flex gap-6">
+    <div class="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar">
       {#each tabs as tab}
         <button
           onclick={() => switchTab(tab.key)}
-          class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab.key
+          class="pb-2 sm:pb-4 text-xs sm:text-base px-1 border-b-2 transition-colors {activeTab === tab.key
             ? 'border-info text-info font-medium'
             : 'border-transparent text-muted-foreground hover:text-foreground'}"
         >
@@ -1195,7 +1195,7 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg px-4 py-3">
-        <div class="flex items-end gap-3 flex-wrap">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-3 flex-wrap">
           <div class="flex-1 min-w-0">
             <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('navLocation')}</label>
             <SearchSelect
@@ -1400,7 +1400,7 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2 sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted-foreground">Row Per Page</span>
             <select
@@ -1696,7 +1696,7 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg px-4 py-3">
-        <div class="flex items-end gap-3 flex-wrap">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-3 flex-wrap">
           <div class="flex-1 min-w-0">
             <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterFrom')}</label>
             <input
@@ -1880,7 +1880,7 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col sm:flex-row gap-2 items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted-foreground">Row Per Page</span>
             <select
@@ -1951,7 +1951,7 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg px-4 py-3">
-        <div class="flex items-end gap-3 flex-wrap">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-3 flex-wrap">
           <div class="flex-1 min-w-0">
             <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('filterFrom')}</label>
             <input
@@ -2146,7 +2146,7 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col sm:flex-row gap-2 items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted-foreground">Row Per Page</span>
             <select
@@ -2223,7 +2223,7 @@
 
       <!-- Filters Section -->
       <div class="bg-card border border-border rounded-lg px-4 py-3">
-        <div class="flex items-end gap-3 flex-wrap">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-3 flex-wrap">
           <div class="flex-1 min-w-0">
             <label class="text-xs font-medium text-muted-foreground mb-1 block">{$_('navLocation')}</label>
             <SearchSelect
@@ -2437,7 +2437,7 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col sm:flex-row gap-2 items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted-foreground">Row Per Page</span>
             <select

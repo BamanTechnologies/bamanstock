@@ -125,3 +125,6 @@ export function resetClients() {
   authClient = null;
   roleClients.clear();
 }
+
+authStore.onLogout(resetClients);
+authStore.onLogin(resetClients);

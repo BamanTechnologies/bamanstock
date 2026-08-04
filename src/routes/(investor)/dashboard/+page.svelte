@@ -468,9 +468,9 @@
 <div class="flex-1 p-6 space-y-6">
 
   <!-- ── ROW 1: Welcome + KPI cards ── -->
-  <div class="bg-card p-6 space-y-6">
+  <div class="bg-card p-3 sm:p-6 space-y-3 sm:space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-semibold text-foreground">{$_('welcome')}, Investor</h2>
+      <h2 class="text-xl sm:text-2xl font-semibold text-foreground">{$_('welcome')}, Investor</h2>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -486,9 +486,9 @@
         {/each}
       {:else}
         {#each kpiCards as kpi}
-          <div class="bg-background border border-border rounded-lg p-5 flex flex-col gap-2">
+          <div class="bg-background border border-border rounded-lg p-3 sm:p-5 flex flex-col gap-1 sm:gap-2">
             <div class="flex items-start justify-between">
-              <p class="text-2xl font-bold text-foreground">{kpi.value}</p>
+              <p class="text-xl sm:text-2xl font-bold text-foreground">{kpi.value}</p>
               <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
                 <Icon iconName={kpi.icon} size={20} class="text-foreground" />
               </div>
@@ -509,11 +509,11 @@
   <!-- ── ROW 2: Revenue Over Time  |  Top Merchants ── -->
   <div class={COL}>
 
-    <div class="bg-card border border-border rounded-lg p-6 space-y-4">
+    <div class="bg-card border border-border rounded-lg p-3 sm:p-6 space-y-3 sm:space-y-6">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-muted-foreground">{$_('revenueOverTime')}</p>
-          <p class="text-2xl font-bold text-foreground">{chartMonthData.revenue}</p>
+          <p class="text-xl sm:text-2xl font-bold text-foreground">{chartMonthData.revenue}</p>
           {#if chartMonthData.changePct}
             <p class="text-sm {chartMonthData.positive ? 'text-green-600' : 'text-red-500'}">{chartMonthData.change} <span class="font-medium">{chartMonthData.changePct}</span></p>
           {/if}
@@ -547,7 +547,7 @@
       {/if}
     </div>
 
-    <div class="bg-card border border-border rounded-lg p-6 space-y-4" id="topCustomersSection">
+    <div class="bg-card border border-border rounded-lg p-3 sm:p-6 space-y-3 sm:space-y-6" id="topCustomersSection">
       <div class="flex items-center justify-between">
         <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
           <Icon iconName="icon/users" size={15} class="text-orange-400" />
@@ -613,7 +613,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-muted/30 border-b border-border">
-            <tr class="text-left text-xs text-muted-foreground uppercase">
+            <tr class="text-left text-xs text-muted-foreground sm:uppercase">
               <th class="px-3 py-2 font-medium">{$_('merchant')}</th>
               <th class="px-3 py-2 font-medium text-right">{$_('revenue')}</th>
               <th class="px-3 py-2 font-medium text-right">{$_('totalOrders')}</th>
@@ -675,7 +675,7 @@
         </h3>
       </div>
 
-      <div class="w-full h-fit flex items-center gap-10 justify-center">
+      <div class="w-full h-fit flex flex-col sm:flex-row items-center gap-10 justify-center">
 
         {#if loading}
           <div class="flex items-center gap-4">
@@ -714,14 +714,14 @@
         <h3 class="text-sm font-semibold text-foreground">{$_('categoryStatistics')}</h3>
       </div>
       <div class="border border-border rounded-lg divide-y divide-border">
-        <div class="flex items-center justify-between px-4 py-3 text-sm">
+        <div class="flex items-center justify-between px-4 py-3 text-xs sm:text-sm">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
             <span class="text-muted-foreground">{$_('totalCategories')}</span>
           </div>
           <span class="font-bold text-foreground">{categoryStats.categories}</span>
         </div>
-        <div class="flex items-center justify-between px-4 py-3 text-sm">
+        <div class="flex items-center justify-between px-4 py-3 text-xs sm:text-sm">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
             <span class="text-muted-foreground">{$_('totalProducts')} {$_('quantity')}</span>
