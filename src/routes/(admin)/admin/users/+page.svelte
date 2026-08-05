@@ -83,7 +83,7 @@
       </div>
 
       <table class="w-full text-sm">
-        <thead class="bg-muted/80 text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
+        <thead class="uppercase bg-muted/80 text-muted-foreground font-bold text-[11px] tracking-wider">
           <tr>
             <th class="px-6 py-4 w-10"><input type="checkbox" class="rounded border-slate-300" /></th>
             <th class="px-6 py-4 text-left">Name <Icon iconName="icon/arrow-down" size={12} class="inline opacity-50" /></th>
@@ -210,7 +210,7 @@
           </div>
         </div>
         <table class="w-full text-sm">
-          <thead class="bg-muted/80 text-muted-foreground text-[11px] uppercase font-bold">
+          <thead class="uppercase bg-muted/80 text-muted-foreground text-[11px] font-bold">
             <tr>
               <th class="px-6 py-4 w-10"><input type="checkbox" class="rounded border-slate-300" /></th>
               <th class="px-6 py-4 text-left">Merchant <Icon iconName="icon/arrow-down" size={12} class="inline" /></th>

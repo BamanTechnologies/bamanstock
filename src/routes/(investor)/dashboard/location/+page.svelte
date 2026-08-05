@@ -311,7 +311,7 @@
 
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-muted/30 border-b border-border">
+          <thead class="uppercase bg-muted/30 border-b border-border">
             <tr class="text-left text-xs text-muted-foreground uppercase">
               <th class="px-4 py-3 w-10">
                 <input type="checkbox" class="rounded" />
@@ -319,7 +319,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("name")}
                 >
                   {$_('navLocation')}
@@ -336,7 +336,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("address")}
                 >
                   {$_('address')}
@@ -353,7 +353,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("company")}
                 >
                   {$_('company')}
@@ -370,7 +370,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("stock_value")}
                 >
                   {$_('totalStockValue')}
@@ -387,7 +387,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("merchants")}
                 >
                   {$_('navMerchants')}
@@ -404,7 +404,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("customers")}
                 >
                   {$_('customers')}

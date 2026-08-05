@@ -70,7 +70,7 @@
   }
 </script>
 
-<div class="flex items-center justify-between w-full py-3">
+<div class="flex flex-col gap-2 sm:flex-row items-center justify-between w-full py-3">
   <div class="flex items-center gap-2 text-sm text-muted-foreground">
     <span>Row Per Page</span>
     <select

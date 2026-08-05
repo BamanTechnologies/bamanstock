@@ -42,6 +42,7 @@
     if (path.includes("/dashboard/merchants/")) return $_('pageMerchantDetails');
     if (path.startsWith("/dashboard/merchants")) return $_('pageMerchants');
     if (path.includes("/location")) return $_('pageLocations');
+    if (path.startsWith("/dashboard/products")) return $_('pageProducts');
     if (path.includes("/stock")) return $_('pageStock');
     if (path.includes("/report")) return $_('pageReports');
     if (path.includes("/setting")) return $_('pageSettings');
@@ -54,6 +55,7 @@
     { title: $_('navDashboard'), icon: "icon/layout-grid", href: "/dashboard" },
     { title: $_('navMerchants'), icon: "icon/users",        href: "/dashboard/merchants" },
     { title: $_('navLocation'),  icon: "icon/map-pin",      href: "/dashboard/location" },
+    { title: $_('navProducts'),  icon: "icon/shopping-bag",      href: "/dashboard/products" },
     { title: $_('navStock'),     icon: "icon/box",           href: "/dashboard/stock" },
     { title: $_('navReport'),    icon: "icon/bar-chart",     href: "/dashboard/reports" },
     { title: $_('navSettings'),  icon: "icon/settings",      href: "/dashboard/setting" },

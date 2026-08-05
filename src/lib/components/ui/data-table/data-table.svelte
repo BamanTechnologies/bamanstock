@@ -147,7 +147,7 @@
   <!-- Table -->
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
-      <thead class="bg-muted/30 border-b border-border">
+      <thead class="uppercase bg-muted/30 border-b border-border">
         <tr class="text-left text-xs text-muted-foreground uppercase">
           <th class="px-4 py-3 w-10">
             <input type="checkbox" class="rounded" />

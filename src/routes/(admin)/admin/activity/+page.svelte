@@ -106,7 +106,7 @@
 
   <div class="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
     <table class="w-full">
-      <thead class="bg-muted/50 border-b border-border">
+      <thead class="uppercase bg-muted/50 border-b border-border">
         <tr>
           <th class="px-8 py-5 text-left text-[13px] font-bold text-foreground">Date/Time</th>
           <th class="px-8 py-5 text-left text-[13px] font-bold text-foreground">Type</th>

@@ -60,16 +60,16 @@
 </script>
 
 <div
-  class="flex flex-col justify-between items-start flex-none bg-card border border-border"
-  style="box-sizing: border-box; padding: 18px 12.2619px 23px; gap: 13.49px; width: 311.52px; height: 225.21px; border-radius: 9.80952px; flex-grow: 0;"
+  class="flex flex-col justify-between items-start w-full h-full bg-card border border-border"
+  style="box-sizing: border-box; padding: 18px 12.2619px 23px; gap: 13.49px; border-radius: 9.80952px;"
 >
   <div
-    class="flex flex-row items-start flex-none"
-    style="padding: 0px; gap: 11.04px; margin: 0 auto; width: 287px; height: 50px; flex-grow: 0;"
+    class="flex flex-row items-start w-full min-w-0"
+    style="padding: 0px; gap: 11.04px;"
   >
     <div
-      class="flex-none"
-      style="display: flex; flex-direction: row; justify-content: center; align-items: center; width: 55px; height: 55px; border-radius: 50%; background: {avatarColor}; flex: none; order: 0; flex-grow: 0;"
+      class="flex-none shrink-0"
+      style="display: flex; flex-direction: row; justify-content: center; align-items: center; width: 55px; height: 55px; border-radius: 50%; background: {avatarColor};"
     >
       {#if avatar}
         <img
@@ -85,30 +85,30 @@
     </div>
 
     <div
-      class="flex flex-row justify-between items-start flex-none"
-      style="padding: 0px; gap: 4.9px; width: 226.92px; height: 50px; flex-grow: 1;"
+      class="flex flex-row justify-between items-start flex-1 min-w-0"
+      style="padding: 0px; gap: 4.9px;"
     >
       <div
-        class="flex flex-col justify-center items-start flex-none"
-        style="padding: 0px; margin: 0 auto; width: 139px; height: 50px; flex-grow: 0;"
+        class="flex flex-col justify-center items-start flex-1 min-w-0"
+        style="padding: 0px;"
       >
         <div
-          class="flex-none text-foreground"
-          style="width: 139px; height: 30px; font-family: 'Nunito Sans'; font-style: normal; font-weight: 700; font-size: 23.2976px; line-height: 29px; display: flex; align-items: flex-end; flex: none; order: 0; flex-grow: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+          class="w-full min-w-0 text-foreground"
+          style="height: 30px; font-family: 'Nunito Sans'; font-style: normal; font-weight: 700; font-size: 23.2976px; line-height: 29px; display: flex; align-items: flex-end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
         >
           {name}
         </div>
 
         <div
-          class="flex flex-row items-center flex-none"
-          style="padding: 0px; gap: 4.9px; width: 144.62px; height: 20px; flex-grow: 0;"
+          class="flex flex-row items-center w-full min-w-0"
+          style="padding: 0px; gap: 4.9px; height: 20px;"
         >
-          <div class="flex-none" style="width: 14.71px; height: 14.71px;">
+          <div class="flex-none shrink-0" style="width: 14.71px; height: 14.71px;">
             <Icon iconName="icon/trending-up" size={14.71} style="color: {PRIMARY_BLUE};" />
           </div>
           <div
-            class="flex-none"
-            style="width: 125px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; color: {PRIMARY_BLUE}; display: flex; align-items: center; flex-grow: 0;"
+            class="flex-1 min-w-0"
+            style="height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; color: {PRIMARY_BLUE}; display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
           >
             {productsSold}+ {$_('productSold')}
           </div>
@@ -117,8 +117,8 @@
 
       <!-- Status badge -->
       <div
-        class="flex flex-col justify-center items-center flex-none {statusConfig[status].bgClass} {statusConfig[status].textClass}"
-        style="padding: 0px; margin: 0 auto; width: 67.44px; height: 20px; border-radius: 104029px; flex-grow: 0;"
+        class="flex flex-col justify-center items-center flex-none shrink-0 {statusConfig[status].bgClass} {statusConfig[status].textClass}"
+        style="padding: 0px; width: 67.44px; height: 20px; border-radius: 104029px;"
       >
         <div
           class="flex-none"
@@ -130,22 +130,22 @@
     </div>
   </div>
 
-  <div class="flex-none border-t border-border" style="margin: 0 auto; width: 287px;"></div>
+  <div class="w-full border-t border-border"></div>
 
   <div
-    class="flex flex-col items-start flex-none"
-    style="padding: 0px; gap: 22.07px; margin: 0 auto; width: 287px; height: 82.24px; flex-grow: 0;"
+    class="flex flex-col items-start w-full"
+    style="padding: 0px; gap: 22.07px;"
   >
     <div
-      class="flex flex-row items-center flex-none"
-      style="padding: 0px; gap: 4.9px; width: 287px; height: 20px; flex-grow: 0;"
+      class="flex flex-row items-center w-full min-w-0"
+      style="padding: 0px; gap: 4.9px; height: 20px;"
     >
-      <div class="flex-none flex items-center justify-center" style="width: 14.71px; height: 20px;">
+      <div class="flex-none shrink-0 flex items-center justify-center" style="width: 14.71px; height: 20px;">
         <Icon iconName="icon/map-pin" size={14.71} class="text-foreground" />
       </div>
       <div
-        class="flex-none flex items-center text-foreground"
-        style="max-width: 260px; height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; flex-grow: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+        class="flex-1 min-w-0 flex items-center text-foreground"
+        style="height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
       >
         {location}
       </div>
@@ -153,13 +153,13 @@
 
     <button
       type="button"
-      class="flex flex-row justify-center items-center flex-none"
-      style="box-sizing: border-box; padding: 8.58333px 14.7143px; gap: 9.81px; width: 287px; height: 40.17px; background: {PRIMARY_BLUE}; border: 1.22619px solid {PRIMARY_BLUE}; border-radius: 6.13095px; flex-grow: 0; align-self: stretch;"
+      class="flex flex-row justify-center items-center w-full flex-none"
+      style="box-sizing: border-box; padding: 8.58333px 14.7143px; gap: 9.81px; height: 40.17px; background: {PRIMARY_BLUE}; border: 1.22619px solid {PRIMARY_BLUE}; border-radius: 6.13095px;"
       onclick={onHire}
     >
       <span
         class="flex-none text-center"
-        style="height: 23px; font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: #FFFFFF; text-align: center; flex-grow: 0;"
+        style="height: 23px; font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: #FFFFFF; text-align: center;"
       >
         {$_('hire')}
       </span>

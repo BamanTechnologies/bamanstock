@@ -192,7 +192,7 @@ const creditStats = [
         </div>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-left text-[10px] uppercase text-muted-foreground"> 
+        <thead class="uppercase bg-gray-50 text-left text-[10px] text-muted-foreground"> 
           <tr>
             <th class="px-6 py-4 w-10"><input type="checkbox" /></th>
             <th class="px-4 py-4">Order ID ⇅</th>
@@ -303,7 +303,7 @@ const creditStats = [
         </div>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-left text-[10px] uppercase text-muted-foreground"> 
+        <thead class="uppercase bg-gray-50 text-left text-[10px] text-muted-foreground"> 
           <tr>
             <th class="px-6 py-4 w-10"><input type="checkbox" /></th>
             <th class="px-4 py-4">Product Name</th>
@@ -389,7 +389,7 @@ const creditStats = [
         </div>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-left text-[10px] uppercase text-muted-foreground"> 
+        <thead class="uppercase bg-gray-50 text-left text-[10px] text-muted-foreground"> 
           <tr>
             <th class="px-6 py-4 w-10"><input type="checkbox" /></th>
             <th class="px-4 py-4">Order ID ⇅</th>

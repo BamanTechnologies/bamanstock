@@ -323,7 +323,7 @@
 
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-muted/30 border-b border-border">
+          <thead class="uppercase bg-muted/30 border-b border-border">
             <tr class="text-left text-xs text-muted-foreground uppercase">
               <th class="px-4 py-3 w-10">
                 <input type="checkbox" class="rounded" />
@@ -331,7 +331,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("name")}
                 >
                   {$_('navStock')}
@@ -348,7 +348,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("type")}
                 >
                   {$_('category')}
@@ -365,7 +365,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("batch")}
                 >
                   {$_('batch')}
@@ -382,7 +382,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("branch")}
                 >
                   {$_('navLocation')}
@@ -399,7 +399,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("quantity")}
                 >
                   Qty
@@ -416,7 +416,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("created_at")}
                 >
                   {$_('received')}
@@ -433,7 +433,7 @@
               <th class="px-4 py-3 font-medium">
                 <button
                   type="button"
-                  class="flex items-center gap-1 hover:text-foreground transition-colors"
+                  class="flex items-center gap-1 hover:text-foreground transition-colors uppercase"
                   onclick={() => handleSort("expiry")}
                 >
                   Expiry
@@ -447,8 +447,8 @@
                   </span>
                 </button>
               </th>
-              <th class="px-4 py-3 font-medium">Attributes</th>
-              <th class="px-4 py-3 text-right font-medium">Actions</th>
+              <th class="px-4 py-3 font-medium uppercase">Attributes</th>
+              <th class="px-4 py-3 text-right font-medium uppercase">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border">

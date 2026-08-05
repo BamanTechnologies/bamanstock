@@ -979,10 +979,10 @@
 
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="bg-muted/30 border-b border-border">
+            <thead class="uppercase bg-muted/30 border-b border-border">
               <tr class="text-left text-xs text-muted-foreground uppercase">
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("product")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => stockHandleSort("product")}>
                     Product
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'product' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -991,7 +991,7 @@
                   </button>
                 </th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("category")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => stockHandleSort("category")}>
                     Category
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'category' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1001,7 +1001,7 @@
                 </th>
                 <th class="px-4 py-3 font-medium">Batch #</th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("quantity")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => stockHandleSort("quantity")}>
                     Qty
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'quantity' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1010,7 +1010,7 @@
                   </button>
                 </th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("price")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => stockHandleSort("price")}>
                     Unit Price
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'price' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1020,7 +1020,7 @@
                 </th>
                 <th class="px-4 py-3 font-medium">Branch</th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => stockHandleSort("created_at")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => stockHandleSort("created_at")}>
                     Date Added
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={stockSortColumn === 'created_at' && stockSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1144,10 +1144,10 @@
 
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="bg-muted/30 border-b border-border">
+            <thead class="uppercase bg-muted/30 border-b border-border">
               <tr class="text-left text-xs text-muted-foreground uppercase">
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => merchantHandleSort("name")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => merchantHandleSort("name")}>
                     Merchant
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={merchantSortColumn === 'name' && merchantSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1157,7 +1157,7 @@
                 </th>
                 <th class="px-4 py-3 font-medium">Phone</th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => merchantHandleSort("sales")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => merchantHandleSort("sales")}>
                     Sales
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={merchantSortColumn === 'sales' && merchantSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1166,7 +1166,7 @@
                   </button>
                 </th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => merchantHandleSort("outstanding")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => merchantHandleSort("outstanding")}>
                     Outstanding
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={merchantSortColumn === 'outstanding' && merchantSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1175,7 +1175,7 @@
                   </button>
                 </th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => merchantHandleSort("orders")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => merchantHandleSort("orders")}>
                     Orders
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={merchantSortColumn === 'orders' && merchantSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1332,11 +1332,11 @@
 
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead class="bg-muted/30 border-b border-border">
+            <thead class="uppercase bg-muted/30 border-b border-border">
               <tr class="text-left text-xs text-muted-foreground uppercase">
-                <th class="px-4 py-3 font-medium">Reference</th>
+                <th class="px-4 py-3 font-medium uppercase">Reference</th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("movement_type")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => smHandleSort("movement_type")}>
                     Type
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'movement_type' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1345,7 +1345,7 @@
                   </button>
                 </th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("product")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => smHandleSort("product")}>
                     Product
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'product' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1355,7 +1355,7 @@
                 </th>
                 <th class="px-4 py-3 font-medium">Batch #</th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("branch")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => smHandleSort("branch")}>
                     Location
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'branch' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1365,7 +1365,7 @@
                 </th>
                 <th class="px-4 py-3 font-medium">Merchant</th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("quantity")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => smHandleSort("quantity")}>
                     Qty
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'quantity' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
@@ -1374,7 +1374,7 @@
                   </button>
                 </th>
                 <th class="px-4 py-3 font-medium">
-                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => smHandleSort("created_at")}>
+                  <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => smHandleSort("created_at")}>
                     Date
                     <span class="flex flex-col ml-0.5">
                       <Icon iconName="icon/chevron-up" size={10} class={smSortColumn === 'created_at' && smSortDirection === 'asc' ? 'text-info -mb-0.5' : 'text-muted-foreground/50 -mb-0.5'} />
