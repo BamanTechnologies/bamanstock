@@ -271,7 +271,7 @@
           />
         </div>
         <div class="flex gap-2 ml-auto flex-wrap items-center">
-          <div class="w-44">
+          <div class="w-full sm:w-44">
             <SearchSelect
               query={PRODUCT_QUERY}
               dataKey="products"
@@ -281,7 +281,7 @@
               onSelect={(item) => { productFilterId = item?.id ?? ""; currentPage = 1; }}
             />
           </div>
-          <div class="w-44">
+          <div class="w-full sm:w-44">
             <SearchSelect
               query={COMPANY_QUERY}
               dataKey="companies"
@@ -291,7 +291,7 @@
               onSelect={(item) => { companyFilterId = item?.id ?? ""; currentPage = 1; }}
             />
           </div>
-          <div class="w-44">
+          <div class="w-full sm:w-44">
             <SearchSelect
               query={LOCATION_QUERY}
               dataKey="branches"
@@ -301,7 +301,7 @@
               onSelect={(item) => { branchFilterId = item?.id ?? ""; currentPage = 1; }}
             />
           </div>
-          <div class="w-32">
+          <div class="w-full sm:w-32">
             <select
               class="w-full px-3 py-2 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none"
               onchange={(e) => { statusFilter = e.currentTarget.value; currentPage = 1; }}
@@ -535,7 +535,7 @@
         </table>
       </div>
 
-      <div class="p-4 border-t border-border flex items-center justify-between">
+      <div class="p-4 border-t border-border flex flex-col sm:flex-row gap-2 items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-sm text-muted-foreground">Row Per Page</span>
           <select

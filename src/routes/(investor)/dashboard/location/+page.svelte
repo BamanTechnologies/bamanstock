@@ -482,7 +482,7 @@
         </table>
       </div>
 
-      <div class="p-4 border-t border-border flex items-center justify-between">
+      <div class="p-4 border-t border-border flex flex-col gap-2 sm:flex-row items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-sm text-muted-foreground">Row Per Page</span>
           <select

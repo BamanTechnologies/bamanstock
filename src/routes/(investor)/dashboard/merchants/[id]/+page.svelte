@@ -607,18 +607,18 @@
   <!-- Back Navigation -->
   <button
     onclick={handleBack}
-    class="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+    class="flex items-center gap-2 text-xs sm:text-base text-muted-foreground hover:text-foreground transition-colors"
   >
     <Icon iconName="icon/arrow-left" size={20} />
     <span>Back to Merchants</span>
   </button>
 
   <!-- Merchant Profile Card -->
-  <div class="bg-card border border-border rounded-lg p-6">
-    <div class="flex items-center justify-between">
+  <div class="bg-card border border-border rounded-lg p-3 sm:p-6">
+    <div class="flex flex-col sm:flex-row gap-y-2 sm:items-center sm:justify-between">
       <div class="flex items-center gap-4">
         <div
-          class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold shrink-0"
+          class="w-12 sm:w-16 h-12 sm:h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold shrink-0"
           style="background-color: {avatarColor(merchantDetail?.first_name ?? 'M')}"
         >
           {merchantDetail ? initials(merchantDetail.first_name, merchantDetail.last_name) : 'M'}
@@ -628,11 +628,11 @@
             <div class="h-6 w-48 bg-muted rounded animate-pulse mb-2" />
             <div class="h-4 w-32 bg-muted/60 rounded animate-pulse" />
           {:else if merchantDetail}
-            <h2 class="text-2xl font-semibold text-foreground">
+            <h2 class="text-sm sm:text-2xl font-semibold text-foreground">
               {merchantDetail.first_name} {merchantDetail.last_name}
             </h2>
             <div class="flex items-center gap-4 mt-1">
-              <span class="text-sm text-muted-foreground">
+              <span class="text-xs sm:text-sm text-muted-foreground">
                 {formatBranch(merchantDetail.branch?.name)}
               </span>
               <span
@@ -643,20 +643,20 @@
               </span>
             </div>
           {:else}
-            <h2 class="text-2xl font-semibold text-foreground">Merchant</h2>
+            <h2 class="text-sm sm:text-2xl font-semibold text-foreground">Merchant</h2>
           {/if}
         </div>
       </div>
       <div class="flex items-center gap-3">
         <Button
           variant="outline"
-          class="border-info text-info"
+          class="border-info text-xs sm:text-base text-info"
           onclick={() => (isEditLocationModalOpen = true)}
         >
           Edit Location
         </Button>
         <Button
-          class="bg-[var(--primary-blue)] text-white hover:opacity-90"
+          class="bg-[var(--primary-blue)] text-white text-xs sm:text-base hover:opacity-90"
           onclick={() => (isAssignStockModalOpen = true)}
         >
           Assign Stock
@@ -667,11 +667,11 @@
 
   <!-- Tabs -->
   <div class="border-b border-border">
-    <div class="flex gap-6">
+    <div class="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar">
       {#each tabs as tab}
         <button
           onclick={() => (activeTab = tab)}
-          class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab
+          class="pb-2 sm:pb-4 px-1 text-xs sm:text-base border-b-2 transition-colors {activeTab === tab
             ? 'border-info text-info font-medium'
             : 'border-transparent text-muted-foreground hover:text-foreground'}"
         >
@@ -696,8 +696,8 @@
           {/each}
         {:else}
           {#each overviewKpiCards as kpi}
-            <div class="bg-card border border-border rounded-lg p-6">
-              <div class="flex items-center justify-between mb-4">
+            <div class="bg-card border border-border rounded-lg p-3 sm:p-6">
+              <div class="flex items-center justify-between mb-2 sm:mb-4">
                 <span class="text-sm text-muted-foreground">{kpi.label}</span>
                 <div
                   class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center"
@@ -705,7 +705,7 @@
                   <Icon iconName={kpi.icon} size={20} class="text-foreground" />
                 </div>
               </div>
-              <p class="text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
+              <p class="text-xl sm:text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
             </div>
           {/each}
         {/if}
@@ -717,16 +717,16 @@
         <div class="bg-card border border-border rounded-lg p-6">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="text-lg font-semibold text-foreground mb-1">
+              <h3 class="text-xs sm:text-lg font-semibold text-foreground mb-1">
                 Revenue Over Time
               </h3>
-              <p class="text-2xl font-bold text-foreground">{fmtCurrency(totalSales)}</p>
+              <p class="text-sm sm:text-2xl font-bold text-foreground">{fmtCurrency(totalSales)}</p>
               {#if chartYear}
                 <p class="text-sm text-muted-foreground">Year {chartYear}</p>
               {/if}
             </div>
             <select
-              class="px-3 py-1.5 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-0 focus:border-border"
+              class="px-3 py-1.5 text-xs sm:text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-0 focus:border-border"
               bind:value={chartYear}
             >
               {#each yearOptions as year}
@@ -754,7 +754,7 @@
 
         <!-- Merchant Information -->
         <div class="bg-card border border-border rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-foreground mb-6">
+          <h3 class="text-xs sm:text-lg font-semibold text-foreground mb-6">
             Merchant Information
           </h3>
           {#if detailLoading}
@@ -769,24 +769,24 @@
           {:else if merchantDetail}
             <div class="space-y-4">
               <div>
-                <p class="text-sm text-muted-foreground mb-1">Contact Phone</p>
-                <p class="text-sm text-foreground">{merchantDetail.phone_number ?? "-"}</p>
+                <p class="text-xs sm:text-sm text-muted-foreground mb-1">Contact Phone</p>
+                <p class="text-xs sm:text-sm text-foreground">{merchantDetail.phone_number ?? "-"}</p>
               </div>
               <div>
-                <p class="text-sm text-muted-foreground mb-1">Address</p>
-                <p class="text-sm text-foreground">{merchantDetail.address ?? "-"}</p>
+                <p class="text-xs sm:text-sm text-muted-foreground mb-1">Address</p>
+                <p class="text-xs sm:text-sm text-foreground">{merchantDetail.address ?? "-"}</p>
               </div>
               <div>
-                <p class="text-sm text-muted-foreground mb-1">Location</p>
-                <p class="text-sm text-foreground">{formatBranch(merchantDetail.branch?.name)}</p>
+                <p class="text-xs sm:text-sm text-muted-foreground mb-1">Location</p>
+                <p class="text-xs sm:text-sm text-foreground">{formatBranch(merchantDetail.branch?.name)}</p>
               </div>
               <div>
-                <p class="text-sm text-muted-foreground mb-1">Company</p>
-                <p class="text-sm text-foreground">{merchantDetail.branch?.company?.name ?? "-"}</p>
+                <p class="text-xs sm:text-sm text-muted-foreground mb-1">Company</p>
+                <p class="text-xs sm:text-sm text-foreground">{merchantDetail.branch?.company?.name ?? "-"}</p>
               </div>
               <div>
-                <p class="text-sm text-muted-foreground mb-1">Joined</p>
-                <p class="text-sm text-foreground">
+                <p class="text-xs sm:text-sm text-muted-foreground mb-1">Joined</p>
+                <p class="text-xs sm:text-sm text-foreground">
                   {merchantDetail.created_at ? new Date(merchantDetail.created_at).toLocaleDateString() : "-"}
                 </p>
               </div>
@@ -920,9 +920,9 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2  sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
               bind:value={stockRowsPerPage}
@@ -933,7 +933,7 @@
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span class="text-sm text-muted-foreground">Entries</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Entries</span>
           </div>
           <div class="flex items-center gap-1">
             <button
@@ -1103,9 +1103,9 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2 sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
               bind:value={smRowsPerPage}
@@ -1116,7 +1116,7 @@
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span class="text-sm text-muted-foreground">Entries</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Entries</span>
           </div>
           <div class="flex items-center gap-1">
             <button
@@ -1248,9 +1248,9 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2  sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
               bind:value={rptRowsPerPage}
@@ -1261,7 +1261,7 @@
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span class="text-sm text-muted-foreground">Entries</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Entries</span>
           </div>
           <div class="flex items-center gap-1">
             <button
