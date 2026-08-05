@@ -19,7 +19,7 @@
     <Icon iconName={icon as any} size={32} color={iconColor} />
   </div>
   <div class="flex flex-col gap-0.5">
-    <span class="text-sm text-muted-foreground">{label}</span>
-    <p class="text-2xl font-bold text-foreground">{value}</p>
+    <span class="text-xs sm:text-sm text-muted-foreground">{label}</span>
+    <p class="text-sm sm:text-2xl font-bold text-foreground">{value}</p>
   </div>
 </div>

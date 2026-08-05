@@ -707,7 +707,7 @@
   <!-- Back Navigation -->
   <button
     onclick={handleBack}
-    class="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+    class="flex items-center text-xs sm:text-base gap-2 text-muted-foreground hover:text-foreground transition-colors"
   >
     <Icon iconName="icon/arrow-left" size={20} />
     <span>Back to Location</span>
@@ -715,23 +715,23 @@
 
   <!-- Location Profile Card -->
   <div class="bg-card border border-border rounded-lg p-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>
         {#if detailLoading}
           <div class="h-6 w-48 bg-muted rounded animate-pulse mb-2" />
           <div class="h-4 w-32 bg-muted/60 rounded animate-pulse" />
         {:else}
-          <h2 class="text-2xl font-semibold text-foreground mb-2">
+          <h2 class="text-sm sm:text-2xl font-semibold text-foreground mb-2">
             {formatLocationName(detailData?.branches_by_pk?.name)}
           </h2>
           <div class="flex items-center gap-2 mb-2">
-            <p class="text-sm text-muted-foreground">{detailData?.branches_by_pk?.address ?? "-"}</p>
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-600">
+            <p class="text-xs sm:text-sm text-muted-foreground">{detailData?.branches_by_pk?.address ?? "-"}</p>
+            <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-green-600">
               <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
               Active
             </span>
           </div>
-          <p class="text-xs text-muted-foreground">
+          <p class="text-xs sm:text-sm text-muted-foreground">
             Company: {detailData?.branches_by_pk?.company?.name ?? "-"}
           </p>
         {/if}
@@ -739,13 +739,13 @@
       <div class="flex items-center gap-3">
         <Button
           variant="outline"
-          class="border-[#4DA0E6] text-[#4DA0E6] hover:bg-[#4DA0E6]/10"
+          class="border-[#4DA0E6] text-[#4DA0E6] text-xs sm:text-base hover:bg-[#4DA0E6]/10"
           onclick={() => (isDeleteLocationModalOpen = true)}
         >
           Close Location
         </Button>
         <Button
-          class="bg-[#4DA0E6] text-white hover:bg-[#4DA0E6]/90"
+          class="bg-[#4DA0E6] text-white text-xs sm:text-base hover:bg-[#4DA0E6]/90"
           onclick={() => (isEditLocationModalOpen = true)}
         >
           Edit Location
@@ -756,11 +756,11 @@
 
   <!-- Tabs -->
   <div class="border-b border-border">
-    <div class="flex gap-6">
+    <div class="flex gap-3 sm:gap-6  overflow-x-auto no-scrollbar">
       {#each tabs as tab}
         <button
           onclick={() => switchTab(tab)}
-          class="pb-4 px-1 border-b-2 transition-colors {activeTab === tab
+          class="pb-2 sm:pb-4 px-1 text-xs sm:text-base border-b-2 transition-colors {activeTab === tab
             ? 'border-info text-info font-medium'
             : 'border-transparent text-muted-foreground hover:text-foreground'}"
         >
@@ -785,14 +785,14 @@
           {/each}
         {:else}
           {#each overviewKpiCards as kpi}
-            <div class="bg-card border border-border rounded-lg p-6">
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm text-muted-foreground">{kpi.label}</span>
+            <div class="bg-card border border-border rounded-lg p-3 sm:p-6">
+              <div class="flex items-center justify-between mb-2 sm:mb-4">
+                <span class="text-xs sm:text-sm text-muted-foreground">{kpi.label}</span>
                 <div class="{kpi.iconColor} w-10 h-10 rounded-lg flex items-center justify-center">
                   <Icon iconName={kpi.icon} size={20} class="text-foreground" />
                 </div>
               </div>
-              <p class="text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
+              <p class="text-xl sm:text-2xl font-bold text-foreground mb-1">{kpi.value}</p>
             </div>
           {/each}
         {/if}
@@ -801,13 +801,13 @@
       <!-- Charts Section -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Revenue Over Time Chart -->
-        <div class="bg-card border border-border rounded-lg p-6">
+        <div class="bg-card border border-border rounded-lg p-3 sm:p-6">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="text-lg font-semibold text-foreground mb-1">Revenue Over Time</h3>
-              <p class="text-2xl font-bold text-foreground">{fmtCurrency(totalSales)}</p>
+              <h3 class="text-xs sm:text-lg font-semibold text-foreground mb-1">Revenue Over Time</h3>
+              <p class="text-lg sm:text-2xl font-bold text-foreground">{fmtCurrency(totalSales)}</p>
               {#if chartYear}
-                <p class="text-sm text-muted-foreground">Year {chartYear}</p>
+                <p class="text-xs sm:text-sm text-muted-foreground">Year {chartYear}</p>
               {/if}
             </div>
             <select
@@ -838,8 +838,8 @@
         </div>
 
         <!-- Stock Distribution -->
-        <div class="bg-card border border-border rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-foreground mb-6">Stock Distribution</h3>
+        <div class="bg-card border border-border rounded-lg p-3 sm:p-6">
+          <h3 class="text-xs sm:text-lg font-semibold text-foreground mb-2 sm:mb-6">Stock Distribution</h3>
           {#if categoryProportion.length > 0}
             <div use:donutChartAction class="w-full" />
           {:else}
@@ -851,8 +851,8 @@
       </div>
 
       <!-- Low Stock Alert Section -->
-      <div class="bg-card border border-border rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-foreground mb-6">Low Stock Alert</h3>
+      <div class="bg-card border border-border rounded-lg p-3 sm:p-6">
+        <h3 class="text-xs sm:text-lg font-semibold text-foreground mb-3 sm:mb-6">Low Stock Alert</h3>
         {#if lowStockLoading}
           <div class="space-y-4">
             {#each [1,2,3] as _}
@@ -1066,9 +1066,9 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2  sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
               bind:value={stockRowsPerPage}
@@ -1079,7 +1079,7 @@
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span class="text-sm text-muted-foreground">Entries</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Entries</span>
           </div>
           <div class="flex items-center gap-1">
             <button
@@ -1233,9 +1233,9 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2  sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
               bind:value={merchantRowsPerPage}
@@ -1246,7 +1246,7 @@
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span class="text-sm text-muted-foreground">Entries</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Entries</span>
           </div>
           <div class="flex items-center gap-1">
             <button
@@ -1420,9 +1420,9 @@
           </table>
         </div>
 
-        <div class="p-4 border-t border-border flex items-center justify-between">
+        <div class="p-4 border-t border-border flex flex-col gap-2 sm:flex-row items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-sm text-muted-foreground">Row Per Page</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Row Per Page</span>
             <select
               class="px-2 py-1 border border-border rounded bg-background text-foreground text-sm"
               bind:value={smRowsPerPage}
@@ -1433,7 +1433,7 @@
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span class="text-sm text-muted-foreground">Entries</span>
+            <span class="text-xs sm:text-sm text-muted-foreground">Entries</span>
           </div>
           <div class="flex items-center gap-1">
             <button
