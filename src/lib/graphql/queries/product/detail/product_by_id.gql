@@ -13,6 +13,8 @@ query getProductById($id: uuid!) {
     qr_code
     barcode
     attributes
+    company_id
+    created_by
   }
   total_orders: orders_aggregate(
     where: { stock: { product_id: { _eq: $id } } }

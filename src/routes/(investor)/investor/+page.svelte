@@ -228,7 +228,7 @@
           <Icon iconName="icon/plus" size={13} class="text-white flex-none" />
           <span
             class="flex-none text-center"
-            style="font-family: 'Nunito Sans', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF;"
+            style="font-family: 'Raleway', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF;"
           >
             {$_('inviteMerchant')}
           </span>

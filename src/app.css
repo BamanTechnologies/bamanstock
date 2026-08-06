@@ -149,11 +149,11 @@
   h4,
   h5,
   h6 {
-    font-family: "Sora", sans-serif;
+    font-family: "Raleway", sans-serif;
   }
   /* Subtitles - paragraphs with larger text sizes */
   p.text-xl,
   p.text-2xl {
-    font-family: "Sora", sans-serif;
+    font-family: "Raleway", sans-serif;
   }
 }

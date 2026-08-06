@@ -7,6 +7,7 @@
     title?: string;
     icon?: string;
     message?: string;
+    error?: string | null;
     confirmText?: string;
     cancelText?: string;
     loading?: boolean;
@@ -19,6 +20,7 @@
     title = "Confirm",
     icon = "icon/alert-triangle" as any,
     message = "Are you sure you want to proceed?",
+    error = null,
     confirmText = "Confirm",
     cancelText = "Cancel",
     loading = false,
@@ -80,6 +82,12 @@
       </div>
 
       <div class="p-6 flex flex-col items-center text-center gap-4">
+        {#if error}
+          <div class="w-full p-3 rounded-md bg-destructive/10 border border-destructive/20 flex items-start gap-2 text-left">
+            <Icon iconName="icon/alert-circle" size={16} class="text-destructive shrink-0 mt-0.5" />
+            <p class="text-sm text-destructive break-words">{error}</p>
+          </div>
+        {/if}
         {#if icon}
           <div class="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
             <Icon iconName={icon as any} size={28} class="text-destructive" />

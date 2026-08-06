@@ -3,7 +3,7 @@ import { cn } from "$lib/utils.js";
 /** Shared Tailwind classes for merchant app pages (Figma light dashboard). */
 export const mc = {
 	pageHeader: "mb-6 flex flex-wrap items-start justify-between gap-4",
-	pageTitle: "font-[Sora] text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50",
+	pageTitle: "text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50",
 	pageSubtitle: "mt-1 text-sm text-gray-500 dark:text-gray-400",
 	primaryBtn:
 		"inline-flex h-[30px] shrink-0 items-center justify-center rounded-[5px] border border-[#3d8fd4] bg-[#4DA0E6] px-4 text-sm font-semibold leading-none text-white transition hover:bg-[#3d8fd4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4DA0E6] disabled:opacity-50",

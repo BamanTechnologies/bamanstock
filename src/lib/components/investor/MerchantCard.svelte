@@ -78,7 +78,7 @@
           style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;"
         />
       {:else}
-        <span style="font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 16px; color: #FFFFFF;">
+        <span style="font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 16px; color: #FFFFFF;">
           {initials}
         </span>
       {/if}
@@ -94,7 +94,7 @@
       >
         <div
           class="w-full min-w-0 text-foreground"
-          style="height: 30px; font-family: 'Nunito Sans'; font-style: normal; font-weight: 700; font-size: 23.2976px; line-height: 29px; display: flex; align-items: flex-end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+          style="height: 30px; font-family: 'Raleway'; font-style: normal; font-weight: 700; font-size: 23.2976px; line-height: 29px; display: flex; align-items: flex-end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
         >
           {name}
         </div>

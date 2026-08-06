@@ -1,11 +1,15 @@
 <script lang="ts">
+  import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
+  import CreateProductModal from "$lib/components/investor/CreateProductModal.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { getAuthClient } from "$graphql/client.ts";
   import PRODUCTS_LIST_QUERY from "$graphql/queries/product/products_list.gql";
   import PRODUCT_TYPE_QUERY from "$graphql/queries/selector/product_category.gql";
+  import DELETE_PRODUCT from "$graphql/mutation/product/delete.gql";
   import { _ } from "svelte-i18n";
 
   let searchQuery = $state($page.url.searchParams.get("search") ?? "");
@@ -22,6 +26,14 @@
   let loading = $state(true);
   let fetchError = $state<string | null>(null);
   let productTypes = $state<Array<{ id: string; name: string }>>([]);
+  let refetchTrigger = $state(0);
+
+  let isCreateModalOpen = $state(false);
+  let editingProductId = $state("");
+  let isDeleteModalOpen = $state(false);
+  let deletingProduct = $state<any>(null);
+  let deleteLoading = $state(false);
+  let deleteError = $state<string | null>(null);
 
   let debouncedSearch = $state($page.url.searchParams.get("search") ?? "");
   let debounceTimer: ReturnType<typeof setTimeout>;
@@ -87,6 +99,7 @@
     void rowsPerPage;
     void sortColumn;
     void sortDirection;
+    void refetchTrigger;
 
     loading = true;
     fetchError = null;
@@ -148,8 +161,49 @@
     currentPage = page;
   }
 
+  function handleCreateSuccess() {
+    refetchTrigger++;
+  }
+
+  function handleDeleteClick(product: any) {
+    deletingProduct = product;
+    deleteError = null;
+    isDeleteModalOpen = true;
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deletingProduct) return;
+    deleteLoading = true;
+    deleteError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: DELETE_PRODUCT,
+        variables: { id: deletingProduct.id },
+      });
+      isDeleteModalOpen = false;
+      deletingProduct = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      deleteError = err.message ?? "An unexpected error occurred";
+    } finally {
+      deleteLoading = false;
+    }
+  }
+
+  function handleDeleteCancel() {
+    isDeleteModalOpen = false;
+    deletingProduct = null;
+    deleteError = null;
+  }
+
+  function handleView(product: any) {
+    goto(`/dashboard/products/${product.id}`);
+  }
+
   function handleEdit(product: any) {
-    console.log("Edit product:", product);
+    editingProductId = product.id;
+    isCreateModalOpen = true;
   }
 
   function handleDelete(product: any) {
@@ -180,6 +234,19 @@
 </script>
 
 <div class="flex-1 p-6 space-y-6">
+  <div class="flex items-center justify-end">
+    <Button
+      class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
+      onclick={() => {
+        editingProductId = "";
+        isCreateModalOpen = true;
+      }}
+    >
+      <Icon iconName="icon/plus" size={16} class="mr-2" />
+      Add Product
+    </Button>
+  </div>
+
   {#if fetchError}
     <div class="flex flex-col items-center justify-center py-16 bg-card border border-border rounded-lg">
       <Icon iconName="icon/alert-circle" size={48} class="text-destructive mb-4" />
@@ -318,9 +385,9 @@
               </tr>
             {:else}
               {#each products as product}
-                <tr class="hover:bg-muted/20 transition-colors">
+                <tr class="hover:bg-muted/20 transition-colors cursor-pointer" onclick={() => handleView(product)}>
                   <td class="px-4 py-4">
-                    <input type="checkbox" class="rounded" />
+                    <input type="checkbox" class="rounded" onclick={(e) => e.stopPropagation()} />
                   </td>
                   <td class="px-4 py-4 text-foreground">
                     <div class="flex items-center gap-3">
@@ -365,14 +432,21 @@
                   </td>
                   <td class="px-4 py-4 text-right">
                     <button
-                      onclick={() => handleEdit(product)}
+                      onclick={(e) => { e.stopPropagation(); handleView(product); }}
+                      class="p-1.5 rounded hover:bg-muted transition-colors"
+                      aria-label={$_('view')}
+                    >
+                      <Icon iconName="icon/eye" size={16} class="text-muted-foreground hover:text-foreground" />
+                    </button>
+                    <button
+                      onclick={(e) => { e.stopPropagation(); handleEdit(product); }}
                       class="p-1.5 rounded hover:bg-muted transition-colors"
                       aria-label={$_('edit')}
                     >
                       <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
                     </button>
                     <button
-                      onclick={() => handleDelete(product)}
+                      onclick={(e) => { e.stopPropagation(); handleDeleteClick(product); }}
                       class="p-1.5 rounded hover:bg-muted transition-colors"
                       aria-label={$_('delete')}
                     >
@@ -438,6 +512,23 @@
     </div>
   {/if}
 </div>
+
+<CreateProductModal
+  bind:isOpen={isCreateModalOpen}
+  productId={editingProductId}
+  onSuccess={handleCreateSuccess}
+/>
+
+<ConfirmModal
+  bind:isOpen={isDeleteModalOpen}
+  title="Delete Product"
+  message={deletingProduct ? `Are you sure you want to delete <strong>${deletingProduct.name}</strong>? This action cannot be undone.` : ""}
+  error={deleteError}
+  confirmText="Delete Product"
+  loading={deleteLoading}
+  onConfirm={handleDeleteConfirm}
+  onClose={handleDeleteCancel}
+/>
 
 <style>
   :global(.loading-slide) {
