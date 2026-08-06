@@ -1,0 +1,49 @@
+query getProductById($id: uuid!) {
+  products_by_pk(id: $id) {
+    id
+    name
+    product_type {
+      id
+      name
+    }
+    default_unit
+    is_active
+    current_available_stock
+    treshold_quantity
+    qr_code
+    barcode
+    attributes
+  }
+  total_orders: orders_aggregate(
+    where: { stock: { product_id: { _eq: $id } } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  total_product_sales: orders_aggregate(
+    where: { stock: { product_id: { _eq: $id } } }
+  ) {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  total_product_sales_outstanding: orders_aggregate(
+    where: { stock: { product_id: { _eq: $id } } }
+  ) {
+    aggregate {
+      sum {
+        outstanding_amount
+      }
+    }
+  }
+  total_transfers: stock_movements_aggregate(
+    where: { product_id: { _eq: $id } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
