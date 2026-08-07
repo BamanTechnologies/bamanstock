@@ -14,6 +14,7 @@
     status: "active" | "declined" | "invited";
     productsSold: number;
     location: string;
+    total_investors: number;
     onHire?: () => void;
   }
 
@@ -23,6 +24,7 @@
     status,
     productsSold,
     location,
+    total_investors,
     onHire,
   }: MerchantCardProps = $props();
 
@@ -98,6 +100,15 @@
         >
           {name}
         </div>
+         <!--  if total_investors_count > 0 we will show a badge -->
+        {#if total_investors > 0}
+          <div
+            class="flex items-center text-xs bg-blue-200 font-bold text-blue-500 px-2 py-0.5 rounded-full shrink-0"
+          >
+          <Icon iconName="icon/users" size={11} class="mr-1" />
+              {total_investors} {$_('investors')}
+          </div>
+        {/if}
 
         <div
           class="flex flex-row items-center w-full min-w-0"
@@ -108,11 +119,12 @@
           </div>
           <div
             class="flex-1 min-w-0"
-            style="height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 12.2619px; line-height: 20px; color: {PRIMARY_BLUE}; display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+            style="height: 20px; font-family: 'Raleway', sans-serif; font-weight: 400; font-size: 11.2619px; line-height: 20px; color: {PRIMARY_BLUE}; display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
           >
             {productsSold}+ {$_('productSold')}
           </div>
         </div>
+       
       </div>
 
       <!-- Status badge -->

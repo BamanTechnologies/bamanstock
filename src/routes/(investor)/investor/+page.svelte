@@ -301,6 +301,7 @@
             status="active"
             productsSold={m.orders_aggregate?.aggregate?.count ?? 0}
             location={m.address || m.branch?.name || ""}
+            total_investors={m.total_investors || 0}
             onHire={() => handleHire(m.id)}
           />
         {/each}
