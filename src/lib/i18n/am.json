@@ -78,6 +78,18 @@
   "system": "ስርዓት",
   "settingsLanguage": "ቋንቋ",
   "notificationsLabel": "ማሳወቂያዎች",
+  "telegramNotification": "የቴሌግራም ማሳወቂያ",
+  "telegramConnected": "ተገናኝቷል",
+  "connect": "አገናኝ",
+  "reconnect": "እንደገና አገናኝ",
+  "telegramConnectConfirmTitle": "ቴሌግራም አገናኝ",
+  "telegramConnectConfirmMessage": "የቴሌግራም መለያዎን ማገናኘት ይፈልጋሉ?",
+  "telegramConnectSuccess": "የቴሌግራም ግንኙነት በተሳካ ሁኔታ ተጀምሯል! ቴሌግራም ለመክፈት ከታች ይጫኑ።",
+  "goToTelegram": "ወደ ቴሌግራም ሂድ",
+  "disconnect": "አላቅ",
+  "telegramDisconnectConfirmTitle": "የቴሌግራም ግንኙነት አቋርጥ",
+  "telegramDisconnectConfirmMessage": "የቴሌግራም መለያዎን ማላቀቅ ይፈልጋሉ?",
+  "telegramDisconnectSuccess": "የቴሌግራም መለያ በተሳካ ሁኔታ ተላቋል።",
   "security": "ደህንነት",
   "password": "የሚስጥር ቁጥር",
   "changePassword": "ምስጥር ቁጥር ቀይር",
@@ -191,5 +203,6 @@
   "passwordChangedSuccessfully": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
   "failedToChangePassword": "የይለፍ ቃል መቀየር አልተቻለም",
   "oldPasswordPlaceholder": "የአሁኑን የይለፍ ቃልዎን ያስገቡ",
-  "newPasswordPlaceholder": "አዲስ የይለፍ ቃልዎን ያስገቡ"
+  "newPasswordPlaceholder": "አዲስ የይለፍ ቃልዎን ያስገቡ",
+  "reload": "አድስ"
 }

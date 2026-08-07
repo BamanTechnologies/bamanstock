@@ -78,6 +78,18 @@
   "system": "System",
   "settingsLanguage": "Language",
   "notificationsLabel": "Notifications",
+  "telegramNotification": "Telegram Notification",
+  "telegramConnected": "Connected",
+  "connect": "Connect",
+  "reconnect": "Re-connect",
+  "telegramConnectConfirmTitle": "Connect Telegram",
+  "telegramConnectConfirmMessage": "Are you sure you want to connect your Telegram account?",
+  "telegramConnectSuccess": "Telegram connection initialized successfully! Click below to open Telegram.",
+  "goToTelegram": "Go to Telegram",
+  "disconnect": "Disconnect",
+  "telegramDisconnectConfirmTitle": "Disconnect Telegram",
+  "telegramDisconnectConfirmMessage": "Are you sure you want to disconnect your Telegram account?",
+  "telegramDisconnectSuccess": "Telegram account disconnected successfully.",
   "security": "Security",
   "password": "Password",
   "changePassword": "Change Password",
@@ -195,5 +207,6 @@
   "newPasswordPlaceholder": "Enter your new password",
   "actions": "Actions",
   "view": "View",
-  "topCustomers": "Top Customers"
+  "topCustomers": "Top Customers",
+  "reload": "Reload"
 }

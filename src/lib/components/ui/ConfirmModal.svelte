@@ -13,6 +13,8 @@
     loading?: boolean;
     onConfirm?: () => void;
     onClose?: () => void;
+    propsClass?: string;
+    propsIconClass?: string;
   }
 
   let {
@@ -26,6 +28,8 @@
     loading = false,
     onConfirm,
     onClose,
+    propsClass = "",
+    propsIconClass = "",
   }: ConfirmModalProps = $props();
 
   function handleClose() {
@@ -89,7 +93,9 @@
           </div>
         {/if}
         {#if icon}
-          <div class="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+          <div 
+          class={`w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center ${propsIconClass}`}
+          >
             <Icon iconName={icon as any} size={28} class="text-destructive" />
           </div>
         {/if}
@@ -110,7 +116,7 @@
         <Button
           onclick={handleConfirm}
           disabled={loading}
-          class="bg-red-600 text-white hover:bg-red-700 min-w-[100px]"
+          class={`bg-red-600 text-white hover:bg-red-700 min-w-[100px] ${propsClass}`}
         >
           {#if loading}
             <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">

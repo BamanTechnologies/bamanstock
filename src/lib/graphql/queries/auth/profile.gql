@@ -6,6 +6,9 @@ query getProfile($id: uuid!) {
     email
     phone
     profile_picture
+    telegram_chat_id
+    telegram_user_name
+    connect_telegram_url
     investors {
       id
       first_name

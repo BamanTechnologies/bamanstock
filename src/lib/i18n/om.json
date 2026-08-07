@@ -78,6 +78,18 @@
   "system": "Sirna",
   "settingsLanguage": "Afaan",
   "notificationsLabel": "Beeksisalee",
+  "telegramNotification": "Beeksisa Telegram",
+  "telegramConnected": "Hundeeffameera",
+  "connect": "Hundeesi",
+  "reconnect": "Deebi'ii Hundeesi",
+  "telegramConnectConfirmTitle": "Telegram Hundeesi",
+  "telegramConnectConfirmMessage": "Herrega Telegram keessan qabsiisuu ni barbaadduu?",
+  "telegramConnectSuccess": "Qunnamtiin Telegram milkiin jalqabameera! Telegram banuuf as tuqi.",
+  "goToTelegram": "Gara Telegram Deemi",
+  "disconnect": "Addaan Kuti",
+  "telegramDisconnectConfirmTitle": "Telegram Addaan Kuti",
+  "telegramDisconnectConfirmMessage": "Herrega Telegram keessan addaan kutuu ni barbaadduu?",
+  "telegramDisconnectSuccess": "Herregni Telegram milkiin addaan citeera.",
   "security": "Nageenyaa",
   "password": "Jecha Darbii",
   "changePassword": "Jecha Darbii Jijjiiri",
@@ -191,5 +203,6 @@
   "passwordChangedSuccessfully": "Jecha darbii teessuu garaa",
   "failedToChangePassword": "Jecha darbii teessuu hin dandeenye",
   "oldPasswordPlaceholder": "Enter your current password",
-  "newPasswordPlaceholder": "Enter your new password"
+  "newPasswordPlaceholder": "Enter your new password",
+  "reload": "haaromsuu"
 }
