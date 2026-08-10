@@ -17,8 +17,11 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
   import { themeStore } from "$lib/stores/theme.svelte.js";
+  import { ensurePushNotifications } from "$lib/notification/push-notification.js";
 
   let { children } = $props();
+
+  ensurePushNotifications();
 
   $effect(() => { themeStore.init(); });
 

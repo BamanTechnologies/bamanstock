@@ -16,10 +16,13 @@
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
   import { authStore } from "$lib/stores/auth.svelte.js";
   import { useProfile } from "$lib/stores/profile.svelte.js";
+  import { ensurePushNotifications } from "$lib/notification/push-notification.js";
 
   const profile = useProfile();
 
   let { children } = $props();
+
+  ensurePushNotifications();
 
   let showProfileDropdown = $state(false);
   let showNotifications = $state(false);
