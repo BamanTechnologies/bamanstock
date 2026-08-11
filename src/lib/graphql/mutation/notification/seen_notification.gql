@@ -1,0 +1,8 @@
+mutation SeenNotifications($ids: [uuid!]) {
+  update_dispatch_user_notifications(
+    where: { id: { _in: $ids } }
+    _set: { is_seen: true }
+  ) {
+    affected_rows
+  }
+}

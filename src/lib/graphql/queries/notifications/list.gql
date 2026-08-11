@@ -1,0 +1,27 @@
+query getNotifications(
+  $limit: Int
+  $offset: Int
+  $filter: dispatch_user_notifications_bool_exp
+) {
+  notifications: dispatch_user_notifications(
+    where: $filter
+    limit: $limit
+    offset: $offset
+    order_by: [{ created_at: desc_nulls_last }]
+  ) {
+    id
+    type
+    message
+    payload
+    is_seen
+    is_grouped
+    group_id
+    created_at
+    updated_at
+  }
+  total: dispatch_user_notifications_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

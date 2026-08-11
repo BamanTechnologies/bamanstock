@@ -1,0 +1,9 @@
+query unseenNotifications {
+  count: dispatch_user_notifications_aggregate(
+    where: { is_seen: { _eq: false } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
