@@ -1,0 +1,40 @@
+query productOrders(
+  $filter: orders_bool_exp
+  $limit: Int
+  $offset: Int
+  $orderBy: [orders_order_by!]
+) {
+  orders(where: $filter, limit: $limit, offset: $offset, order_by: $orderBy) {
+    id
+    status
+    total_amount
+    outstanding_amount
+    unit
+    customer {
+      id
+      first_name
+      last_name
+      phone_number
+    }
+    merchant {
+      id
+      first_name
+      last_name
+      phone_number
+    }
+    stock {
+      id
+      order_item_batches {
+        id
+        line_total
+        quantity
+        unit_price
+      }
+    }
+  }
+  total: orders_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

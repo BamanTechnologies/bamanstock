@@ -1,0 +1,8 @@
+mutation seenAll {
+  seen_all: update_dispatch_user_notifications(
+    where: { is_seen: { _eq: false } }
+    _set: { is_seen: true }
+  ) {
+    affected_rows
+  }
+}

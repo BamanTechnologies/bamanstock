@@ -7,6 +7,7 @@
   import { useProfile } from "$lib/stores/profile.svelte.js";
   import { _, locale } from "svelte-i18n";
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
+  import NotificationBell from "$lib/components/notification/NotificationBell.svelte";
 
   const profile = useProfile();
 
@@ -67,13 +68,7 @@
           {/if}
         </div>
         {#if authStore.isAuthenticated}
-          <button
-            type="button"
-            class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
-            aria-label="Notifications"
-          >
-            <Icon iconName="icon/bell" size={20} class="text-muted-foreground" />
-          </button>
+          <NotificationBell />
 
           <div class="relative">
             <button

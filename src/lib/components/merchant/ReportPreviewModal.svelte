@@ -81,7 +81,7 @@
           <div class="space-y-3">
             <p class="text-[10px] font-bold text-gray-400 uppercase">Table Detail View</p>
             <table class="w-full text-xs">
-              <thead class="bg-gray-50 border-y">
+              <thead class="uppercase bg-gray-50 border-y">
                 <tr>
                   <th class="text-left px-4 py-3 font-bold uppercase text-gray-500">Product</th>
                   <th class="text-left px-4 py-3 font-bold uppercase text-gray-500">Customer</th>

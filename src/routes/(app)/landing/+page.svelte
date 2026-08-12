@@ -227,7 +227,7 @@
             <div style="width: 305px; height: 204px;">
               <div
                 class="font-bold text-muted-foreground/20 select-none pointer-events-none"
-                style="font-family: 'Sora', sans-serif; font-size: 100px; line-height: 1;"
+                style="font-family: 'Raleway', sans-serif; font-size: 100px; line-height: 1;"
               >
                 01
               </div>
@@ -246,7 +246,7 @@
             <div style="width: 305px; height: 204px; margin-left: auto;">
               <div
                 class="font-bold text-muted-foreground/20 select-none pointer-events-none"
-                style="font-family: 'Sora', sans-serif; font-size: 100px; line-height: 1;"
+                style="font-family: 'Raleway', sans-serif; font-size: 100px; line-height: 1;"
               >
                 02
               </div>
@@ -265,7 +265,7 @@
             <div style="width: 305px; height: 204px;">
               <div
                 class="font-bold text-muted-foreground/20 select-none pointer-events-none"
-                style="font-family: 'Sora', sans-serif; font-size: 100px; line-height: 1;"
+                style="font-family: 'Raleway', sans-serif; font-size: 100px; line-height: 1;"
               >
                 03
               </div>

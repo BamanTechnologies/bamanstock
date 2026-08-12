@@ -195,14 +195,14 @@
   <main class="container mx-auto px-5 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
       <h1
-        class="flex-none text-foreground"
-        style="width: 507px; max-width: 100%; height: 38px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 29px; line-height: 38px; flex: none; order: 0; flex-grow: 0;"
+        class="w-full text-foreground"
+        style="font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 29px; line-height: 34px;"
       >
         {$_('pageTitle')}
       </h1>
       <p
-        class="flex-none mt-2 text-muted-foreground"
-        style="width: 528px; max-width: 100%; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px; flex: none; order: 1; flex-grow: 0;"
+        class="mt-2 max-w-full text-muted-foreground"
+        style="font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 13px; line-height: 18px;"
       >
         {$_('pageSubtitle')}
       </p>
@@ -222,13 +222,13 @@
         <button
           type="button"
           onclick={handleInvite}
-          class="flex flex-row justify-center items-center flex-none sm:ml-auto"
-          style="padding: 7px 20px; gap: 4px; width: 148px; height: 38px; border-radius: 5px; flex-grow: 0; background: var(--primary-blue);"
+          class="flex flex-row justify-center items-center w-full sm:w-[148px] flex-none sm:ml-auto"
+          style="padding: 7px 20px; gap: 4px; height: 38px; border-radius: 5px; flex-grow: 0; background: var(--primary-blue);"
         >
           <Icon iconName="icon/plus" size={13} class="text-white flex-none" />
           <span
             class="flex-none text-center"
-            style="font-family: 'Nunito Sans', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF;"
+            style="font-family: 'Raleway', sans-serif; font-weight: 500; font-size: 13px; line-height: 20px; color: #FFFFFF;"
           >
             {$_('inviteMerchant')}
           </span>
@@ -252,13 +252,13 @@
       </div>
     {:else if loading}
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-10"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch mb-10"
         style="row-gap: 41px; column-gap: 36.79px;"
       >
         {#each Array(7) as _}
           <div
             class="flex flex-col bg-card border border-border animate-pulse rounded-[9.8px]"
-            style="width: 311.52px; height: 225.21px; padding: 18px 12.26px 23px;"
+            style="padding: 18px 12.26px 23px;"
           >
             <div class="flex items-start gap-3">
               <div class="size-14 rounded-full bg-muted dark:bg-muted/50 shrink-0" />
@@ -275,7 +275,6 @@
         {/each}
         <div
           class="flex flex-col bg-card border border-border animate-pulse rounded-[9.8px]"
-          style="width: 311.52px; height: 225.21px; align-self: stretch;"
         >
           <div class="flex flex-col items-center justify-center h-full gap-3 px-6">
             <div class="size-14 rounded-full bg-muted dark:bg-muted/50" />
@@ -293,7 +292,7 @@
       />
     {:else}
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-10"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch mb-10"
         style="row-gap: 41px; column-gap: 36.79px;"
       >
         {#each merchants as m}
@@ -302,6 +301,7 @@
             status="active"
             productsSold={m.orders_aggregate?.aggregate?.count ?? 0}
             location={m.address || m.branch?.name || ""}
+            total_investors={m.total_investors || 0}
             onHire={() => handleHire(m.id)}
           />
         {/each}

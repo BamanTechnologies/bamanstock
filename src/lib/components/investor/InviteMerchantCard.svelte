@@ -12,54 +12,44 @@
 </script>
 
 <div
-  class="relative flex-none bg-card border border-border"
-  style="box-sizing: border-box; width: 311.52px; height: 225.21px; border-radius: 9.80952px; flex-grow: 0; align-self: stretch;"
+  class="flex flex-col items-center w-full h-full bg-card border border-border"
+  style="box-sizing: border-box; padding: 18px 22.26px 23px; gap: 11px; border-radius: 9.80952px;"
 >
   <div
-    class="flex flex-col items-center flex-none"
-    style="position: absolute; padding: 0px; gap: 11px; width: 267px; height: 110.24px; left: 22.26px; top: 18px; flex-grow: 0;"
+    class="flex flex-row justify-center items-center flex-none shrink-0"
+    style="width: 55.24px; height: 55.24px; background: rgba(77, 160, 230, 0.08); border-radius: 104029px;"
+  >
+    <Icon iconName="icon/user-plus" size={27} style="color: {PRIMARY_BLUE};" />
+  </div>
+
+  <div
+    class="flex flex-col items-center w-full"
+    style="padding: 0px; gap: 4px;"
   >
     <div
-      class="flex flex-row justify-center items-center flex-none relative"
-      style="width: 55.24px; height: 55.24px; background: rgba(77, 160, 230, 0.08); border-radius: 104029px; flex-grow: 0;"
+      class="w-full text-center text-foreground"
+      style="font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 19px; line-height: 24px;"
     >
-      <div
-        class="flex-none"
-        style="position: absolute; width: 27px; height: 27px; left: 16.96px; top: 14.19px;"
-      >
-        <Icon iconName="icon/user-plus" size={27} style="color: {PRIMARY_BLUE};" />
-      </div>
+      Invite New Merchant
     </div>
 
     <div
-      class="flex flex-col items-center flex-none"
-      style="padding: 0px; gap: 4px; width: 267px; height: 44px; flex-grow: 0; align-self: stretch;"
+      class="w-full text-center text-muted-foreground"
+      style="font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 12px; line-height: 16px;"
     >
-      <div
-        class="flex-none text-foreground"
-        style="width: 188px; height: 24px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 19px; line-height: 24px; flex-grow: 0;"
-      >
-        Invite New Merchant
-      </div>
-
-      <div
-        class="flex-none text-muted-foreground"
-        style="width: 267px; height: 16px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 12px; line-height: 16px; flex: none; order: 1; flex-grow: 0;"
-      >
-        Know a merchant who isn't on Baman Stock yet?
-      </div>
+      Know a merchant who isn't on Baman Stock yet?
     </div>
   </div>
 
   <button
     type="button"
-    class="flex flex-row justify-center items-center flex-none"
-    style="box-sizing: border-box; position: absolute; padding: 8.58333px 14.7143px; gap: 9.81px; width: 287.52px; height: 40.17px; left: 12px; top: 162px; background: rgba(77, 160, 230, 0.2); border: 1.22619px solid {PRIMARY_BLUE}; border-radius: 6.13095px; flex-grow: 0;"
+    class="flex flex-row justify-center items-center w-full mt-auto"
+    style="box-sizing: border-box; padding: 8.58333px 14.7143px; gap: 9.81px; height: 40.17px; background: rgba(77, 160, 230, 0.2); border: 1.22619px solid {PRIMARY_BLUE}; border-radius: 6.13095px;"
     onclick={onInvite}
   >
     <span
       class="flex-none text-center"
-      style="width: 43px; height: 23px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: {PRIMARY_BLUE}; text-align: center; flex-grow: 0;"
+      style="height: 23px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 700; font-size: 15.9405px; line-height: 22px; color: {PRIMARY_BLUE}; text-align: center;"
     >
       Invite
     </span>

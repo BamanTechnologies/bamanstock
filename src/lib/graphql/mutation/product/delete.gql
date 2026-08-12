@@ -1,0 +1,5 @@
+mutation deleteProduct($id: uuid!) {
+  delete_products(where: { id: { _eq: $id } }) {
+    affected_rows
+  }
+}

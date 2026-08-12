@@ -153,7 +153,7 @@
 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
-      <thead>
+      <thead class="uppercase">
         <tr class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/80 border-b border-slate-100">
           <th class="px-6 py-4 font-medium">Customer Name</th>
           <th class="px-6 py-4 font-medium">Amount</th>

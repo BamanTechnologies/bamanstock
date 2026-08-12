@@ -109,7 +109,7 @@
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="bg-muted">
+        <thead class="uppercase bg-muted">
           <tr class="text-left text-xs text-muted-foreground border-b border-border">
             <th class="px-6 py-2 w-10 text-center"><input type="checkbox" class="rounded border-border" /></th>
             <th class="px-4 py-2 font-medium uppercase tracking-wider">Order ID <Icon iconName="icon/chevron-down" size={10} class="inline ml-1" /></th>

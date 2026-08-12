@@ -10,6 +10,7 @@ query getLandingMerchants(
     last_name
     address
     phone_number
+    total_investors
     branch: branchByBranch {
       id
       name

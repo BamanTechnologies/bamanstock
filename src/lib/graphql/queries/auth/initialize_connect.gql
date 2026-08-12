@@ -1,0 +1,7 @@
+mutation startConnectToTelegram {
+  connect_initialization(media: "telegram") {
+    connect_link
+    message
+    status_code
+  }
+}

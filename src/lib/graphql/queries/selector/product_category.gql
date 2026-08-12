@@ -1,5 +1,10 @@
 query getCategory($limit: Int, $offset: Int, $filter: product_types_bool_exp) {
-  product_types(limit: $limit, offset: $offset, where: $filter) {
+  product_types(
+    limit: $limit
+    offset: $offset
+    where: $filter
+    distinct_on: name
+  ) {
     id
     name
   }

@@ -16,13 +16,16 @@
   import { setLocale, localeAbbr } from "$lib/i18n/index.js";
   import { authStore } from "$lib/stores/auth.svelte.js";
   import { useProfile } from "$lib/stores/profile.svelte.js";
+  import { ensurePushNotifications } from "$lib/notification/push-notification.js";
+  import NotificationBell from "$lib/components/notification/NotificationBell.svelte";
 
   const profile = useProfile();
 
   let { children } = $props();
 
+  ensurePushNotifications();
+
   let showProfileDropdown = $state(false);
-  let showNotifications = $state(false);
   let showLanguageDropdown = $state(false);
 
   const langOptions = [
@@ -42,6 +45,7 @@
     if (path.includes("/dashboard/merchants/")) return $_('pageMerchantDetails');
     if (path.startsWith("/dashboard/merchants")) return $_('pageMerchants');
     if (path.includes("/location")) return $_('pageLocations');
+    if (path.startsWith("/dashboard/products")) return $_('pageProducts');
     if (path.includes("/stock")) return $_('pageStock');
     if (path.includes("/report")) return $_('pageReports');
     if (path.includes("/setting")) return $_('pageSettings');
@@ -54,6 +58,7 @@
     { title: $_('navDashboard'), icon: "icon/layout-grid", href: "/dashboard" },
     { title: $_('navMerchants'), icon: "icon/users",        href: "/dashboard/merchants" },
     { title: $_('navLocation'),  icon: "icon/map-pin",      href: "/dashboard/location" },
+    { title: $_('navProducts'),  icon: "icon/shopping-bag",      href: "/dashboard/products" },
     { title: $_('navStock'),     icon: "icon/box",           href: "/dashboard/stock" },
     { title: $_('navReport'),    icon: "icon/bar-chart",     href: "/dashboard/reports" },
     { title: $_('navSettings'),  icon: "icon/settings",      href: "/dashboard/setting" },
@@ -65,7 +70,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Raleway:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
 </svelte:head>
@@ -122,7 +127,7 @@
             <button
               type="button"
               class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
-              onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; showNotifications = false; }}
+              onclick={() => { showLanguageDropdown = !showLanguageDropdown; showProfileDropdown = false; }}
               aria-label="Switch language"
             >
               <Icon iconName="icon/globe" size={20} class="text-gray-500 dark:text-gray-400" />
@@ -164,26 +169,7 @@
 
           <div class="flex items-center gap-4">
             <!-- Notifications -->
-            <div class="relative">
-              <button
-                type="button"
-                onclick={() => (showNotifications = !showNotifications)}
-                class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-              >
-                <Icon iconName="icon/bell" size={20} />
-              </button>
-              {#if showNotifications}
-                <div class="absolute right-0 top-full mt-2 w-80 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden">
-                  <div class="px-4 py-3 border-b border-border">
-                    <p class="text-sm font-semibold text-foreground">{$_('notificationsTitle')}</p>
-                  </div>
-                  <div class="px-4 py-8 flex flex-col items-center gap-2 text-center">
-                    <Icon iconName="icon/bell" size={32} class="text-muted-foreground/40" />
-                    <p class="text-sm text-muted-foreground">{$_('noNotificationsMsg')}</p>
-                  </div>
-                </div>
-              {/if}
-            </div>
+            <NotificationBell />
 
             <div class="relative">
               <button
