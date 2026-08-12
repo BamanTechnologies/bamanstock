@@ -1,0 +1,13 @@
+mutation UpsertDeviceToken($object: dispatch_device_tokens_insert_input!) {
+  insert_dispatch_device_tokens_one(
+    object: $object
+    on_conflict: {
+      constraint: device_tokens_user_id_device_token_key
+      update_columns: [device_token]
+    }
+  ) {
+    id
+    source
+    device_token
+  }
+}

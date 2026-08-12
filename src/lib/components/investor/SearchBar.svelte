@@ -14,35 +14,30 @@
 </script>
 
 <div
-  class="flex flex-col justify-center items-start flex-none"
-  style="width: 484px; max-width: 100%; height: 42px; padding: 0px; flex-grow: 0;"
+  class="flex flex-col justify-center items-start w-full flex-none"
+  style="max-width: 484px; flex-grow: 0;"
 >
   <div
-    class="flex flex-row items-center flex-none w-full"
-    style="padding: 0px; gap: 17px; height: 42px; border: 1px solid #E0E0E0; border-radius: 12px; flex-grow: 0;"
+    class="flex flex-row items-center flex-none w-full min-w-0"
+    style="padding: 0px; gap: 17px; height: 42px; border: 1px solid #E0E0E0; border-radius: 12px; flex-grow: 0; box-sizing: border-box;"
   >
     <div
-      class="flex flex-row justify-center items-center flex-none"
-      style="padding: 0px 0px 0px 16px; width: 32px; height: 42px; border-radius: 12px 0px 0px 12px; flex: none; order: 0; align-self: stretch; flex-grow: 0;"
+      class="flex flex-none items-center justify-center shrink-0 self-stretch"
+      style="padding: 0px 0px 0px 16px; width: 32px;"
     >
-      <div
-        class="flex-none flex items-center justify-center"
-        style="width: 16px; height: 16px; flex: none; order: 0; flex-grow: 0;"
-      >
-        <Icon iconName="icon/search" size={16} style="color: #757575;" />
-      </div>
+      <Icon iconName="icon/search" size={16} style="color: #757575;" />
     </div>
 
     <div
-      class="flex flex-col justify-center items-start flex-none"
-      style="padding: 0px; width: 402px; max-width: 100%; height: 42px; flex: none; order: 1; flex-grow: 0;"
+      class="flex flex-col justify-center items-start flex-1 min-w-0"
+      style="padding: 0px 16px 0px 0px;"
     >
       <input
         type="text"
         bind:value
         {placeholder}
-        class="w-full border-0 outline-none bg-transparent focus:outline-none"
-        style="width: 373px; max-width: 100%; height: 20px; font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 15px; line-height: 20px; color: #757575; display: flex; align-items: center; flex: none; order: 0; flex-grow: 0;"
+        class="w-full min-w-0 border-0 outline-none bg-transparent focus:outline-none"
+        style="font-family: 'Raleway', sans-serif; font-style: normal; font-weight: 400; font-size: 15px; line-height: 20px; color: #757575;"
       />
     </div>
   </div>

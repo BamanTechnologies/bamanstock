@@ -612,7 +612,7 @@
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-muted/30 border-b border-border">
+          <thead class="uppercase bg-muted/30 border-b border-border">
             <tr class="text-left text-xs text-muted-foreground sm:uppercase">
               <th class="px-3 py-2 font-medium">{$_('merchant')}</th>
               <th class="px-3 py-2 font-medium text-right">{$_('revenue')}</th>

@@ -15,7 +15,7 @@ function extractUserIdFromToken(): string | null {
   }
 }
 
-function extractRoleFromToken(): string {
+export function extractRoleFromToken(): string {
   if (!browser) return 'user';
   const token = localStorage.getItem('auth_token');
   if (!token) return 'user';
@@ -34,6 +34,9 @@ export type ProfileData = {
   email: string;
   phone: string;
   profile_picture: string;
+  telegram_chat_id?: string | null;
+  telegram_user_name?: string | null;
+  connect_telegram_url?: string | null;
   investors?: {
     id: string;
     first_name: string;
@@ -57,6 +60,10 @@ export type ProfileResult = {
   email: string;
   phone: string;
   investorId: string | null;
+  telegramChatId: string | null;
+  telegramUserName: string | null;
+  connectTelegramUrl: string | null;
+  refetch: () => Promise<void>;
 };
 
 export function useProfile(): ProfileResult {
@@ -116,5 +123,16 @@ export function useProfile(): ProfileResult {
     get investorId() {
       return data?.investors?.[0]?.id ?? null;
     },
+    get telegramChatId() {
+      return data?.telegram_chat_id ?? null;
+    },
+    get telegramUserName() {
+      return data?.telegram_user_name ?? null;
+    },
+    get connectTelegramUrl() {
+      return data?.connect_telegram_url ?? null;
+    },
+    refetch: fetchProfile,
   };
 }
+

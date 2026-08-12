@@ -14,7 +14,7 @@
 
 <select
   bind:value
-  class="text-sm border border-border rounded-lg px-3 py-2 bg-transparent text-foreground focus:outline-none cursor-pointer min-w-30"
+  class="text-sm border border-border rounded-lg px-3 py-2 bg-transparent text-foreground focus:outline-none cursor-pointer min-w-30 w-full sm:w-auto"
 >
   <option value="">{label}</option>
   {#each options.filter(o => o.value !== "") as option}

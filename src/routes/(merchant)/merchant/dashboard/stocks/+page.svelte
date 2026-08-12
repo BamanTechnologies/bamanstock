@@ -94,7 +94,7 @@
 
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="bg-muted/30 border-y border-border">
+        <thead class="uppercase bg-muted/30 border-y border-border">
           <tr class="text-left text-xs text-muted-foreground">
             <th class="px-6 py-4"><input type="checkbox" /></th>
             <th class="px-4 py-4 uppercase">Stock Item</th>

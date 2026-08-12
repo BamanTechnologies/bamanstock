@@ -17,8 +17,11 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
+  import { ensurePushNotifications } from "$lib/notification/push-notification.js";
 
   let { children } = $props();
+
+  ensurePushNotifications();
 
   let profileDropdownOpen = $state(false);
   let profileDropdownRef = $state<HTMLDivElement | undefined>(undefined);

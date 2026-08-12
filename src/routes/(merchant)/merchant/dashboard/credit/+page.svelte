@@ -144,7 +144,7 @@
 
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="bg-muted/30">
+        <thead class="uppercase bg-muted/30">
           <tr class="text-left text-xs text-muted-foreground border-b border-border">
             <th class="px-6 py-4 w-10 text-center"><input type="checkbox" class="rounded border-border" /></th>
             <th class="px-4 py-4 font-medium uppercase">Order ID <Icon iconName="icon/chevron-down" size={10} class="inline" /></th>

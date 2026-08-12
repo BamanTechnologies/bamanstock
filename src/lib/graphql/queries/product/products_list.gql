@@ -1,0 +1,24 @@
+query getProducts(
+  $filter: products_bool_exp
+  $limit: Int
+  $offset: Int
+  $orderBy: [products_order_by!]
+) {
+  products(where: $filter, limit: $limit, offset: $offset, order_by: $orderBy) {
+    id
+    name
+    product_type {
+      id
+      name
+    }
+    default_unit
+    is_active
+    current_available_stock
+    treshold_quantity
+  }
+  total: products_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}
