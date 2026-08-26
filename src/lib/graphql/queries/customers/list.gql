@@ -1,0 +1,37 @@
+query getCustomers(
+  $limit: Int
+  $offset: Int
+  $filter: customers_bool_exp
+  $order: [customers_order_by!]!
+) {
+  customers(where: $filter, offset: $offset, limit: $limit, order_by: $order) {
+    id
+    first_name
+    last_name
+    phone_number
+    address
+    created_at
+    total_orders: orders_aggregate {
+      aggregate {
+        count
+      }
+    }
+    total_unpayed_or_partially_Payed_orders: orders_aggregate(
+      where: {
+        _or: [
+          { status: { _eq: "unpaid" } }
+          { status: { _eq: "partially_paid" } }
+        ]
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+  }
+  total: customers_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

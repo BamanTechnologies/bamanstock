@@ -1,0 +1,9 @@
+mutation sendCustomerSms($ids: [String!]!, $message: String!) {
+  send_customer_sms(customer_ids: $ids, message: $message, is_reminder: false) {
+    error
+    failure_count
+    message
+    status_code
+    success_count
+  }
+}

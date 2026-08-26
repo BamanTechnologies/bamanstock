@@ -1,0 +1,40 @@
+query getCustomerDetail($id: uuid!) {
+  customers_by_pk(id: $id) {
+    id
+    first_name
+    last_name
+    address
+    phone_number
+    total_orders: orders_aggregate {
+      aggregate {
+        count
+      }
+    }
+    total_order_payments: orders_aggregate {
+      aggregate {
+        sum {
+          total_amount
+        }
+      }
+    }
+    total_outstanding: orders_aggregate {
+      aggregate {
+        sum {
+          outstanding_amount
+        }
+      }
+    }
+    total_unpayed_or_partially_Payed_orders: orders_aggregate(
+      where: {
+        _or: [
+          { status: { _eq: "unpaid" } }
+          { status: { _eq: "partially_paid" } }
+        ]
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+  }
+}

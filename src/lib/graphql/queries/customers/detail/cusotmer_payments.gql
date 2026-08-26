@@ -1,0 +1,40 @@
+query CustomerDetailPayments($customerId: uuid!, $offset: Int, $limit: Int) {
+  payment(
+    where: { order: { customer_id: { _eq: $customerId } } }
+    offset: $offset
+    limit: $limit
+    order_by: { created_at: desc }
+  ) {
+    id
+    amount
+    created_at
+    order_id
+    payment_method
+    merchant {
+      id
+      first_name
+      last_name
+    }
+  }
+  payments_count: payment_aggregate(
+    where: { order: { customer_id: { _eq: $customerId } } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  payments_received_aggregate: payment_aggregate(
+    where: {
+      _and: [
+        { order: { customer_id: { _eq: $customerId } } }
+        { payment_method: { _neq: "Customer balance" } }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+}
