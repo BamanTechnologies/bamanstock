@@ -9,6 +9,8 @@
   import PRODUCT_STOCKS_QUERY from "$graphql/queries/product/detail/product_stocks.gql";
   import PRODUCT_ORDERS_QUERY from "$graphql/queries/product/detail/product_orders.gql";
   import PRODUCT_STOCK_MOVEMENTS_QUERY from "$graphql/queries/product/detail/product_stock_movements.gql";
+  import WAIGHT_LISTS_QUERY from "$graphql/queries/product/detail/waight_lists.gql";
+  import WaightListsTab from "$lib/components/investor/WaightListsTab.svelte";
   import {
     formatProductTypeLabel,
     buildProductLabel,
@@ -17,7 +19,7 @@
   const productId = $derived($page.params.id);
 
   let activeTab = $state($page.url.searchParams.get("tab") ?? "Overview");
-  const tabs = ["Overview", "Stock", "Orders", "Stock Movement"];
+  const tabs = ["Overview", "Stock", "Orders", "Stock Movement", "Waight Lists"];
 
   function switchTab(tab: string) {
     activeTab = tab;
@@ -1268,6 +1270,8 @@
         </div>
       </div>
     </div>
+  {:else if activeTab === "Waight Lists"}
+    <WaightListsTab query={WAIGHT_LISTS_QUERY} productId={productId} />
   {/if}
 </div>
 

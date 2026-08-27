@@ -8,12 +8,14 @@
   import CUSTOMER_DETAIL_QUERY from "$graphql/queries/customers/detail/detail.gql";
   import CUSTOMER_ORDERS_QUERY from "$graphql/queries/customers/detail/customer_orders.gql";
   import CUSTOMER_PAYMENTS_QUERY from "$graphql/queries/customers/detail/cusotmer_payments.gql";
+  import WAIGHT_LISTS_QUERY from "$graphql/queries/customers/detail/waight_lists.gql";
+  import WaightListsTab from "$lib/components/investor/WaightListsTab.svelte";
   import { _ } from "svelte-i18n";
 
   const customerId = $derived($page.params.id ?? "");
 
   let activeTab = $state("Orders");
-  const tabs = ["Orders", "Payments"];
+  const tabs = ["Orders", "Payments", "Waight Lists"];
 
   let isSmsModalOpen = $state(false);
   let detailRefetchTrigger = $state(0);
@@ -545,6 +547,8 @@
         </div>
       </div>
     </div>
+  {:else if activeTab === "Waight Lists"}
+    <WaightListsTab query={WAIGHT_LISTS_QUERY} customerId={customerId} />
   {/if}
 </div>
 
