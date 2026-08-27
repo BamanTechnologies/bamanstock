@@ -90,8 +90,8 @@
           { customer: { last_name: { _ilike: `%${wlDebouncedSearch}%` } } },
           { customer: { phone_number: { _ilike: `%${wlDebouncedSearch}%` } } },
           { product: { name: { _ilike: `%${wlDebouncedSearch}%` } } },
-          { product: { product_type: { name: { _ilike: `%${wlDebouncedSearch}%` } } } },
-          { status: { _ilike: `%${wlDebouncedSearch}%` } },
+          // { product: { product_type: { name: { _ilike: `%${wlDebouncedSearch}%` } } } },
+          // { status: { _ilike: `%${wlDebouncedSearch}%` } },
         ],
       });
     }
