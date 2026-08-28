@@ -1,5 +1,13 @@
-mutation sendCustomerSms($ids: [String!]!, $message: String!) {
-  send_customer_sms(customer_ids: $ids, message: $message, is_reminder: false) {
+mutation sendCustomerSms(
+  $ids: [String!]!
+  $message: String
+  $isWaightListReminder: Boolean!
+) {
+  send_customer_sms(
+    ids: $ids
+    message: $message
+    is_waightlist_reminder: $isWaightListReminder
+  ) {
     error
     failure_count
     message

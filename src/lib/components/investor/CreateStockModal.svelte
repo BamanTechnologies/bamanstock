@@ -14,7 +14,7 @@
   interface CreateStockModalProps {
     isOpen?: boolean;
     onClose?: () => void;
-    onSuccess?: () => void;
+    onSuccess?: (productId: string) => void;
   }
 
   let {
@@ -182,7 +182,7 @@
         variables: { object },
       });
 
-      onSuccess?.();
+      onSuccess?.(productId);
       handleClose();
     } catch (err: any) {
       error = err.message ?? "An unexpected error occurred";

@@ -3,6 +3,7 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
   import CreateStockModal from "$lib/components/investor/CreateStockModal.svelte";
+  import WaightListReminderModal from "$lib/components/investor/WaightListReminderModal.svelte";
   import UpdateStockModal from "$lib/components/investor/UpdateStockModal.svelte";
   import DeleteStockConfirmModal from "$lib/components/investor/DeleteStockConfirmModal.svelte";
   import { goto } from "$app/navigation";
@@ -16,6 +17,8 @@
   import LOCATION_QUERY from "$graphql/queries/selector/location.gql";
 
   let isCreateStockModalOpen = $state(false);
+  let isReminderModalOpen = $state(false);
+  let reminderProductId = $state("");
   let isUpdateStockModalOpen = $state(false);
   let stockItemToEdit = $state<any>(null);
   let isDeleteStockModalOpen = $state(false);
@@ -589,7 +592,16 @@
 
   <CreateStockModal
     bind:isOpen={isCreateStockModalOpen}
-    onSuccess={handleRefetch}
+    onSuccess={(productId) => {
+      refetchTrigger++;
+      reminderProductId = productId;
+      isReminderModalOpen = true;
+    }}
+  />
+
+  <WaightListReminderModal
+    bind:isOpen={isReminderModalOpen}
+    productId={reminderProductId}
   />
 
   <UpdateStockModal

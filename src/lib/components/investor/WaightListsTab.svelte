@@ -4,6 +4,8 @@
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
   import { getAuthClient } from "$graphql/client.js";
+  import { toast } from "svelte-sonner";
+  import SEND_SMS from "$graphql/mutation/customers/send_sms.gql";
   import WaightListModal from "$lib/components/investor/WaightListModal.svelte";
   import WaightListDeleteConfirmModal from "$lib/components/investor/WaightListDeleteConfirmModal.svelte";
   import type { DocumentNode } from "@apollo/client";
@@ -28,7 +30,7 @@
   const showCustomerColumn = $derived(!customerId);
 
   const columnCount = $derived(
-    5 + (showProductColumn ? 1 : 0) + (showCustomerColumn ? 1 : 0)
+    6 + (showProductColumn ? 1 : 0) + (showCustomerColumn ? 1 : 0)
   );
 
   // ===================== State =====================
@@ -65,6 +67,57 @@
   let isEditModalOpen = $state(false);
   let deletingItem = $state<any>(null);
   let isDeleteModalOpen = $state(false);
+
+  let selectedIds = $state<string[]>([]);
+  let isReminderConfirmOpen = $state(false);
+  let reminderSending = $state(false);
+  let reminderError = $state<string | null>(null);
+
+  const selectableRows = $derived(wlData.filter((r) => r.allow_for_reminder));
+  const allSelectableSelected = $derived(
+    selectableRows.length > 0 &&
+      selectableRows.every((r) => selectedIds.includes(r.id))
+  );
+
+  function toggleSelect(id: string, checked: boolean) {
+    if (checked) {
+      if (!selectedIds.includes(id)) selectedIds = [...selectedIds, id];
+    } else {
+      selectedIds = selectedIds.filter((sid) => sid !== id);
+    }
+  }
+
+  function toggleSelectAll(checked: boolean) {
+    if (checked) {
+      selectedIds = [
+        ...new Set([...selectedIds, ...selectableRows.map((r) => r.id)]),
+      ];
+    } else {
+      const selectableIdSet = new Set(selectableRows.map((r) => r.id));
+      selectedIds = selectedIds.filter((sid) => !selectableIdSet.has(sid));
+    }
+  }
+
+  async function confirmSendReminder() {
+    if (selectedIds.length === 0) return;
+    reminderSending = true;
+    reminderError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: SEND_SMS,
+        variables: { ids: selectedIds, isWaightListReminder: true },
+      });
+      toast.success("Reminder SMS sent successfully");
+      selectedIds = [];
+      isReminderConfirmOpen = false;
+      wlRefetchTrigger++;
+    } catch (err: any) {
+      reminderError = err.message ?? "Failed to send reminder SMS";
+    } finally {
+      reminderSending = false;
+    }
+  }
 
   $effect(() => {
     clearTimeout(wlDebounceTimer);
@@ -255,6 +308,15 @@
             <option value={option.value}>{option.label}</option>
           {/each}
         </select>
+        {#if selectedIds.length > 0}
+          <Button
+            class="bg-green-600 text-white text-xs sm:text-base hover:bg-green-700"
+            onclick={() => (isReminderConfirmOpen = true)}
+          >
+            <Icon iconName="icon/send" size={16} class="mr-2" />
+            Send SMS Reminder ({selectedIds.length})
+          </Button>
+        {/if}
         <Button
           class="bg-[var(--primary-blue)] text-white text-xs sm:text-base hover:opacity-90"
           onclick={() => (isAddModalOpen = true)}
@@ -275,6 +337,15 @@
       <table class="w-full text-sm">
         <thead class="uppercase bg-muted/30 border-b border-border">
           <tr class="text-left text-xs text-muted-foreground uppercase">
+            <th class="px-4 py-3 w-10">
+              <input
+                type="checkbox"
+                class="accent-[#4DA0E6] w-4 h-4 cursor-pointer"
+                checked={allSelectableSelected}
+                disabled={selectableRows.length === 0}
+                onchange={(e) => toggleSelectAll(e.currentTarget.checked)}
+              />
+            </th>
             {#if showProductColumn}
               <th class="px-4 py-3 font-medium">
                 <button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors uppercase" onclick={() => wlHandleSort("product")}>
@@ -341,6 +412,16 @@
           {:else}
             {#each wlData as item}
               <tr class="hover:bg-muted/20 transition-colors">
+                <td class="px-4 py-3 w-10">
+                  {#if item.allow_for_reminder}
+                    <input
+                      type="checkbox"
+                      class="accent-[#4DA0E6] w-4 h-4 cursor-pointer"
+                      checked={selectedIds.includes(item.id)}
+                      onchange={(e) => toggleSelect(item.id, e.currentTarget.checked)}
+                    />
+                  {/if}
+                </td>
                 {#if showProductColumn}
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
@@ -493,6 +574,79 @@
   onSuccess={() => { wlRefetchTrigger++; }}
   onClose={() => { isDeleteModalOpen = false; deletingItem = null; }}
 />
+
+{#if isReminderConfirmOpen}
+  <div
+    class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+    onclick={(e) => { if (e.target === e.currentTarget && !reminderSending) isReminderConfirmOpen = false; }}
+    onkeydown={(e) => { if (e.key === "Escape" && !reminderSending) isReminderConfirmOpen = false; }}
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reminder-confirm-title"
+    tabindex="-1"
+  >
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events -->
+    <div
+      class="bg-card rounded-lg shadow-xl w-full max-w-md"
+      onclick={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div class="flex items-center justify-between p-6 border-b border-border">
+        <h2 id="reminder-confirm-title" class="text-xl font-bold text-foreground">
+          Send SMS Reminder
+        </h2>
+        <button
+          type="button"
+          class="p-1 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
+          onclick={() => (isReminderConfirmOpen = false)}
+          disabled={reminderSending}
+          aria-label="Close modal"
+        >
+          <Icon iconName="icon/x" size={20} class="text-foreground" />
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        {#if reminderError}
+          <div class="p-3 rounded-md bg-destructive/10 border border-destructive/20 flex items-start gap-2">
+            <Icon iconName="icon/alert-circle" size={16} class="text-destructive shrink-0 mt-0.5" />
+            <p class="text-sm text-destructive">{reminderError}</p>
+          </div>
+        {/if}
+
+        <p class="text-sm text-foreground leading-relaxed">
+          Are you sure you want to send
+          <strong>{selectedIds.length}</strong> reminder{selectedIds.length !== 1 ? 's' : ''}
+          to customers to order the product they are waiting for?
+        </p>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 p-6 border-t border-border">
+        <Button
+          variant="outline"
+          onclick={() => (isReminderConfirmOpen = false)}
+          disabled={reminderSending}
+          class="border-border text-foreground hover:bg-muted"
+        >
+          Cancel
+        </Button>
+        <Button
+          onclick={confirmSendReminder}
+          disabled={reminderSending || selectedIds.length === 0}
+          class="bg-green-600 text-white hover:bg-green-700 min-w-[140px]"
+        >
+          {#if reminderSending}
+            <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          {/if}
+          Send Reminder
+        </Button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   :global(.loading-slide) {

@@ -55,7 +55,7 @@
       const client = getAuthClient("investor");
       const res = await client.mutate({
         mutation: SEND_SMS,
-        variables: { ids: customerIds, message: message.trim() },
+        variables: { ids: customerIds, message: message.trim(), isWaightListReminder: false },
       });
       result = (res.data as any)?.send_customer_sms ?? null;
     } catch (err) {
