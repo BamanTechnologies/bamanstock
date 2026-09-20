@@ -3,6 +3,7 @@ query getLandingMerchants(
   $offset: Int
   $filter: merchant_bool_exp
   $order: [merchant_order_by!]!
+  $ordersFilter: orders_bool_exp = {}
 ) {
   merchant(limit: $limit, offset: $offset, where: $filter, order_by: $order) {
     id
@@ -17,19 +18,19 @@ query getLandingMerchants(
       company
       created_at
     }
-    total_orders: orders_aggregate {
+    total_orders: orders_aggregate(where: $ordersFilter) {
       aggregate {
         count
       }
     }
-    sales: orders_aggregate {
+    sales: orders_aggregate(where: $ordersFilter) {
       aggregate {
         sum {
           total_amount
         }
       }
     }
-    total_outstanding: orders_aggregate {
+    total_outstanding: orders_aggregate(where: $ordersFilter) {
       aggregate {
         sum {
           outstanding_amount
@@ -47,9 +48,7 @@ query getLandingMerchants(
       count
     }
   }
-  active_merchants: merchant_aggregate(
-    where: { orders_aggregate: { count: { predicate: { _gt: 0 } } } }
-  ) {
+  active_merchants: merchant_aggregate(where: { orders: $ordersFilter }) {
     aggregate {
       count
     }

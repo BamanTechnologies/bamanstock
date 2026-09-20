@@ -1,4 +1,9 @@
-query topMerchants($limit: Int, $offset: Int, $filter: merchant_bool_exp!) {
+query topMerchants(
+  $limit: Int
+  $offset: Int
+  $filter: merchant_bool_exp = {}
+  $ordersFilter: orders_bool_exp = {}
+) {
   merchant(
     limit: $limit
     offset: $offset
@@ -10,19 +15,19 @@ query topMerchants($limit: Int, $offset: Int, $filter: merchant_bool_exp!) {
     last_name
     phone_number
     created_at
-    total_orders: orders_aggregate {
+    total_orders: orders_aggregate(where: $ordersFilter) {
       aggregate {
         count
       }
     }
-    total_sales: orders_aggregate {
+    total_sales: orders_aggregate(where: $ordersFilter) {
       aggregate {
         sum {
           total_amount
         }
       }
     }
-    total_outstanding: orders_aggregate {
+    total_outstanding: orders_aggregate(where: $ordersFilter) {
       aggregate {
         sum {
           outstanding_amount

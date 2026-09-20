@@ -7,6 +7,7 @@
   import UpdateMerchantModal from "$lib/components/investor/UpdateMerchantModal.svelte";
   import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { getAuthClient } from "$graphql/client.ts";
+  import { nonDeletedFilter } from "$lib/graphql/filters";
   import INVESTOR_MERCHANTS_QUERY from "$graphql/queries/merchants/investor_merchants.gql";
   import DELETE_MERCHANT from "$graphql/mutation/merchant/delete.gql";
   import { _ } from "svelte-i18n";
@@ -146,6 +147,7 @@
             offset: (currentPage - 1) * rowsPerPage,
             filter: buildFilter(),
             order: buildOrder(),
+            ordersFilter: nonDeletedFilter(),
           },
         });
         merchants = result.data?.merchant ?? [];
