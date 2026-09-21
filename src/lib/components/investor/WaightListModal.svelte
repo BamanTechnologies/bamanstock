@@ -221,6 +221,7 @@
                   filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
                   displayLabel={(item) => item.name ?? item.id}
                   placeholder="Search and select product"
+                  mode="form"
                   onSelect={(item) => { selectedProductId = item?.id ?? ""; }}
                 />
               </div>

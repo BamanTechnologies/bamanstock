@@ -6,6 +6,7 @@
   import AddLocationModal from "$lib/components/investor/AddLocationModal.svelte";
   import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { getAuthClient } from "$graphql/client.ts";
+  import { nonDeletedFilter } from "$lib/graphql/filters";
   import INVESTOR_BRANCHES_QUERY from "$graphql/queries/locations/branches.gql";
   import DELETE_BRANCH from "$graphql/mutation/locations/delete.gql";
   import { _ } from "svelte-i18n";
@@ -121,6 +122,7 @@
             offset: (currentPage - 1) * rowsPerPage,
             filter: buildFilter(),
             order: buildOrder(),
+            stocksFilter: nonDeletedFilter(),
           },
         });
         locations = result.data?.branches ?? [];

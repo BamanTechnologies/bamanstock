@@ -5,6 +5,7 @@
   import { page } from "$app/stores";
   import SendSmsModal from "$lib/components/investor/SendSmsModal.svelte";
   import { getAuthClient } from "$graphql/client.ts";
+  import { nonDeletedFilter } from "$lib/graphql/filters";
   import CUSTOMERS_LIST_QUERY from "$graphql/queries/customers/list.gql";
   import { _ } from "svelte-i18n";
 
@@ -128,6 +129,7 @@
             offset: (currentPage - 1) * rowsPerPage,
             filter: buildFilter(),
             order: buildOrder(),
+            ordersFilter: nonDeletedFilter(),
           },
         });
         customers = result.data?.customers ?? [];
