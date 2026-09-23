@@ -21,6 +21,7 @@
     placeholder = $_('searchAndSelect'),
     initialValue = "",
     mode = "filter",
+    excludeDeleted = false,
     role = "investor",
     client: clientProp,
     onSelect = (item: SelectItem | null) => {},
@@ -33,6 +34,7 @@
     placeholder?: string;
     initialValue?: string;
     mode?: "filter" | "form";
+    excludeDeleted?: boolean;
     role?: string;
     client?: ApolloClient;
     onSelect?: (item: SelectItem | null) => void;
@@ -64,7 +66,7 @@
   });
 
   function effectiveFilter(filter: Record<string, unknown>): Record<string, unknown> {
-    if (mode !== "form") return filter;
+    if (mode !== "form" || !excludeDeleted) return filter;
     return { _and: [filter, { is_deleted: { _eq: false } }] };
   }
 

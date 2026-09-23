@@ -20,10 +20,12 @@
     query,
     productId = "",
     customerId = "",
+    disabled = false,
   }: {
     query: DocumentNode;
     productId?: string;
     customerId?: string;
+    disabled?: boolean;
   } = $props();
 
   const showProductColumn = $derived(!productId);
@@ -319,6 +321,7 @@
         {/if}
         <Button
           class="bg-[var(--primary-blue)] text-white text-xs sm:text-base hover:opacity-90"
+          disabled={disabled}
           onclick={() => (isAddModalOpen = true)}
         >
           <Icon iconName="icon/plus" size={16} class="mr-2" />

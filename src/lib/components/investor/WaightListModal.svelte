@@ -222,6 +222,7 @@
                   displayLabel={(item) => item.name ?? item.id}
                   placeholder="Search and select product"
                   mode="form"
+                  excludeDeleted={true}
                   onSelect={(item) => { selectedProductId = item?.id ?? ""; }}
                 />
               </div>

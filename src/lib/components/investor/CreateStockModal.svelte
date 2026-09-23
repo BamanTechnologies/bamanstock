@@ -278,6 +278,7 @@
               displayLabel={(item) => item.name}
               placeholder="Search and select product"
               mode="form"
+              excludeDeleted={true}
               onSelect={handleProductSelect}
             />
           </div>
