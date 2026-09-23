@@ -5,19 +5,19 @@ query getCustomerDetail($id: uuid!) {
     last_name
     address
     phone_number
-    total_orders: orders_aggregate {
+    total_orders: orders_aggregate(where: { is_deleted: { _eq: false } }) {
       aggregate {
         count
       }
     }
-    total_order_payments: orders_aggregate {
+    total_order_payments: orders_aggregate(where: { is_deleted: { _eq: false } }) {
       aggregate {
         sum {
           total_amount
         }
       }
     }
-    total_outstanding: orders_aggregate {
+    total_outstanding: orders_aggregate(where: { is_deleted: { _eq: false } }) {
       aggregate {
         sum {
           outstanding_amount
@@ -26,14 +26,40 @@ query getCustomerDetail($id: uuid!) {
     }
     total_unpayed_or_partially_Payed_orders: orders_aggregate(
       where: {
-        _or: [
-          { status: { _eq: "unpaid" } }
-          { status: { _eq: "partially_paid" } }
+        _and: [
+          { is_deleted: { _eq: false } }
+          {
+            _or: [
+              { status: { _eq: "unpaid" } }
+              { status: { _eq: "partially_paid" } }
+            ]
+          }
         ]
       }
     ) {
       aggregate {
         count
+      }
+    }
+  }
+  total_payments_received: payment_aggregate(
+    where: {
+      _and: [
+        { payment_method: { _neq: "Customer balance" } }
+        {
+          order: {
+            _and: [
+              { customer_id: { _eq: $id } }
+              { is_deleted: { _eq: false } }
+            ]
+          }
+        }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        amount
       }
     }
   }

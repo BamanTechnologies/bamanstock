@@ -9,6 +9,7 @@ query ($id: uuid!, $limit: Int, $offset: Int) {
           ]
         }
         { is_low_stock: { _eq: true } }
+        { is_deleted: { _eq: false } }
       ]
     }
     limit: $limit
@@ -29,6 +30,7 @@ query ($id: uuid!, $limit: Int, $offset: Int) {
           ]
         }
         { is_low_stock: { _eq: true } }
+        { is_deleted: { _eq: false } }
       ]
     }
   ) {

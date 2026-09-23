@@ -10,6 +10,8 @@
   import CUSTOMER_PAYMENTS_QUERY from "$graphql/queries/customers/detail/cusotmer_payments.gql";
   import WAIGHT_LISTS_QUERY from "$graphql/queries/customers/detail/waight_lists.gql";
   import WaightListsTab from "$lib/components/investor/WaightListsTab.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
+  import ARCHIVE_ORDER from "$graphql/mutation/order/archive.gql";
   import { _ } from "svelte-i18n";
 
   const customerId = $derived($page.params.id ?? "");
@@ -52,6 +54,17 @@
   let ordersLoading = $state(false);
   let ordersCurrentPage = $state(1);
   let ordersRowsPerPage = $state(10);
+  let ordersSubFilter = $state<"active" | "archived">("active");
+
+  let isOrderArchiveModalOpen = $state(false);
+  let orderArchivingItem = $state<any>(null);
+  let orderArchiveLoading = $state(false);
+  let orderArchiveError = $state<string | null>(null);
+
+  let isOrderActivateModalOpen = $state(false);
+  let orderActivatingItem = $state<any>(null);
+  let orderActivateLoading = $state(false);
+  let orderActivateError = $state<string | null>(null);
 
   const ordersTotalPages = $derived(Math.max(1, Math.ceil(ordersTotalCount / ordersRowsPerPage)));
 
@@ -60,6 +73,7 @@
     void activeTab;
     void ordersCurrentPage;
     void ordersRowsPerPage;
+    void ordersSubFilter;
     void detailRefetchTrigger;
 
     if (activeTab !== "Orders") return;
@@ -74,6 +88,7 @@
             customerId,
             limit: ordersRowsPerPage,
             offset: (ordersCurrentPage - 1) * ordersRowsPerPage,
+            filter: { is_deleted: { _eq: ordersSubFilter === "archived" } },
           },
         });
         const data = res.data as any;
@@ -92,13 +107,77 @@
     return () => clearTimeout(timer);
   });
 
+  function openOrderArchiveModal(orderItem: any) {
+    orderArchivingItem = orderItem;
+    orderArchiveError = null;
+    isOrderArchiveModalOpen = true;
+  }
+
+  function closeOrderArchiveModal() {
+    isOrderArchiveModalOpen = false;
+    orderArchivingItem = null;
+    orderArchiveError = null;
+  }
+
+  async function confirmOrderArchive() {
+    if (!orderArchivingItem) return;
+    orderArchiveLoading = true;
+    orderArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_ORDER,
+        variables: { id: orderArchivingItem.id, isDeleted: true },
+      });
+      isOrderArchiveModalOpen = false;
+      orderArchivingItem = null;
+      detailRefetchTrigger++;
+    } catch (err: any) {
+      orderArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      orderArchiveLoading = false;
+    }
+  }
+
+  function openOrderActivateModal(orderItem: any) {
+    orderActivatingItem = orderItem;
+    orderActivateError = null;
+    isOrderActivateModalOpen = true;
+  }
+
+  function closeOrderActivateModal() {
+    isOrderActivateModalOpen = false;
+    orderActivatingItem = null;
+    orderActivateError = null;
+  }
+
+  async function confirmOrderActivate() {
+    if (!orderActivatingItem) return;
+    orderActivateLoading = true;
+    orderActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_ORDER,
+        variables: { id: orderActivatingItem.id, isDeleted: false },
+      });
+      isOrderActivateModalOpen = false;
+      orderActivatingItem = null;
+      detailRefetchTrigger++;
+    } catch (err: any) {
+      orderActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      orderActivateLoading = false;
+    }
+  }
+
   // ===================== Payments Tab =====================
   let payments = $state<any[]>([]);
   let paymentsTotalCount = $state(0);
-  let paymentsTotalAmount = $state(0);
   let paymentsLoading = $state(false);
   let paymentsCurrentPage = $state(1);
   let paymentsRowsPerPage = $state(10);
+  let paymentsSubFilter = $state<"active" | "archived">("active");
 
   const paymentsTotalPages = $derived(Math.max(1, Math.ceil(paymentsTotalCount / paymentsRowsPerPage)));
 
@@ -107,6 +186,7 @@
     void activeTab;
     void paymentsCurrentPage;
     void paymentsRowsPerPage;
+    void paymentsSubFilter;
     void detailRefetchTrigger;
 
     if (activeTab !== "Payments") return;
@@ -121,16 +201,15 @@
             customerId,
             limit: paymentsRowsPerPage,
             offset: (paymentsCurrentPage - 1) * paymentsRowsPerPage,
+            filter: { order: { is_deleted: { _eq: paymentsSubFilter === "archived" } } },
           },
         });
         const data = res.data as any;
         payments = data?.payment ?? [];
         paymentsTotalCount = data?.payments_count?.aggregate?.count ?? 0;
-        paymentsTotalAmount = data?.payments_received_aggregate?.aggregate?.sum?.amount ?? 0;
       } catch {
         payments = [];
         paymentsTotalCount = 0;
-        paymentsTotalAmount = 0;
       } finally {
         paymentsLoading = false;
       }
@@ -236,7 +315,7 @@
       },
       {
         label: "Total Payments Received",
-        value: fmtCurrency(paymentsTotalAmount),
+        value: fmtCurrency(d?.total_payments_received?.aggregate?.sum?.amount),
         icon: "icon/credit-card" as const,
         color: "bg-purple-100 dark:bg-purple-900/40",
       },
@@ -350,6 +429,21 @@
   {#if activeTab === "Orders"}
     <div class="space-y-6">
       <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-sm font-semibold text-foreground">Orders</h3>
+          <select
+            class="px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:border-border"
+            value={ordersSubFilter}
+            onchange={(e) => {
+              ordersSubFilter = e.currentTarget.value as "active" | "archived";
+              ordersCurrentPage = 1;
+            }}
+          >
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
         {#if ordersLoading}
           <div class="h-1 bg-muted/30 w-full overflow-hidden">
             <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
@@ -366,12 +460,13 @@
                 <th class="px-4 py-3 font-medium">{$_('status')}</th>
                 <th class="px-4 py-3 font-medium">{$_('totalAmount')}</th>
                 <th class="px-4 py-3 font-medium">{$_('outstanding')}</th>
+                <th class="px-4 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if orders.length === 0 && !ordersLoading}
                 <tr>
-                  <td colspan="6" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/shopping-bag" size={32} class="text-muted-foreground" />
                       <p>No orders found</p>
@@ -391,6 +486,27 @@
                     </td>
                     <td class="px-4 py-3 text-foreground font-medium">{fmtCurrency(order.total_amount)}</td>
                     <td class="px-4 py-3 text-foreground">{fmtCurrency(order.outstanding_amount)}</td>
+                    <td class="px-4 py-3 text-right">
+                      {#if order.is_deleted}
+                        <button
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:bg-muted transition-colors"
+                          onclick={() => openOrderActivateModal(order)}
+                          title="{$_('activate')}"
+                        >
+                          <Icon iconName="icon/rotate-ccw" size={14} />
+                          {$_(order.is_deleted ? 'activate' : 'archive')}
+                        </button>
+                      {:else}
+                        <button
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:border-destructive/40 hover:text-destructive transition-colors"
+                          onclick={() => openOrderArchiveModal(order)}
+                          title="{$_('archive')}"
+                        >
+                          <Icon iconName="icon/archive" size={14} />
+                          {$_(order.is_deleted ? 'activate' : 'archive')}
+                        </button>
+                      {/if}
+                    </td>
                   </tr>
                 {/each}
               {/if}
@@ -453,6 +569,21 @@
   {:else if activeTab === "Payments"}
     <div class="space-y-6">
       <div class="bg-card border border-border rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-sm font-semibold text-foreground">Payments</h3>
+          <select
+            class="px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:border-border"
+            value={paymentsSubFilter}
+            onchange={(e) => {
+              paymentsSubFilter = e.currentTarget.value as "active" | "archived";
+              paymentsCurrentPage = 1;
+            }}
+          >
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
         {#if paymentsLoading}
           <div class="h-1 bg-muted/30 w-full overflow-hidden">
             <div class="h-full w-full bg-[#4DA0E6] loading-slide"></div>
@@ -551,6 +682,28 @@
     <WaightListsTab query={WAIGHT_LISTS_QUERY} customerId={customerId} />
   {/if}
 </div>
+
+<ConfirmModal
+  bind:isOpen={isOrderArchiveModalOpen}
+  title="Archive Order"
+  message="Are you sure you want to archive this order? This will also archive its items and payments."
+  error={orderArchiveError}
+  confirmText="Archive"
+  loading={orderArchiveLoading}
+  onConfirm={confirmOrderArchive}
+  onClose={closeOrderArchiveModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isOrderActivateModalOpen}
+  title="Activate Order"
+  message="Are you sure you want to activate this order back?"
+  error={orderActivateError}
+  confirmText="Activate"
+  loading={orderActivateLoading}
+  onConfirm={confirmOrderActivate}
+  onClose={closeOrderActivateModal}
+/>
 
 <SendSmsModal
   bind:isOpen={isSmsModalOpen}
