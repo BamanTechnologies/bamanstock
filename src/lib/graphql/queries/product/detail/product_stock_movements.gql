@@ -11,6 +11,7 @@ query getStockTransfers(
     order_by: $order
   ) {
     id
+    is_deleted
     quantity_delta
     reference_type
     movement_type

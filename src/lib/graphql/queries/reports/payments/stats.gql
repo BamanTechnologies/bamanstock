@@ -1,5 +1,8 @@
-query GetPaymentStats {
-  total_payment: payment_aggregate {
+query GetPaymentStats(
+  $paymentFilter: payment_bool_exp!
+  $ordersFilter: orders_bool_exp!
+) {
+  total_payment: payment_aggregate(where: $paymentFilter) {
     aggregate {
       sum {
         amount
@@ -7,7 +10,7 @@ query GetPaymentStats {
     }
   }
   total_payed: payment_aggregate(
-    where: { order: { status: { _eq: "paid" } } }
+    where: { _and: [{ order: { status: { _eq: "paid" } } }, $paymentFilter] }
   ) {
     aggregate {
       sum {
@@ -15,14 +18,16 @@ query GetPaymentStats {
       }
     }
   }
-  total_overdue: orders_aggregate {
+  total_overdue: orders_aggregate(where: $ordersFilter) {
     aggregate {
       sum {
         outstanding_amount
       }
     }
   }
-  completed_orderes: orders_aggregate(where: { status: { _eq: "paid" } }) {
+  completed_orderes: orders_aggregate(
+    where: { _and: [{ status: { _eq: "paid" } }, $ordersFilter] }
+  ) {
     aggregate {
       count
     }

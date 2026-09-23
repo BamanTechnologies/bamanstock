@@ -1,0 +1,17 @@
+mutation sendCustomerSms(
+  $ids: [String!]!
+  $message: String
+  $isWaightListReminder: Boolean!
+) {
+  send_customer_sms(
+    ids: $ids
+    message: $message
+    is_waightlist_reminder: $isWaightListReminder
+  ) {
+    error
+    failure_count
+    message
+    status_code
+    success_count
+  }
+}

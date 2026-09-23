@@ -1,6 +1,11 @@
-query GetDashboardStats($pastMonthEndDate: timestamptz!) {
+query GetDashboardStats(
+  $pastMonthEndDate: timestamptz!
+  $ordersFilter: orders_bool_exp = {}
+) {
   total_sales: payment_aggregate(
-    where: { order: { status: { _neq: "cancelled" } } }
+    where: {
+      order: { _and: [{ status: { _neq: "cancelled" } }, $ordersFilter] }
+    }
   ) {
     aggregate {
       sum {
@@ -11,7 +16,7 @@ query GetDashboardStats($pastMonthEndDate: timestamptz!) {
   previous_month_sales: payment_aggregate(
     where: {
       created_at: { _lte: $pastMonthEndDate }
-      order: { status: { _neq: "cancelled" } }
+      order: { _and: [{ status: { _neq: "cancelled" } }, $ordersFilter] }
     }
   ) {
     aggregate {
@@ -20,13 +25,15 @@ query GetDashboardStats($pastMonthEndDate: timestamptz!) {
       }
     }
   }
-  total_orders: orders_aggregate {
+  total_orders: orders_aggregate(where: $ordersFilter) {
     aggregate {
       count
     }
   }
   previous_month_orders: orders_aggregate(
-    where: { created_at: { _lte: $pastMonthEndDate } }
+    where: {
+      _and: [{ created_at: { _lte: $pastMonthEndDate } }, $ordersFilter]
+    }
   ) {
     aggregate {
       count
@@ -44,7 +51,9 @@ query GetDashboardStats($pastMonthEndDate: timestamptz!) {
       count
     }
   }
-  total_units_sold: orders_aggregate(where: { status: { _neq: "cancelled" } }) {
+  total_units_sold: orders_aggregate(
+    where: { _and: [{ status: { _neq: "cancelled" } }, $ordersFilter] }
+  ) {
     aggregate {
       sum {
         order_quantity
@@ -53,8 +62,11 @@ query GetDashboardStats($pastMonthEndDate: timestamptz!) {
   }
   previous_month_units: orders_aggregate(
     where: {
-      created_at: { _lte: $pastMonthEndDate }
-      status: { _neq: "cancelled" }
+      _and: [
+        { created_at: { _lte: $pastMonthEndDate } }
+        { status: { _neq: "cancelled" } }
+        $ordersFilter
+      ]
     }
   ) {
     aggregate {

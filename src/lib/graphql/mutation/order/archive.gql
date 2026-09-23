@@ -1,0 +1,14 @@
+mutation archiveOrder($id: uuid!, $isDeleted: Boolean!) {
+  update_orders(where: { id: { _eq: $id } }, _set: { is_deleted: $isDeleted }) {
+    affected_rows
+  }
+  update_order_items(where: { order_id: { _eq: $id } }, _set: { is_deleted: $isDeleted }) {
+    affected_rows
+  }
+  update_order_item_batches(
+    where: { order_item: { order_id: { _eq: $id } } }
+    _set: { is_deleted: $isDeleted }
+  ) {
+    affected_rows
+  }
+}

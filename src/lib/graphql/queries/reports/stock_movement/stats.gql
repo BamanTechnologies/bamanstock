@@ -1,9 +1,14 @@
-query getStockMovementStats {
+query getStockMovementStats($filter: stock_movements_bool_exp!) {
   total_stocks_in: stock_movements_aggregate(
     where: {
-      _or: [
-        { movement_type: { _eq: "PURCHASE" } }
-        { movement_type: { _eq: "TRANSFER_IN" } }
+      _and: [
+        {
+          _or: [
+            { movement_type: { _eq: "PURCHASE" } }
+            { movement_type: { _eq: "TRANSFER_IN" } }
+          ]
+        }
+        $filter
       ]
     }
   ) {
@@ -15,9 +20,14 @@ query getStockMovementStats {
   }
   total_stocks_out: stock_movements_aggregate(
     where: {
-      _or: [
-        { movement_type: { _eq: "TRANSFER_OUT" } }
-        { movement_type: { _eq: "SALE" } }
+      _and: [
+        {
+          _or: [
+            { movement_type: { _eq: "TRANSFER_OUT" } }
+            { movement_type: { _eq: "SALE" } }
+          ]
+        }
+        $filter
       ]
     }
   ) {
@@ -27,7 +37,7 @@ query getStockMovementStats {
       }
     }
   }
-  number_of_transfers: stock_movements_aggregate {
+  number_of_transfers: stock_movements_aggregate(where: $filter) {
     aggregate {
       count
     }

@@ -3,6 +3,11 @@
   import { jwtDecode } from 'jwt-decode';
   import { goto } from '$app/navigation';
   import { getAuthClient } from '$lib/graphql/client';
+  import {
+    nonDeletedFilter,
+    customersWithActiveOrdersFilter,
+    merchantsWithActiveOrdersFilter,
+  } from '$lib/graphql/filters';
   import ApexCharts from "apexcharts";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Skeleton } from "$lib/components/ui/skeleton/index.js";
@@ -153,10 +158,10 @@
     const pastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
 
     Promise.all([
-      client.query({ query: STATS_QUERY, variables: { pastMonthEndDate: pastMonthEnd.toISOString() }, fetchPolicy: 'network-only' }),
-      client.query({ query: TOP_CUSTOMERS_QUERY, variables: { limit: 5, offset: 0, filter: {} }, fetchPolicy: 'network-only' }),
+      client.query({ query: STATS_QUERY, variables: { pastMonthEndDate: pastMonthEnd.toISOString(), ordersFilter: nonDeletedFilter() }, fetchPolicy: 'network-only' }),
+      client.query({ query: TOP_CUSTOMERS_QUERY, variables: { limit: 5, offset: 0, filter: customersWithActiveOrdersFilter(), ordersFilter: nonDeletedFilter() }, fetchPolicy: 'network-only' }),
       client.query({ query: PRODUCT_PROPORTION_QUERY, variables: { investorId }, fetchPolicy: 'network-only' }),
-      client.query({ query: TOP_MERCHANTS_QUERY, variables: { limit: 5, offset: 0, filter: {} }, fetchPolicy: 'network-only' }),
+      client.query({ query: TOP_MERCHANTS_QUERY, variables: { limit: 5, offset: 0, filter: merchantsWithActiveOrdersFilter(), ordersFilter: nonDeletedFilter() }, fetchPolicy: 'network-only' }),
     ]).then(([stats, customers, proportion, merchants]) => {
       statsData = stats.data ?? null;
       topCustomersData = customers.data ?? null;
@@ -182,7 +187,7 @@
 
     client.query({
       query: SALES_TREND_QUERY,
-      variables: { investorId, year, lastTwelveMonth },
+      variables: { investorId, year, lastTwelveMonth, ordersFilter: nonDeletedFilter() },
       fetchPolicy: 'network-only',
     }).then((result) => {
       salesTrendData = result.data ?? null;

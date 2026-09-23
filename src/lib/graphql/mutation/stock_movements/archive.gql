@@ -1,0 +1,5 @@
+mutation archiveStockMovement($id: uuid!, $isDeleted: Boolean!) {
+  update_stock_movements(where: { id: { _eq: $id } }, _set: { is_deleted: $isDeleted }) {
+    affected_rows
+  }
+}

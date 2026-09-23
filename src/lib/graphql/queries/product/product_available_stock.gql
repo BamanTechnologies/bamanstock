@@ -1,0 +1,8 @@
+query getProductAvailableStock($id: uuid!) {
+  products_by_pk(id: $id) {
+    id
+    name
+    current_available_stock
+    treshold_quantity
+  }
+}

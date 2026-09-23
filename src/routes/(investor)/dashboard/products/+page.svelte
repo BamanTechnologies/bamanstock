@@ -10,8 +10,12 @@
   import PRODUCTS_LIST_QUERY from "$graphql/queries/product/products_list.gql";
   import PRODUCT_TYPE_QUERY from "$graphql/queries/selector/product_category.gql";
   import DELETE_PRODUCT from "$graphql/mutation/product/delete.gql";
+  import ARCHIVE_PRODUCT from "$graphql/mutation/product/archive.gql";
   import { _ } from "svelte-i18n";
 
+  let activeTab = $state<"active" | "archived">(
+    ($page.url.searchParams.get("tab") as "active" | "archived") || "active"
+  );
   let searchQuery = $state($page.url.searchParams.get("search") ?? "");
   let typeFilterId = $state($page.url.searchParams.get("type") ?? "");
   let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
@@ -35,6 +39,16 @@
   let deleteLoading = $state(false);
   let deleteError = $state<string | null>(null);
 
+  let isArchiveModalOpen = $state(false);
+  let archivingProduct = $state<any>(null);
+  let archiveLoading = $state(false);
+  let archiveError = $state<string | null>(null);
+
+  let isActivateModalOpen = $state(false);
+  let activatingProduct = $state<any>(null);
+  let activateLoading = $state(false);
+  let activateError = $state<string | null>(null);
+
   let debouncedSearch = $state($page.url.searchParams.get("search") ?? "");
   let debounceTimer: ReturnType<typeof setTimeout>;
 
@@ -51,7 +65,9 @@
   const totalPages = $derived(Math.max(1, Math.ceil(totalCount / rowsPerPage)));
 
   function buildFilter(): Record<string, unknown> {
-    const conditions: Record<string, unknown>[] = [];
+    const conditions: Record<string, unknown>[] = [
+      { is_deleted: { _eq: activeTab === "archived" } },
+    ];
     if (debouncedSearch) {
       conditions.push({
         _or: [
@@ -82,6 +98,7 @@
 
   function syncUrl() {
     const params = new URLSearchParams();
+    if (activeTab !== "active") params.set("tab", activeTab);
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (typeFilterId) params.set("type", typeFilterId);
     if (currentPage > 1) params.set("page", String(currentPage));
@@ -94,6 +111,7 @@
 
   $effect(() => {
     void debouncedSearch;
+    void activeTab;
     void typeFilterId;
     void currentPage;
     void rowsPerPage;
@@ -197,6 +215,70 @@
     deleteError = null;
   }
 
+  function handleArchiveClick(product: any) {
+    archivingProduct = product;
+    archiveError = null;
+    isArchiveModalOpen = true;
+  }
+
+  async function handleArchiveConfirm() {
+    if (!archivingProduct) return;
+    archiveLoading = true;
+    archiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_PRODUCT,
+        variables: { id: archivingProduct.id, isDeleted: true },
+      });
+      isArchiveModalOpen = false;
+      archivingProduct = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      archiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      archiveLoading = false;
+    }
+  }
+
+  function handleArchiveCancel() {
+    isArchiveModalOpen = false;
+    archivingProduct = null;
+    archiveError = null;
+  }
+
+  function handleActivateClick(product: any) {
+    activatingProduct = product;
+    activateError = null;
+    isActivateModalOpen = true;
+  }
+
+  async function handleActivateConfirm() {
+    if (!activatingProduct) return;
+    activateLoading = true;
+    activateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_PRODUCT,
+        variables: { id: activatingProduct.id, isDeleted: false },
+      });
+      isActivateModalOpen = false;
+      activatingProduct = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      activateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      activateLoading = false;
+    }
+  }
+
+  function handleActivateCancel() {
+    isActivateModalOpen = false;
+    activatingProduct = null;
+    activateError = null;
+  }
+
   function handleView(product: any) {
     goto(`/dashboard/products/${product.id}`);
   }
@@ -237,6 +319,7 @@
   <div class="flex items-center justify-end">
     <Button
       class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
+      disabled={activeTab === "archived"}
       onclick={() => {
         editingProductId = "";
         isCreateModalOpen = true;
@@ -255,6 +338,30 @@
     </div>
   {:else}
     <div class="bg-card border border-border rounded-lg overflow-hidden">
+      <div class="px-4 pt-3 border-b border-border">
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            onclick={() => {
+              activeTab = "active";
+              currentPage = 1;
+            }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {activeTab === 'active' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('statusActive')}
+          </button>
+          <button
+            type="button"
+            onclick={() => {
+              activeTab = "archived";
+              currentPage = 1;
+            }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {activeTab === 'archived' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('archived')}
+          </button>
+        </div>
+      </div>
       <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
         <div class="relative w-full sm:w-72 shrink-0">
           <Icon
@@ -431,27 +538,51 @@
                     {/if}
                   </td>
                   <td class="px-4 py-4 text-right">
-                    <button
-                      onclick={(e) => { e.stopPropagation(); handleView(product); }}
-                      class="p-1.5 rounded hover:bg-muted transition-colors"
-                      aria-label={$_('view')}
-                    >
-                      <Icon iconName="icon/eye" size={16} class="text-muted-foreground hover:text-foreground" />
-                    </button>
-                    <button
-                      onclick={(e) => { e.stopPropagation(); handleEdit(product); }}
-                      class="p-1.5 rounded hover:bg-muted transition-colors"
-                      aria-label={$_('edit')}
-                    >
-                      <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
-                    </button>
-                    <button
-                      onclick={(e) => { e.stopPropagation(); handleDeleteClick(product); }}
-                      class="p-1.5 rounded hover:bg-muted transition-colors"
-                      aria-label={$_('delete')}
-                    >
-                      <Icon iconName="icon/trash" size={16} class="text-muted-foreground hover:text-destructive" />
-                    </button>
+                    {#if activeTab === "active"}
+                      <button
+                        onclick={(e) => { e.stopPropagation(); handleView(product); }}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('view')}
+                      >
+                        <Icon iconName="icon/eye" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                      <button
+                        onclick={(e) => { e.stopPropagation(); handleEdit(product); }}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('edit')}
+                      >
+                        <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                      <button
+                        onclick={(e) => { e.stopPropagation(); handleArchiveClick(product); }}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('archive')}
+                      >
+                        <Icon iconName="icon/archive" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                    {:else}
+                      <button
+                        onclick={(e) => { e.stopPropagation(); handleView(product); }}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('view')}
+                      >
+                        <Icon iconName="icon/eye" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                      <button
+                        onclick={(e) => { e.stopPropagation(); handleActivateClick(product); }}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('activate')}
+                      >
+                        <Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                      <button
+                        onclick={(e) => { e.stopPropagation(); handleDeleteClick(product); }}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('delete')}
+                      >
+                        <Icon iconName="icon/trash" size={16} class="text-muted-foreground hover:text-destructive" />
+                      </button>
+                    {/if}
                   </td>
                 </tr>
               {/each}
@@ -528,6 +659,28 @@
   loading={deleteLoading}
   onConfirm={handleDeleteConfirm}
   onClose={handleDeleteCancel}
+/>
+
+<ConfirmModal
+  bind:isOpen={isArchiveModalOpen}
+  title="Archive Product"
+  message={archivingProduct ? `Are you sure you want to archive <strong>${archivingProduct.name}</strong>? This will also archive its related stocks, orders and transfers.` : ""}
+  error={archiveError}
+  confirmText="Archive Product"
+  loading={archiveLoading}
+  onConfirm={handleArchiveConfirm}
+  onClose={handleArchiveCancel}
+/>
+
+<ConfirmModal
+  bind:isOpen={isActivateModalOpen}
+  title="Activate Product"
+  message={activatingProduct ? `Are you sure you want to activate <strong>${activatingProduct.name}</strong>? This will also restore its related stocks, orders and transfers.` : ""}
+  error={activateError}
+  confirmText="Activate Product"
+  loading={activateLoading}
+  onConfirm={handleActivateConfirm}
+  onClose={handleActivateCancel}
 />
 
 <style>

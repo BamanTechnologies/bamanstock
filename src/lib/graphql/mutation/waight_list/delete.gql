@@ -1,0 +1,5 @@
+mutation deleteCustomerWaightList($id: uuid!) {
+  delete_customer_waight_lists_by_pk(id: $id) {
+    id
+  }
+}
