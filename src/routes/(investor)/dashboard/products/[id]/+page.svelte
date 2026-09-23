@@ -858,15 +858,15 @@
     {/if}
 
     {#if !detailLoading && productIsArchived}
-      <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+      <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/20">
         <div class="flex items-center gap-3">
-          <Icon iconName="icon/archive" size={20} class="shrink-0 text-amber-600" />
+          <Icon iconName="icon/archive" size={20} class="shrink-0 text-red-600" />
           <div>
             <p class="text-sm font-medium text-foreground">This product is archived</p>
             <p class="text-xs text-muted-foreground">Restore it to edit the product or add weight lists.</p>
           </div>
         </div>
-        <Button variant="outline" class="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-950/40" onclick={() => (isProductRestoreModalOpen = true)}>
+        <Button variant="outline" class="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-800 dark:text-green-300 dark:hover:bg-green-950/40" onclick={() => (isProductRestoreModalOpen = true)}>
           <Icon iconName="icon/rotate-ccw" size={14} class="mr-1.5" />
           Restore Product
         </Button>
