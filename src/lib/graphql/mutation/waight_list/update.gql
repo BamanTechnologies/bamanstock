@@ -1,0 +1,8 @@
+mutation updateWaightList(
+  $id: uuid!
+  $object: customer_waight_lists_set_input!
+) {
+  update_customer_waight_lists_by_pk(pk_columns: { id: $id }, _set: $object) {
+    id
+  }
+}

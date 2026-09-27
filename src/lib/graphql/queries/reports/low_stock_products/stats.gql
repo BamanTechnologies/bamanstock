@@ -1,20 +1,34 @@
-query lowStockPropertiesStats {
+query lowStockPropertiesStats(
+  $productFilter: products_bool_exp!
+  $stockFilter: stock_bool_exp!
+) {
   low_stock_products: products_aggregate(
-    where: { is_low_stock: { _eq: true } }
+    where: { _and: [{ is_low_stock: { _eq: true } }, $productFilter] }
   ) {
     aggregate {
       count
     }
   }
   critical_low_stock_products: products_aggregate(
-    where: { is_low_stock: { _eq: true }, current_available_stock: { _lte: 0 } }
+    where: {
+      _and: [
+        { is_low_stock: { _eq: true } }
+        { current_available_stock: { _lte: 0 } }
+        $productFilter
+      ]
+    }
   ) {
     aggregate {
       count
     }
   }
   low_stock_properties_prices: stock_aggregate(
-    where: { product: { is_low_stock: { _eq: true } } }
+    where: {
+      _and: [
+        { product: { _and: [{ is_low_stock: { _eq: true } }, $productFilter] } }
+        $stockFilter
+      ]
+    }
   ) {
     aggregate {
       sum {

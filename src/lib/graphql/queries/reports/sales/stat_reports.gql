@@ -1,6 +1,10 @@
-query salesReportStat($pastMonthEndDate: timestamptz!) {
+query salesReportStat(
+  $pastMonthEndDate: timestamptz!
+  $paymentFilter: payment_bool_exp!
+  $ordersFilter: orders_bool_exp!
+) {
   total_sales: payment_aggregate(
-    where: { order: { status: { _neq: "cancelled" } } }
+    where: { _and: [{ order: { status: { _neq: "cancelled" } } }, $paymentFilter] }
   ) {
     aggregate {
       sum {
@@ -10,8 +14,11 @@ query salesReportStat($pastMonthEndDate: timestamptz!) {
   }
   previous_month_sales: payment_aggregate(
     where: {
-      created_at: { _lte: $pastMonthEndDate }
-      order: { status: { _neq: "cancelled" } }
+      _and: [
+        { created_at: { _lte: $pastMonthEndDate } }
+        { order: { status: { _neq: "cancelled" } } }
+        $paymentFilter
+      ]
     }
   ) {
     aggregate {
@@ -20,31 +27,33 @@ query salesReportStat($pastMonthEndDate: timestamptz!) {
       }
     }
   }
-  total_orders: orders_aggregate {
+  total_orders: orders_aggregate(where: $ordersFilter) {
     aggregate {
       count
     }
   }
   previous_month_orders: orders_aggregate(
-    where: { created_at: { _lte: $pastMonthEndDate } }
+    where: { _and: [{ created_at: { _lte: $pastMonthEndDate } }, $ordersFilter] }
   ) {
     aggregate {
       count
     }
   }
-  total_transactions: payment_aggregate {
+  total_transactions: payment_aggregate(where: $paymentFilter) {
     aggregate {
       count
     }
   }
   previous_month_transactions: payment_aggregate(
-    where: { created_at: { _lte: $pastMonthEndDate } }
+    where: { _and: [{ created_at: { _lte: $pastMonthEndDate } }, $paymentFilter] }
   ) {
     aggregate {
       count
     }
   }
-  total_units_sold: orders_aggregate(where: { status: { _neq: "cancelled" } }) {
+  total_units_sold: orders_aggregate(
+    where: { _and: [{ status: { _neq: "cancelled" } }, $ordersFilter] }
+  ) {
     aggregate {
       sum {
         order_quantity
@@ -53,8 +62,11 @@ query salesReportStat($pastMonthEndDate: timestamptz!) {
   }
   previous_month_units: orders_aggregate(
     where: {
-      created_at: { _lte: $pastMonthEndDate }
-      status: { _neq: "cancelled" }
+      _and: [
+        { created_at: { _lte: $pastMonthEndDate } }
+        { status: { _neq: "cancelled" } }
+        $ordersFilter
+      ]
     }
   ) {
     aggregate {

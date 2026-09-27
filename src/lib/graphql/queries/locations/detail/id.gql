@@ -3,14 +3,14 @@ query getStocks($id: uuid!) {
     id
     name
     address
-    stocks_aggregate {
+    stocks_aggregate(where: { is_deleted: { _eq: false } }) {
       aggregate {
         sum {
           selling_price
         }
       }
     }
-    total_merchants: merchants_aggregate {
+    total_merchants: merchants_aggregate(where: { orders: { is_deleted: { _eq: false } } }) {
       aggregate {
         count
       }
@@ -20,7 +20,16 @@ query getStocks($id: uuid!) {
       name
     }
   }
-  payment_aggregate(where: { order: { merchant: { branch: { _eq: $id } } } }) {
+  payment_aggregate(
+    where: {
+      order: {
+        _and: [
+          { merchant: { branch: { _eq: $id } } }
+          { is_deleted: { _eq: false } }
+        ]
+      }
+    }
+  ) {
     aggregate {
       sum {
         amount
@@ -37,6 +46,7 @@ query getStocks($id: uuid!) {
           ]
         }
         { is_low_stock: { _eq: true } }
+        { is_deleted: { _eq: false } }
       ]
     }
   ) {

@@ -1,0 +1,45 @@
+query getWaightLists(
+  $filter: customer_waight_lists_bool_exp
+  $limit: Int
+  $offset: Int
+  $order: [customer_waight_lists_order_by!]!
+) {
+  customer_waight_lists(
+    where: $filter
+    limit: $limit
+    offset: $offset
+    order_by: $order
+  ) {
+    id
+    product_id
+    customer_id
+    quantity
+    status
+    is_reminder_sent
+    allow_for_reminder
+    created_at
+    updated_at
+    product {
+      id
+      name
+      is_low_stock
+      default_unit
+      product_type {
+        id
+        name
+      }
+    }
+    customer {
+      id
+      first_name
+      last_name
+      phone_number
+      address
+    }
+  }
+  total: customer_waight_lists_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

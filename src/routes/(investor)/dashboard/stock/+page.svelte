@@ -3,12 +3,15 @@
   import Icon from "$lib/components/ui/Icon/index.js";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
   import CreateStockModal from "$lib/components/investor/CreateStockModal.svelte";
+  import WaightListReminderModal from "$lib/components/investor/WaightListReminderModal.svelte";
   import UpdateStockModal from "$lib/components/investor/UpdateStockModal.svelte";
   import DeleteStockConfirmModal from "$lib/components/investor/DeleteStockConfirmModal.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { getAuthClient } from "$graphql/client.ts";
   import INVESTOR_STOCKS_QUERY from "$graphql/queries/stocks/stocks.gql";
+  import ARCHIVE_STOCK from "$graphql/mutation/stock/archive.gql";
   import { _ } from "svelte-i18n";
   import SearchSelect from "$lib/components/investor/search-select/SearchSelect.svelte";
   import PRODUCT_QUERY from "$graphql/queries/selector/products.gql";
@@ -16,12 +19,27 @@
   import LOCATION_QUERY from "$graphql/queries/selector/location.gql";
 
   let isCreateStockModalOpen = $state(false);
+  let isReminderModalOpen = $state(false);
+  let reminderProductId = $state("");
   let isUpdateStockModalOpen = $state(false);
   let stockItemToEdit = $state<any>(null);
   let isDeleteStockModalOpen = $state(false);
   let stockItemToDelete = $state<any>(null);
   let refetchTrigger = $state(0);
 
+  let isArchiveModalOpen = $state(false);
+  let archivingStock = $state<any>(null);
+  let archiveLoading = $state(false);
+  let archiveError = $state<string | null>(null);
+
+  let isActivateModalOpen = $state(false);
+  let activatingStock = $state<any>(null);
+  let activateLoading = $state(false);
+  let activateError = $state<string | null>(null);
+
+  let activeTab = $state<"active" | "archived">(
+    ($page.url.searchParams.get("tab") as "active" | "archived") || "active"
+  );
   let searchQuery = $state($page.url.searchParams.get("search") ?? "");
   let currentPage = $state(Number($page.url.searchParams.get("page")) || 1);
   let rowsPerPage = $state(Number($page.url.searchParams.get("limit")) || 10);
@@ -56,7 +74,9 @@
   const totalPages = $derived(Math.max(1, Math.ceil(totalCount / rowsPerPage)));
 
   function buildFilter(): Record<string, unknown> {
-    const conditions: Record<string, unknown>[] = [];
+    const conditions: Record<string, unknown>[] = [
+      { is_deleted: { _eq: activeTab === "archived" } },
+    ];
     if (debouncedSearch) {
       conditions.push({
         _or: [
@@ -100,6 +120,7 @@
 
   function syncUrl() {
     const params = new URLSearchParams();
+    if (activeTab !== "active") params.set("tab", activeTab);
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (currentPage > 1) params.set("page", String(currentPage));
     if (rowsPerPage !== 10) params.set("limit", String(rowsPerPage));
@@ -111,6 +132,7 @@
 
   $effect(() => {
     void debouncedSearch;
+    void activeTab;
     void currentPage;
     void rowsPerPage;
     void sortColumn;
@@ -191,6 +213,70 @@
     isDeleteStockModalOpen = true;
   }
 
+  function handleArchiveClick(item: any) {
+    archivingStock = item;
+    archiveError = null;
+    isArchiveModalOpen = true;
+  }
+
+  async function handleArchiveConfirm() {
+    if (!archivingStock) return;
+    archiveLoading = true;
+    archiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK,
+        variables: { id: archivingStock.id, isDeleted: true },
+      });
+      isArchiveModalOpen = false;
+      archivingStock = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      archiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      archiveLoading = false;
+    }
+  }
+
+  function handleArchiveCancel() {
+    isArchiveModalOpen = false;
+    archivingStock = null;
+    archiveError = null;
+  }
+
+  function handleActivateClick(item: any) {
+    activatingStock = item;
+    activateError = null;
+    isActivateModalOpen = true;
+  }
+
+  async function handleActivateConfirm() {
+    if (!activatingStock) return;
+    activateLoading = true;
+    activateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK,
+        variables: { id: activatingStock.id, isDeleted: false },
+      });
+      isActivateModalOpen = false;
+      activatingStock = null;
+      refetchTrigger++;
+    } catch (err: any) {
+      activateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      activateLoading = false;
+    }
+  }
+
+  function handleActivateCancel() {
+    isActivateModalOpen = false;
+    activatingStock = null;
+    activateError = null;
+  }
+
   function handleAddStock() {
     isCreateStockModalOpen = true;
   }
@@ -241,6 +327,7 @@
   <div class="flex items-center justify-end">
     <Button
       class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
+      disabled={activeTab === "archived"}
       onclick={handleAddStock}
     >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
@@ -256,6 +343,30 @@
     </div>
   {:else}
     <div class="bg-card border border-border rounded-lg overflow-hidden">
+      <div class="px-4 pt-3 border-b border-border">
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            onclick={() => {
+              activeTab = "active";
+              currentPage = 1;
+            }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {activeTab === 'active' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('statusActive')}
+          </button>
+          <button
+            type="button"
+            onclick={() => {
+              activeTab = "archived";
+              currentPage = 1;
+            }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {activeTab === 'archived' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('archived')}
+          </button>
+        </div>
+      </div>
       <div class="px-4 py-3 border-b border-border flex items-center gap-3 flex-wrap">
         <div class="relative w-72 shrink-0">
           <Icon
@@ -457,10 +568,12 @@
                 <td colspan="10" class="p-0">
                   <EmptyState
                     illustration="stock-page"
-                    title="No Stock Assigned Yet"
-                    description="This location doesn't have any products assigned. Once stock is added, you'll be able to track quantities, categories, and performance."
-                    actionLabel="Assign Stock"
-                    onAction={handleAddStock}
+                    title={activeTab === "archived" ? "No Archived Stock" : "No Stock Assigned Yet"}
+                    description={activeTab === "archived"
+                      ? "No archived stock items found. Archived stock will appear here."
+                      : "This location doesn't have any products assigned. Once stock is added, you'll be able to track quantities, categories, and performance."}
+                    actionLabel={activeTab === "archived" ? undefined : "Assign Stock"}
+                    onAction={activeTab === "archived" ? undefined : handleAddStock}
                   />
                 </td>
               </tr>
@@ -513,20 +626,37 @@
                     {/if}
                   </td>
                   <td class="px-4 py-4 text-right" onclick={(e) => e.stopPropagation()}>
-                    <button
-                      onclick={() => handleEdit(row)}
-                      class="p-1.5 rounded hover:bg-muted transition-colors"
-                      aria-label={$_('edit')}
-                    >
-                      <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
-                    </button>
-                    <button
-                      onclick={() => handleDelete(row)}
-                      class="p-1.5 rounded hover:bg-muted transition-colors"
-                      aria-label={$_('delete')}
-                    >
-                      <Icon iconName="icon/trash" size={16} class="text-muted-foreground hover:text-destructive" />
-                    </button>
+                    {#if activeTab === "active"}
+                      <button
+                        onclick={() => handleEdit(row)}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('edit')}
+                      >
+                        <Icon iconName="icon/edit" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                      <button
+                        onclick={() => handleArchiveClick(row)}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('archive')}
+                      >
+                        <Icon iconName="icon/archive" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                    {:else}
+                      <button
+                        onclick={() => handleActivateClick(row)}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('activate')}
+                      >
+                        <Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" />
+                      </button>
+                      <button
+                        onclick={() => handleDelete(row)}
+                        class="p-1.5 rounded hover:bg-muted transition-colors"
+                        aria-label={$_('delete')}
+                      >
+                        <Icon iconName="icon/trash" size={16} class="text-muted-foreground hover:text-destructive" />
+                      </button>
+                    {/if}
                   </td>
                 </tr>
               {/each}
@@ -589,7 +719,16 @@
 
   <CreateStockModal
     bind:isOpen={isCreateStockModalOpen}
-    onSuccess={handleRefetch}
+    onSuccess={(productId) => {
+      refetchTrigger++;
+      reminderProductId = productId;
+      isReminderModalOpen = true;
+    }}
+  />
+
+  <WaightListReminderModal
+    bind:isOpen={isReminderModalOpen}
+    productId={reminderProductId}
   />
 
   <UpdateStockModal
@@ -602,6 +741,28 @@
     bind:isOpen={isDeleteStockModalOpen}
     stock={stockItemToDelete}
     onSuccess={handleRefetch}
+  />
+
+  <ConfirmModal
+    bind:isOpen={isArchiveModalOpen}
+    title="Archive Stock Item"
+    message={archivingStock ? `Are you sure you want to archive <strong>${archivingStock.product?.name ?? archivingStock.id}</strong>? This will also archive its related stock movements, orders and transfers.` : ""}
+    error={archiveError}
+    confirmText="Archive"
+    loading={archiveLoading}
+    onConfirm={handleArchiveConfirm}
+    onClose={handleArchiveCancel}
+  />
+
+  <ConfirmModal
+    bind:isOpen={isActivateModalOpen}
+    title="Activate Stock Item"
+    message={activatingStock ? `Are you sure you want to activate <strong>${activatingStock.product?.name ?? activatingStock.id}</strong>? This will also restore its related stock movements, orders and transfers.` : ""}
+    error={activateError}
+    confirmText="Activate"
+    loading={activateLoading}
+    onConfirm={handleActivateConfirm}
+    onClose={handleActivateCancel}
   />
 </div>
 

@@ -44,6 +44,8 @@
     const path = $page.url.pathname;
     if (path.includes("/dashboard/merchants/")) return $_('pageMerchantDetails');
     if (path.startsWith("/dashboard/merchants")) return $_('pageMerchants');
+    if (path.includes("/dashboard/customers/")) return $_('pageCustomerDetails');
+    if (path.startsWith("/dashboard/customers")) return $_('pageCustomers');
     if (path.includes("/location")) return $_('pageLocations');
     if (path.startsWith("/dashboard/products")) return $_('pageProducts');
     if (path.includes("/stock")) return $_('pageStock');
@@ -57,6 +59,7 @@
   const navigation = $derived([
     { title: $_('navDashboard'), icon: "icon/layout-grid", href: "/dashboard" },
     { title: $_('navMerchants'), icon: "icon/users",        href: "/dashboard/merchants" },
+    { title: $_('navCustomers'), icon: "icon/user",         href: "/dashboard/customers" },
     { title: $_('navLocation'),  icon: "icon/map-pin",      href: "/dashboard/location" },
     { title: $_('navProducts'),  icon: "icon/shopping-bag",      href: "/dashboard/products" },
     { title: $_('navStock'),     icon: "icon/box",           href: "/dashboard/stock" },
@@ -91,7 +94,7 @@
 
         <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain">
           {#each navigation as item}
-            {@const active = $page.url.pathname === item.href || ($page.url.pathname.startsWith("/dashboard/merchants") && item.href === "/dashboard/merchants")}
+            {@const active = $page.url.pathname === item.href || ($page.url.pathname.startsWith("/dashboard/merchants") && item.href === "/dashboard/merchants") || ($page.url.pathname.startsWith("/dashboard/customers") && item.href === "/dashboard/customers")}
             <a
               href={item.href}
               class="relative flex items-center gap-3 rounded-r-lg py-2.5 pl-4 pr-3 text-sm font-medium transition

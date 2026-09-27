@@ -1,0 +1,87 @@
+query CustomerDetailActivity(
+  $customerId: uuid!
+  $offset: Int
+  $limit: Int
+  $filter: orders_bool_exp!
+) {
+  orders(
+    where: { _and: [{ customer_id: { _eq: $customerId } }, $filter] }
+    offset: $offset
+    limit: $limit
+    order_by: { created_at: desc }
+  ) {
+    id
+    created_at
+    is_deleted
+    customer_name
+    customer_phone
+    customer_address
+    order_quantity
+    status
+    stock_id
+    total_amount
+    outstanding_amount
+    unit
+    order_items(order_by: [{ created_at: asc }, { id: asc }]) {
+      stock_id
+      stock {
+        unit
+        type
+        product_type
+        attributes
+        model_number
+        country
+        color
+        figure
+        thickness
+      }
+    }
+    stock {
+      unit
+      type
+      product_type
+      attributes
+      model_number
+      country
+      color
+      figure
+      thickness
+    }
+  }
+  orders_count: orders_aggregate(
+    where: { _and: [{ customer_id: { _eq: $customerId } }, $filter] }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  orders_total: orders_aggregate(
+    where: {
+      _and: [
+        { customer_id: { _eq: $customerId } }
+        { status: { _in: ["unpaid", "paid", "partially_paid"] } }
+        $filter
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  payments_received_aggregate: payment_aggregate(
+    where: {
+      _and: [
+        { payment_method: { _neq: "Customer balance" } }
+        { order: { _and: [{ customer_id: { _eq: $customerId } }, $filter] } }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+}

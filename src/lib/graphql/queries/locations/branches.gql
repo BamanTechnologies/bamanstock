@@ -3,6 +3,7 @@ query investorLocations(
   $offset: Int
   $filter: branches_bool_exp
   $order: [branches_order_by!]!
+  $stocksFilter: stock_bool_exp = {}
 ) {
   branches(limit: $limit, offset: $offset, where: $filter, order_by: $order) {
     id
@@ -17,7 +18,7 @@ query investorLocations(
         count
       }
     }
-    stock_value: stocks_aggregate {
+    stock_value: stocks_aggregate(where: $stocksFilter) {
       aggregate {
         sum {
           selling_price

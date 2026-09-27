@@ -9,6 +9,7 @@ query getMerchantStocks(
     type
     quantity
     created_at
+    is_deleted
     batch_number
     purchased_price
     product {

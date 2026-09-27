@@ -24,6 +24,9 @@
   import CATEGORY_QUERY from "$graphql/queries/selector/product_category.gql";
   import UPDATE_BRANCH from "$graphql/mutation/locations/update.gql";
   import DELETE_BRANCH from "$graphql/mutation/locations/delete.gql";
+  import ARCHIVE_STOCK from "$graphql/mutation/stock/archive.gql";
+  import ARCHIVE_STOCK_MOVEMENT from "$graphql/mutation/stock_movements/archive.gql";
+  import { nonDeletedFilter } from "$lib/graphql/filters";
 
   const locationId = $derived($page.params.id);
 
@@ -302,6 +305,17 @@
   let stockData = $state<any[]>([]);
   let stockTotalCount = $state(0);
   let stockLoading = $state(false);
+  let stockSubFilter = $state<"active" | "archived">("active");
+
+  let isStockArchiveModalOpen = $state(false);
+  let stockArchivingItem = $state<any>(null);
+  let stockArchiveLoading = $state(false);
+  let stockArchiveError = $state<string | null>(null);
+
+  let isStockActivateModalOpen = $state(false);
+  let stockActivatingItem = $state<any>(null);
+  let stockActivateLoading = $state(false);
+  let stockActivateError = $state<string | null>(null);
 
   let stockDebouncedSearch = $state($page.url.searchParams.get("stk_search") ?? "");
   let stockDebounceTimer: ReturnType<typeof setTimeout>;
@@ -337,6 +351,7 @@
     if (stockCategoryId) {
       conditions.push({ product: { product_type_id: { _eq: stockCategoryId } } });
     }
+    conditions.push({ is_deleted: { _eq: stockSubFilter === "archived" } });
     return conditions.length ? { _and: conditions } : {};
   }
 
@@ -359,6 +374,8 @@
     void stockSortColumn;
     void stockSortDirection;
     void stockCategoryId;
+    void stockSubFilter;
+    void detailRefetchTrigger;
 
     if (activeTab !== "Stock") return;
     stockLoading = true;
@@ -397,6 +414,70 @@
       stockSortDirection = "asc";
     }
     stockCurrentPage = 1;
+  }
+
+  function openStockArchiveModal(item: any) {
+    stockArchivingItem = item;
+    stockArchiveError = null;
+    isStockArchiveModalOpen = true;
+  }
+
+  function closeStockArchiveModal() {
+    isStockArchiveModalOpen = false;
+    stockArchivingItem = null;
+    stockArchiveError = null;
+  }
+
+  async function confirmStockArchive() {
+    if (!stockArchivingItem) return;
+    stockArchiveLoading = true;
+    stockArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK,
+        variables: { id: stockArchivingItem.id, isDeleted: true },
+      });
+      isStockArchiveModalOpen = false;
+      stockArchivingItem = null;
+      detailRefetchTrigger++;
+    } catch (err: any) {
+      stockArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      stockArchiveLoading = false;
+    }
+  }
+
+  function openStockActivateModal(item: any) {
+    stockActivatingItem = item;
+    stockActivateError = null;
+    isStockActivateModalOpen = true;
+  }
+
+  function closeStockActivateModal() {
+    isStockActivateModalOpen = false;
+    stockActivatingItem = null;
+    stockActivateError = null;
+  }
+
+  async function confirmStockActivate() {
+    if (!stockActivatingItem) return;
+    stockActivateLoading = true;
+    stockActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK,
+        variables: { id: stockActivatingItem.id, isDeleted: false },
+      });
+      isStockActivateModalOpen = false;
+      stockActivatingItem = null;
+      detailRefetchTrigger++;
+    } catch (err: any) {
+      stockActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      stockActivateLoading = false;
+    }
   }
 
   // ===================== Merchants Tab =====================
@@ -470,6 +551,7 @@
     void merchantRowsPerPage;
     void merchantSortColumn;
     void merchantSortDirection;
+    void detailRefetchTrigger;
 
     if (activeTab !== "Merchants") return;
     merchantLoading = true;
@@ -484,6 +566,7 @@
             offset: (merchantCurrentPage - 1) * merchantRowsPerPage,
             filter: merchantBuildFilter(),
             order: merchantBuildOrder(),
+            ordersFilter: nonDeletedFilter(),
           },
         });
         const d = result.data as any;
@@ -542,6 +625,17 @@
   let smData = $state<any[]>([]);
   let smTotalCount = $state(0);
   let smLoading = $state(false);
+  let smSubFilter = $state<"active" | "archived">("active");
+
+  let isSmArchiveModalOpen = $state(false);
+  let smArchivingItem = $state<any>(null);
+  let smArchiveLoading = $state(false);
+  let smArchiveError = $state<string | null>(null);
+
+  let isSmActivateModalOpen = $state(false);
+  let smActivatingItem = $state<any>(null);
+  let smActivateLoading = $state(false);
+  let smActivateError = $state<string | null>(null);
 
   let smDebouncedSearch = $state($page.url.searchParams.get("sm_search") ?? "");
   let smDebounceTimer: ReturnType<typeof setTimeout>;
@@ -575,6 +669,7 @@
         ],
       });
     }
+    conditions.push({ is_deleted: { _eq: smSubFilter === "archived" } });
     return conditions.length ? { _and: conditions } : {};
   }
 
@@ -598,6 +693,8 @@
     void smSortDirection;
     void smDateFrom;
     void smDateTo;
+    void smSubFilter;
+    void detailRefetchTrigger;
 
     if (activeTab !== "Stock Movement") return;
     smLoading = true;
@@ -636,6 +733,70 @@
       smSortDirection = "asc";
     }
     smCurrentPage = 1;
+  }
+
+  function openSmArchiveModal(item: any) {
+    smArchivingItem = item;
+    smArchiveError = null;
+    isSmArchiveModalOpen = true;
+  }
+
+  function closeSmArchiveModal() {
+    isSmArchiveModalOpen = false;
+    smArchivingItem = null;
+    smArchiveError = null;
+  }
+
+  async function confirmSmArchive() {
+    if (!smArchivingItem) return;
+    smArchiveLoading = true;
+    smArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK_MOVEMENT,
+        variables: { id: smArchivingItem.id, isDeleted: true },
+      });
+      isSmArchiveModalOpen = false;
+      smArchivingItem = null;
+      detailRefetchTrigger++;
+    } catch (err: any) {
+      smArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      smArchiveLoading = false;
+    }
+  }
+
+  function openSmActivateModal(item: any) {
+    smActivatingItem = item;
+    smActivateError = null;
+    isSmActivateModalOpen = true;
+  }
+
+  function closeSmActivateModal() {
+    isSmActivateModalOpen = false;
+    smActivatingItem = null;
+    smActivateError = null;
+  }
+
+  async function confirmSmActivate() {
+    if (!smActivatingItem) return;
+    smActivateLoading = true;
+    smActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK_MOVEMENT,
+        variables: { id: smActivatingItem.id, isDeleted: false },
+      });
+      isSmActivateModalOpen = false;
+      smActivatingItem = null;
+      detailRefetchTrigger++;
+    } catch (err: any) {
+      smActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      smActivateLoading = false;
+    }
   }
 
   function movementTypeClass(type: string): string {
@@ -969,6 +1130,17 @@
             initialValue={stockCategoryId}
             onSelect={(item: any) => { stockCategoryId = item?.id ?? ""; stockCurrentPage = 1; }}
           />
+          <select
+            class="ml-auto px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:border-border"
+            value={stockSubFilter}
+            onchange={(e) => {
+              stockSubFilter = e.currentTarget.value as "active" | "archived";
+              stockCurrentPage = 1;
+            }}
+          >
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
         </div>
 
         {#if stockLoading}
@@ -1028,12 +1200,13 @@
                     </span>
                   </button>
                 </th>
+                <th class="px-4 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if stockData.length === 0 && !stockLoading}
                 <tr>
-                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
                       <p>No stock found for this location</p>
@@ -1058,6 +1231,27 @@
                     <td class="px-4 py-3 text-foreground">{item.branch?.name ?? "-"}</td>
                     <td class="px-4 py-3 text-muted-foreground text-xs">
                       {item.created_at ? new Date(item.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      {#if item.is_deleted}
+                        <button
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:bg-muted transition-colors"
+                          onclick={() => openStockActivateModal(item)}
+                          title="Activate"
+                        >
+                          <Icon iconName="icon/rotate-ccw" size={14} />
+                          Activate
+                        </button>
+                      {:else}
+                        <button
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:border-destructive/40 hover:text-destructive transition-colors"
+                          onclick={() => openStockArchiveModal(item)}
+                          title="Archive"
+                        >
+                          <Icon iconName="icon/archive" size={14} />
+                          Archive
+                        </button>
+                      {/if}
                     </td>
                   </tr>
                 {/each}
@@ -1322,6 +1516,17 @@
               bind:value={smSearchQuery}
             />
           </div>
+          <select
+            class="ml-auto px-3 py-2 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:border-border"
+            value={smSubFilter}
+            onchange={(e) => {
+              smSubFilter = e.currentTarget.value as "active" | "archived";
+              smCurrentPage = 1;
+            }}
+          >
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
         </div>
 
         {#if smLoading}
@@ -1382,12 +1587,13 @@
                     </span>
                   </button>
                 </th>
+                <th class="px-4 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if smData.length === 0 && !smLoading}
                 <tr>
-                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="9" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
                       <p>No stock movements found</p>
@@ -1412,6 +1618,27 @@
                     <td class="px-4 py-3 text-foreground font-medium">{movement.quantity_delta ?? 0}</td>
                     <td class="px-4 py-3 text-muted-foreground text-xs">
                       {movement.created_at ? new Date(movement.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      {#if movement.is_deleted}
+                        <button
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:bg-muted transition-colors"
+                          onclick={() => openSmActivateModal(movement)}
+                          title="Activate"
+                        >
+                          <Icon iconName="icon/rotate-ccw" size={14} />
+                          Activate
+                        </button>
+                      {:else}
+                        <button
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:border-destructive/40 hover:text-destructive transition-colors"
+                          onclick={() => openSmArchiveModal(movement)}
+                          title="Archive"
+                        >
+                          <Icon iconName="icon/archive" size={14} />
+                          Archive
+                        </button>
+                      {/if}
                     </td>
                   </tr>
                 {/each}
@@ -1534,6 +1761,54 @@
         stockItemToRemove = undefined;
       }
     }}
+  />
+
+  <!-- Archive Stock Modal -->
+  <ConfirmModal
+    bind:isOpen={isStockArchiveModalOpen}
+    title="Archive Stock"
+    message="Are you sure you want to archive this stock? This will also archive its movements, orders and transfers."
+    error={stockArchiveError}
+    confirmText="Archive"
+    loading={stockArchiveLoading}
+    onConfirm={confirmStockArchive}
+    onClose={closeStockArchiveModal}
+  />
+
+  <!-- Activate Stock Modal -->
+  <ConfirmModal
+    bind:isOpen={isStockActivateModalOpen}
+    title="Activate Stock"
+    message="Are you sure you want to activate this stock back?"
+    error={stockActivateError}
+    confirmText="Activate"
+    loading={stockActivateLoading}
+    onConfirm={confirmStockActivate}
+    onClose={closeStockActivateModal}
+  />
+
+  <!-- Archive Stock Movement Modal -->
+  <ConfirmModal
+    bind:isOpen={isSmArchiveModalOpen}
+    title="Archive Stock Movement"
+    message="Are you sure you want to archive this stock movement?"
+    error={smArchiveError}
+    confirmText="Archive"
+    loading={smArchiveLoading}
+    onConfirm={confirmSmArchive}
+    onClose={closeSmArchiveModal}
+  />
+
+  <!-- Activate Stock Movement Modal -->
+  <ConfirmModal
+    bind:isOpen={isSmActivateModalOpen}
+    title="Activate Stock Movement"
+    message="Are you sure you want to activate this stock movement back?"
+    error={smActivateError}
+    confirmText="Activate"
+    loading={smActivateLoading}
+    onConfirm={confirmSmActivate}
+    onClose={closeSmActivateModal}
   />
 </div>
 

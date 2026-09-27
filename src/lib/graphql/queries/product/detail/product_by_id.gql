@@ -15,6 +15,39 @@ query getProductById($id: uuid!) {
     attributes
     company_id
     created_by
+    is_deleted
+  }
+  total_orders_active: orders_aggregate(
+    where: { stock: { product_id: { _eq: $id } }, is_deleted: { _eq: false } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  total_product_sales_active: orders_aggregate(
+    where: { stock: { product_id: { _eq: $id } }, is_deleted: { _eq: false } }
+  ) {
+    aggregate {
+      sum {
+        total_amount
+      }
+    }
+  }
+  total_product_sales_outstanding_active: orders_aggregate(
+    where: { stock: { product_id: { _eq: $id } }, is_deleted: { _eq: false } }
+  ) {
+    aggregate {
+      sum {
+        outstanding_amount
+      }
+    }
+  }
+  total_transfers_active: stock_movements_aggregate(
+    where: { product_id: { _eq: $id }, is_deleted: { _eq: false } }
+  ) {
+    aggregate {
+      count
+    }
   }
   total_orders: orders_aggregate(
     where: { stock: { product_id: { _eq: $id } } }

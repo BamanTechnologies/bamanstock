@@ -18,6 +18,10 @@
   import PRODUCT_QUERY from "$graphql/queries/selector/products.gql";
   import LOW_STOCK_QUERY from "$graphql/queries/reports/low_stock_products/low_stock_products.gql";
   import LOW_STOCK_STATS_QUERY from "$graphql/queries/reports/low_stock_products/stats.gql";
+  import ARCHIVE_ORDER from "$graphql/mutation/order/archive.gql";
+  import ARCHIVE_STOCK_MOVEMENT from "$graphql/mutation/stock_movements/archive.gql";
+  import ARCHIVE_PRODUCT from "$graphql/mutation/product/archive.gql";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
 
   const tabs = $derived([
     { key: "Sales",             label: $_('tabSales') },
@@ -145,6 +149,10 @@
       const client = getAuthClient("investor");
       const result = await client.query({
         query: PAYMENT_STATS_QUERY,
+        variables: {
+          paymentFilter: { order: { is_deleted: { _eq: paymentsSub === "archived" } } },
+          ordersFilter: { is_deleted: { _eq: paymentsSub === "archived" } },
+        },
       });
       paymentStatsData = result.data as Record<string, any>;
     } catch {
@@ -156,6 +164,8 @@
 
   $effect(() => {
     void activeTab;
+    void paymentsSub;
+    void paymentsStatsRefetch;
     if (activeTab !== "Payments") return;
     loadPaymentStats();
   });
@@ -192,6 +202,20 @@
   let paymentsTotalCount = $state(0);
   let paymentsLoading = $state(false);
 
+  let paymentsSub = $state<"active" | "archived">(
+    ($page.url.searchParams.get("paymentsSub") as "active" | "archived") || "active"
+  );
+  let paymentsRefetch = $state(0);
+  let paymentsStatsRefetch = $state(0);
+  let isPaymentsArchiveModalOpen = $state(false);
+  let paymentsArchivingOrder = $state<any>(null);
+  let paymentsArchiveLoading = $state(false);
+  let paymentsArchiveError = $state<string | null>(null);
+  let isPaymentsActivateModalOpen = $state(false);
+  let paymentsActivatingOrder = $state<any>(null);
+  let paymentsActivateLoading = $state(false);
+  let paymentsActivateError = $state<string | null>(null);
+
   let paymentsDebouncedSearch = $state(paymentsSearchQuery);
   let paymentsDebounceTimer: ReturnType<typeof setTimeout>;
 
@@ -208,7 +232,9 @@
   const paymentsTotalPages = $derived(Math.max(1, Math.ceil(paymentsTotalCount / paymentsRowsPerPage)));
 
   function paymentsBuildFilter(): Record<string, unknown> {
-    const conditions: Record<string, unknown>[] = [];
+    const conditions: Record<string, unknown>[] = [
+      { order: { is_deleted: { _eq: paymentsSub === "archived" } } },
+    ];
     if (paymentsDateFrom) {
       conditions.push({ created_at: { _gte: paymentsDateFrom } });
     }
@@ -257,6 +283,7 @@
   function paymentsSyncUrl() {
     const params = new URLSearchParams();
     params.set("tab", "Payments");
+    if (paymentsSub !== "active") params.set("paymentsSub", paymentsSub);
     if (paymentsDebouncedSearch) params.set("search", paymentsDebouncedSearch);
     if (paymentsCurrentPage > 1) params.set("page", String(paymentsCurrentPage));
     if (paymentsRowsPerPage !== 10) params.set("limit", String(paymentsRowsPerPage));
@@ -281,6 +308,8 @@
     void paymentsDateTo;
     void paymentsLocationId;
     void paymentsMerchantId;
+    void paymentsSub;
+    void paymentsRefetch;
 
     if (activeTab !== "Payments") return;
     paymentsLoading = true;
@@ -334,6 +363,72 @@
     paymentsCurrentPage = 1;
   }
 
+  function openPaymentsArchiveModal(payment: any) {
+    paymentsArchivingOrder = payment?.order ?? null;
+    paymentsArchiveError = null;
+    isPaymentsArchiveModalOpen = true;
+  }
+
+  function closePaymentsArchiveModal() {
+    isPaymentsArchiveModalOpen = false;
+    paymentsArchivingOrder = null;
+    paymentsArchiveError = null;
+  }
+
+  async function confirmPaymentsArchive() {
+    if (!paymentsArchivingOrder) return;
+    paymentsArchiveLoading = true;
+    paymentsArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_ORDER,
+        variables: { id: paymentsArchivingOrder.id, isDeleted: true },
+      });
+      isPaymentsArchiveModalOpen = false;
+      paymentsArchivingOrder = null;
+      paymentsRefetch++;
+      paymentsStatsRefetch++;
+    } catch (err: any) {
+      paymentsArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      paymentsArchiveLoading = false;
+    }
+  }
+
+  function openPaymentsActivateModal(payment: any) {
+    paymentsActivatingOrder = payment?.order ?? null;
+    paymentsActivateError = null;
+    isPaymentsActivateModalOpen = true;
+  }
+
+  function closePaymentsActivateModal() {
+    isPaymentsActivateModalOpen = false;
+    paymentsActivatingOrder = null;
+    paymentsActivateError = null;
+  }
+
+  async function confirmPaymentsActivate() {
+    if (!paymentsActivatingOrder) return;
+    paymentsActivateLoading = true;
+    paymentsActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_ORDER,
+        variables: { id: paymentsActivatingOrder.id, isDeleted: false },
+      });
+      isPaymentsActivateModalOpen = false;
+      paymentsActivatingOrder = null;
+      paymentsRefetch++;
+      paymentsStatsRefetch++;
+    } catch (err: any) {
+      paymentsActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      paymentsActivateLoading = false;
+    }
+  }
+
   // === Stock Movement Tab: Queries and Stats ===
   import STOCK_MOVEMENT_QUERY from "$graphql/queries/reports/stock_movement/stock_movement.gql";
   import STOCK_MOVEMENT_STATS_QUERY from "$graphql/queries/reports/stock_movement/stats.gql";
@@ -347,6 +442,7 @@
       const client = getAuthClient("investor");
       const result = await client.query({
         query: STOCK_MOVEMENT_STATS_QUERY,
+        variables: { filter: { is_deleted: { _eq: stockSub === "archived" } } },
       });
       stockMovementStatsData = result.data as Record<string, any>;
     } catch {
@@ -358,6 +454,8 @@
 
   $effect(() => {
     void activeTab;
+    void stockSub;
+    void stockStatsRefetch;
     if (activeTab !== "Stock Movement") return;
     loadStockMovementStats();
   });
@@ -395,6 +493,20 @@
   let stockMovementsTotalCount = $state(0);
   let stockLoading = $state(false);
 
+  let stockSub = $state<"active" | "archived">(
+    ($page.url.searchParams.get("stockSub") as "active" | "archived") || "active"
+  );
+  let stockRefetch = $state(0);
+  let stockStatsRefetch = $state(0);
+  let isStockArchiveModalOpen = $state(false);
+  let stockArchivingMovement = $state<any>(null);
+  let stockArchiveLoading = $state(false);
+  let stockArchiveError = $state<string | null>(null);
+  let isStockActivateModalOpen = $state(false);
+  let stockActivatingMovement = $state<any>(null);
+  let stockActivateLoading = $state(false);
+  let stockActivateError = $state<string | null>(null);
+
   let stockDebouncedSearch = $state(stockSearchQuery);
   let stockDebounceTimer: ReturnType<typeof setTimeout>;
 
@@ -419,7 +531,9 @@
   ]);
 
   function stockBuildFilter(): Record<string, unknown> {
-    const conditions: Record<string, unknown>[] = [];
+    const conditions: Record<string, unknown>[] = [
+      { is_deleted: { _eq: stockSub === "archived" } },
+    ];
     if (stockDateFrom) {
       conditions.push({ created_at: { _gte: stockDateFrom } });
     }
@@ -471,6 +585,7 @@
   function stockSyncUrl() {
     const params = new URLSearchParams();
     params.set("tab", "Stock Movement");
+    if (stockSub !== "active") params.set("stockSub", stockSub);
     if (stockDebouncedSearch) params.set("search", stockDebouncedSearch);
     if (stockCurrentPage > 1) params.set("page", String(stockCurrentPage));
     if (stockRowsPerPage !== 10) params.set("limit", String(stockRowsPerPage));
@@ -497,6 +612,8 @@
     void stockLocationId;
     void stockMerchantId;
     void stockMovementType;
+    void stockSub;
+    void stockRefetch;
 
     if (activeTab !== "Stock Movement") return;
     stockLoading = true;
@@ -545,6 +662,72 @@
     stockCurrentPage = 1;
   }
 
+  function openStockArchiveModal(movement: any) {
+    stockArchivingMovement = movement;
+    stockArchiveError = null;
+    isStockArchiveModalOpen = true;
+  }
+
+  function closeStockArchiveModal() {
+    isStockArchiveModalOpen = false;
+    stockArchivingMovement = null;
+    stockArchiveError = null;
+  }
+
+  async function confirmStockArchive() {
+    if (!stockArchivingMovement) return;
+    stockArchiveLoading = true;
+    stockArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK_MOVEMENT,
+        variables: { id: stockArchivingMovement.id, isDeleted: true },
+      });
+      isStockArchiveModalOpen = false;
+      stockArchivingMovement = null;
+      stockRefetch++;
+      stockStatsRefetch++;
+    } catch (err: any) {
+      stockArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      stockArchiveLoading = false;
+    }
+  }
+
+  function openStockActivateModal(movement: any) {
+    stockActivatingMovement = movement;
+    stockActivateError = null;
+    isStockActivateModalOpen = true;
+  }
+
+  function closeStockActivateModal() {
+    isStockActivateModalOpen = false;
+    stockActivatingMovement = null;
+    stockActivateError = null;
+  }
+
+  async function confirmStockActivate() {
+    if (!stockActivatingMovement) return;
+    stockActivateLoading = true;
+    stockActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_STOCK_MOVEMENT,
+        variables: { id: stockActivatingMovement.id, isDeleted: false },
+      });
+      isStockActivateModalOpen = false;
+      stockActivatingMovement = null;
+      stockRefetch++;
+      stockStatsRefetch++;
+    } catch (err: any) {
+      stockActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      stockActivateLoading = false;
+    }
+  }
+
   function movementTypeClass(type: string): string {
     switch (type) {
       case "PURCHASE": return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300";
@@ -565,6 +748,10 @@
       const client = getAuthClient("investor");
       const result = await client.query({
         query: LOW_STOCK_STATS_QUERY,
+        variables: {
+          productFilter: { is_deleted: { _eq: lowStockSub === "archived" } },
+          stockFilter: { is_deleted: { _eq: lowStockSub === "archived" } },
+        },
       });
       lowStockStatsData = result.data as Record<string, any>;
     } catch {
@@ -598,6 +785,8 @@
 
   $effect(() => {
     void activeTab;
+    void lowStockSub;
+    void lowStockStatsRefetch;
     if (activeTab !== "Low Stock") return;
     loadLowStockStats();
   });
@@ -621,6 +810,20 @@
   let lowStockTotalCount = $state(0);
   let lowStockLoading = $state(false);
 
+  let lowStockSub = $state<"active" | "archived">(
+    ($page.url.searchParams.get("lowStockSub") as "active" | "archived") || "active"
+  );
+  let lowStockRefetch = $state(0);
+  let lowStockStatsRefetch = $state(0);
+  let isLowStockArchiveModalOpen = $state(false);
+  let lowStockArchivingProduct = $state<any>(null);
+  let lowStockArchiveLoading = $state(false);
+  let lowStockArchiveError = $state<string | null>(null);
+  let isLowStockActivateModalOpen = $state(false);
+  let lowStockActivatingProduct = $state<any>(null);
+  let lowStockActivateLoading = $state(false);
+  let lowStockActivateError = $state<string | null>(null);
+
   let lowStockDebouncedSearch = $state(lowStockSearchQuery);
   let lowStockDebounceTimer: ReturnType<typeof setTimeout>;
 
@@ -637,7 +840,9 @@
   const lowStockTotalPages = $derived(Math.max(1, Math.ceil(lowStockTotalCount / lowStockRowsPerPage)));
 
   function lowStockBuildFilter(): Record<string, unknown> {
-    const conditions: Record<string, unknown>[] = [];
+    const conditions: Record<string, unknown>[] = [
+      { is_deleted: { _eq: lowStockSub === "archived" } },
+    ];
     if (lowStockLocationId) {
       conditions.push({ company: { branches: { id: { _eq: lowStockLocationId } } } });
     }
@@ -689,6 +894,7 @@
   function lowStockSyncUrl() {
     const params = new URLSearchParams();
     params.set("tab", "Low Stock");
+    if (lowStockSub !== "active") params.set("lowStockSub", lowStockSub);
     if (lowStockDebouncedSearch) params.set("search", lowStockDebouncedSearch);
     if (lowStockCurrentPage > 1) params.set("page", String(lowStockCurrentPage));
     if (lowStockRowsPerPage !== 10) params.set("limit", String(lowStockRowsPerPage));
@@ -713,6 +919,8 @@
     void lowStockMerchantId;
     void lowStockCategoryId;
     void lowStockProductId;
+    void lowStockSub;
+    void lowStockRefetch;
 
     if (activeTab !== "Low Stock") return;
     lowStockLoading = true;
@@ -759,6 +967,72 @@
       lowStockSortDirection = "asc";
     }
     lowStockCurrentPage = 1;
+  }
+
+  function openLowStockArchiveModal(product: any) {
+    lowStockArchivingProduct = product;
+    lowStockArchiveError = null;
+    isLowStockArchiveModalOpen = true;
+  }
+
+  function closeLowStockArchiveModal() {
+    isLowStockArchiveModalOpen = false;
+    lowStockArchivingProduct = null;
+    lowStockArchiveError = null;
+  }
+
+  async function confirmLowStockArchive() {
+    if (!lowStockArchivingProduct) return;
+    lowStockArchiveLoading = true;
+    lowStockArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_PRODUCT,
+        variables: { id: lowStockArchivingProduct.id, isDeleted: true },
+      });
+      isLowStockArchiveModalOpen = false;
+      lowStockArchivingProduct = null;
+      lowStockRefetch++;
+      lowStockStatsRefetch++;
+    } catch (err: any) {
+      lowStockArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      lowStockArchiveLoading = false;
+    }
+  }
+
+  function openLowStockActivateModal(product: any) {
+    lowStockActivatingProduct = product;
+    lowStockActivateError = null;
+    isLowStockActivateModalOpen = true;
+  }
+
+  function closeLowStockActivateModal() {
+    isLowStockActivateModalOpen = false;
+    lowStockActivatingProduct = null;
+    lowStockActivateError = null;
+  }
+
+  async function confirmLowStockActivate() {
+    if (!lowStockActivatingProduct) return;
+    lowStockActivateLoading = true;
+    lowStockActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_PRODUCT,
+        variables: { id: lowStockActivatingProduct.id, isDeleted: false },
+      });
+      isLowStockActivateModalOpen = false;
+      lowStockActivatingProduct = null;
+      lowStockRefetch++;
+      lowStockStatsRefetch++;
+    } catch (err: any) {
+      lowStockActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      lowStockActivateLoading = false;
+    }
   }
 
   function lowStockTypeClass(stock: number, threshold: number): string {
@@ -899,7 +1173,11 @@
       const client = getAuthClient("investor");
       const result = await client.query({
         query: SALES_STAT_QUERY,
-        variables: { pastMonthEndDate: getPastMonthEndISO() },
+        variables: {
+          pastMonthEndDate: getPastMonthEndISO(),
+          paymentFilter: { order: { is_deleted: { _eq: salesSub === "archived" } } },
+          ordersFilter: { is_deleted: { _eq: salesSub === "archived" } },
+        },
       });
       statsData = result.data as Record<string, any>;
     } catch {
@@ -911,6 +1189,8 @@
 
   $effect(() => {
     void activeTab;
+    void salesSub;
+    void salesStatsRefetch;
     if (activeTab !== "Sales") return;
     loadStats();
   });
@@ -983,6 +1263,20 @@
   let salesTotalCount = $state(0);
   let salesLoading = $state(false);
 
+  let salesSub = $state<"active" | "archived">(
+    ($page.url.searchParams.get("salesSub") as "active" | "archived") || "active"
+  );
+  let salesRefetch = $state(0);
+  let salesStatsRefetch = $state(0);
+  let isSalesArchiveModalOpen = $state(false);
+  let salesArchivingOrder = $state<any>(null);
+  let salesArchiveLoading = $state(false);
+  let salesArchiveError = $state<string | null>(null);
+  let isSalesActivateModalOpen = $state(false);
+  let salesActivatingOrder = $state<any>(null);
+  let salesActivateLoading = $state(false);
+  let salesActivateError = $state<string | null>(null);
+
   let salesDebouncedSearch = $state(salesSearchQuery);
   let salesDebounceTimer: ReturnType<typeof setTimeout>;
 
@@ -999,7 +1293,9 @@
   const salesTotalPages = $derived(Math.max(1, Math.ceil(salesTotalCount / salesRowsPerPage)));
 
   function salesBuildFilter(): Record<string, unknown> {
-    const conditions: Record<string, unknown>[] = [];
+    const conditions: Record<string, unknown>[] = [
+      { is_deleted: { _eq: salesSub === "archived" } },
+    ];
     if (salesLocationId) {
       conditions.push({ merchant: { branchByBranch: { id: { _eq: salesLocationId } } } });
     }
@@ -1049,6 +1345,7 @@
   function salesSyncUrl() {
     const params = new URLSearchParams();
     if (activeTab !== "Sales") params.set("tab", activeTab);
+    if (salesSub !== "active") params.set("salesSub", salesSub);
     if (salesDebouncedSearch) params.set("search", salesDebouncedSearch);
     if (salesCurrentPage > 1) params.set("page", String(salesCurrentPage));
     if (salesRowsPerPage !== 10) params.set("limit", String(salesRowsPerPage));
@@ -1073,6 +1370,8 @@
     void salesMerchantId;
     void salesCategoryId;
     void salesProductId;
+    void salesSub;
+    void salesRefetch;
 
     if (activeTab !== "Sales") return;
     salesLoading = true;
@@ -1119,6 +1418,72 @@
       salesSortDirection = "asc";
     }
     salesCurrentPage = 1;
+  }
+
+  function openSalesArchiveModal(order: any) {
+    salesArchivingOrder = order;
+    salesArchiveError = null;
+    isSalesArchiveModalOpen = true;
+  }
+
+  function closeSalesArchiveModal() {
+    isSalesArchiveModalOpen = false;
+    salesArchivingOrder = null;
+    salesArchiveError = null;
+  }
+
+  async function confirmSalesArchive() {
+    if (!salesArchivingOrder) return;
+    salesArchiveLoading = true;
+    salesArchiveError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_ORDER,
+        variables: { id: salesArchivingOrder.id, isDeleted: true },
+      });
+      isSalesArchiveModalOpen = false;
+      salesArchivingOrder = null;
+      salesRefetch++;
+      salesStatsRefetch++;
+    } catch (err: any) {
+      salesArchiveError = err.message ?? "An unexpected error occurred";
+    } finally {
+      salesArchiveLoading = false;
+    }
+  }
+
+  function openSalesActivateModal(order: any) {
+    salesActivatingOrder = order;
+    salesActivateError = null;
+    isSalesActivateModalOpen = true;
+  }
+
+  function closeSalesActivateModal() {
+    isSalesActivateModalOpen = false;
+    salesActivatingOrder = null;
+    salesActivateError = null;
+  }
+
+  async function confirmSalesActivate() {
+    if (!salesActivatingOrder) return;
+    salesActivateLoading = true;
+    salesActivateError = null;
+    try {
+      const client = getAuthClient("investor");
+      await client.mutate({
+        mutation: ARCHIVE_ORDER,
+        variables: { id: salesActivatingOrder.id, isDeleted: false },
+      });
+      isSalesActivateModalOpen = false;
+      salesActivatingOrder = null;
+      salesRefetch++;
+      salesStatsRefetch++;
+    } catch (err: any) {
+      salesActivateError = err.message ?? "An unexpected error occurred";
+    } finally {
+      salesActivateLoading = false;
+    }
   }
 
   function handleExportPDF() {
@@ -1176,6 +1541,26 @@
   <!-- Tab Content -->
     {#if activeTab === "Sales"}
     <div class="space-y-6">
+      <!-- Active / Archived Sub-filter -->
+      <div class="border-b border-border">
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            onclick={() => { salesSub = "active"; salesCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {salesSub === 'active' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('statusActive')}
+          </button>
+          <button
+            type="button"
+            onclick={() => { salesSub = "archived"; salesCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {salesSub === 'archived' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('archived')}
+          </button>
+        </div>
+      </div>
+
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {#if statsLoading}
@@ -1357,12 +1742,13 @@
                     </span>
                   </button>
                 </th>
+                <th class="px-4 py-3 font-medium uppercase">{$_('actions')}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if salesOrders.length === 0 && !salesLoading}
                 <tr>
-                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
                       <p>{$_('noSalesFound')}</p>
@@ -1385,13 +1771,41 @@
                     <td class="px-4 py-3 text-foreground font-medium">{fmtCurrency(order.total_amount)}</td>
                     <td class="px-4 py-3 text-foreground">{order.order_quantity ?? 0}</td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium {order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : order.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'}">
-                        <span class="w-1.5 h-1.5 rounded-full {order.status === 'completed' || order.status === 'delivered' ? 'bg-green-600' : order.status === 'cancelled' ? 'bg-red-600' : 'bg-yellow-600'}"></span>
-                        {order.status}
-                      </span>
+                      {#if salesSub === "archived"}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300">
+                          <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+                          {$_('archived')}
+                        </span>
+                      {:else}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium {order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : order.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'}">
+                          <span class="w-1.5 h-1.5 rounded-full {order.status === 'completed' || order.status === 'delivered' ? 'bg-green-600' : order.status === 'cancelled' ? 'bg-red-600' : 'bg-yellow-600'}"></span>
+                          {order.status}
+                        </span>
+                      {/if}
                     </td>
                     <td class="px-4 py-3 text-muted-foreground text-xs">
                       {order.created_at ? new Date(order.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-1">
+                        {#if salesSub === "active"}
+                          <button
+                            onclick={() => openSalesArchiveModal(order)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('archive')}
+                          >
+                            <Icon iconName="icon/archive" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {:else}
+                          <button
+                            onclick={() => openSalesActivateModal(order)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('activate')}
+                          >
+                            <Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {/if}
+                      </div>
                     </td>
                   </tr>
                 {/each}
@@ -1677,6 +2091,26 @@
   {/if}
   {#if activeTab === "Payments"}
     <div class="space-y-6">
+      <!-- Active / Archived Sub-filter -->
+      <div class="border-b border-border">
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            onclick={() => { paymentsSub = "active"; paymentsCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {paymentsSub === 'active' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('statusActive')}
+          </button>
+          <button
+            type="button"
+            onclick={() => { paymentsSub = "archived"; paymentsCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {paymentsSub === 'archived' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('archived')}
+          </button>
+        </div>
+      </div>
+
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {#if paymentStatsLoading}
@@ -1844,12 +2278,13 @@
                     </span>
                   </button>
                 </th>
+                <th class="px-4 py-3 font-medium uppercase">{$_('actions')}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if paymentsData.length === 0 && !paymentsLoading}
                 <tr>
-                  <td colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
                       <p>{$_('noPaymentsFound')}</p>
@@ -1865,13 +2300,41 @@
                     <td class="px-4 py-3 text-foreground">{payment.payment_method ?? "-"}</td>
                     <td class="px-4 py-3 text-foreground font-medium">{fmtCurrency(payment.amount)}</td>
                     <td class="px-4 py-3">
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium {payment.order?.status === 'paid' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : payment.order?.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'}">
-                        <span class="w-1.5 h-1.5 rounded-full {payment.order?.status === 'paid' ? 'bg-green-600' : payment.order?.status === 'cancelled' ? 'bg-red-600' : 'bg-yellow-600'}"></span>
-                        {payment.order?.status ?? "-"}
-                      </span>
+                      {#if paymentsSub === "archived"}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300">
+                          <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+                          {$_('archived')}
+                        </span>
+                      {:else}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium {payment.order?.status === 'paid' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : payment.order?.status === 'cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'}">
+                          <span class="w-1.5 h-1.5 rounded-full {payment.order?.status === 'paid' ? 'bg-green-600' : payment.order?.status === 'cancelled' ? 'bg-red-600' : 'bg-yellow-600'}"></span>
+                          {payment.order?.status ?? "-"}
+                        </span>
+                      {/if}
                     </td>
                     <td class="px-4 py-3 text-muted-foreground text-xs">
                       {payment.created_at ? new Date(payment.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-1">
+                        {#if paymentsSub === "active"}
+                          <button
+                            onclick={() => openPaymentsArchiveModal(payment)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('archive')}
+                          >
+                            <Icon iconName="icon/archive" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {:else}
+                          <button
+                            onclick={() => openPaymentsActivateModal(payment)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('activate')}
+                          >
+                            <Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {/if}
+                      </div>
                     </td>
                   </tr>
                 {/each}
@@ -1932,6 +2395,26 @@
   {/if}
   {#if activeTab === "Stock Movement"}
     <div class="space-y-6">
+      <!-- Active / Archived Sub-filter -->
+      <div class="border-b border-border">
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            onclick={() => { stockSub = "active"; stockCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {stockSub === 'active' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('statusActive')}
+          </button>
+          <button
+            type="button"
+            onclick={() => { stockSub = "archived"; stockCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {stockSub === 'archived' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('archived')}
+          </button>
+        </div>
+      </div>
+
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#if stockMovementStatsLoading}
@@ -2110,12 +2593,13 @@
                     </span>
                   </button>
                 </th>
+                <th class="px-4 py-3 font-medium uppercase">{$_('actions')}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if stockMovementsData.length === 0 && !stockLoading}
                 <tr>
-                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="9" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
                       <p>{$_('noStockMovementsFound')}</p>
@@ -2138,6 +2622,27 @@
                     <td class="px-4 py-3 text-foreground font-medium">{movement.quantity_delta ?? 0}</td>
                     <td class="px-4 py-3 text-muted-foreground text-xs">
                       {movement.created_at ? new Date(movement.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-1">
+                        {#if stockSub === "active"}
+                          <button
+                            onclick={() => openStockArchiveModal(movement)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('archive')}
+                          >
+                            <Icon iconName="icon/archive" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {:else}
+                          <button
+                            onclick={() => openStockActivateModal(movement)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('activate')}
+                          >
+                            <Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {/if}
+                      </div>
                     </td>
                   </tr>
                 {/each}
@@ -2198,6 +2703,26 @@
   {/if}
   {#if activeTab === "Low Stock"}
     <div class="space-y-6">
+      <!-- Active / Archived Sub-filter -->
+      <div class="border-b border-border">
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            onclick={() => { lowStockSub = "active"; lowStockCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {lowStockSub === 'active' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('statusActive')}
+          </button>
+          <button
+            type="button"
+            onclick={() => { lowStockSub = "archived"; lowStockCurrentPage = 1; }}
+            class="px-4 py-2 rounded-t-md text-sm font-medium transition-colors border-b-2 {lowStockSub === 'archived' ? 'border-[#4DA0E6] text-[#4DA0E6]' : 'border-transparent text-muted-foreground hover:text-foreground'}"
+          >
+            {$_('archived')}
+          </button>
+        </div>
+      </div>
+
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         {#if lowStockStatsLoading}
@@ -2394,12 +2919,13 @@
                     </span>
                   </button>
                 </th>
+                <th class="px-4 py-3 font-medium uppercase">{$_('actions')}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               {#if lowStockData.length === 0 && !lowStockLoading}
                 <tr>
-                  <td colspan="8" class="px-4 py-12 text-center text-muted-foreground">
+                  <td colspan="9" class="px-4 py-12 text-center text-muted-foreground">
                     <div class="flex flex-col items-center gap-2">
                       <Icon iconName="icon/box" size={32} class="text-muted-foreground" />
                       <p>{$_('noLowStockFound')}</p>
@@ -2429,6 +2955,27 @@
                     <td class="px-4 py-3 text-foreground">{product.treshold_quantity ?? 0}</td>
                     <td class="px-4 py-3 text-muted-foreground text-xs">
                       {product.created_at ? new Date(product.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-1">
+                        {#if lowStockSub === "active"}
+                          <button
+                            onclick={() => openLowStockArchiveModal(product)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('archive')}
+                          >
+                            <Icon iconName="icon/archive" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {:else}
+                          <button
+                            onclick={() => openLowStockActivateModal(product)}
+                            class="p-1.5 rounded hover:bg-muted transition-colors"
+                            aria-label={$_('activate')}
+                          >
+                            <Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" />
+                          </button>
+                        {/if}
+                      </div>
                     </td>
                   </tr>
                 {/each}
@@ -2488,6 +3035,94 @@
     </div>
   {/if}
 </div>
+
+<ConfirmModal
+  bind:isOpen={isSalesArchiveModalOpen}
+  title="Archive Order"
+  message={salesArchivingOrder ? `Are you sure you want to archive <strong>${salesArchivingOrder.customer_name || salesArchivingOrder.merchant?.first_name || salesArchivingOrder.id}</strong>? This will also archive its related order items and batches.` : ""}
+  error={salesArchiveError}
+  confirmText="Archive Order"
+  loading={salesArchiveLoading}
+  onConfirm={confirmSalesArchive}
+  onClose={closeSalesArchiveModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isSalesActivateModalOpen}
+  title="Activate Order"
+  message={salesActivatingOrder ? `Are you sure you want to activate <strong>${salesActivatingOrder.customer_name || salesActivatingOrder.merchant?.first_name || salesActivatingOrder.id}</strong>? This will also restore its related order items and batches.` : ""}
+  error={salesActivateError}
+  confirmText="Activate Order"
+  loading={salesActivateLoading}
+  onConfirm={confirmSalesActivate}
+  onClose={closeSalesActivateModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isPaymentsArchiveModalOpen}
+  title="Archive Payment"
+  message={paymentsArchivingOrder ? `Are you sure you want to archive this payment? This will also archive its related order <strong>${paymentsArchivingOrder.id}</strong> and order items.` : ""}
+  error={paymentsArchiveError}
+  confirmText="Archive Payment"
+  loading={paymentsArchiveLoading}
+  onConfirm={confirmPaymentsArchive}
+  onClose={closePaymentsArchiveModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isPaymentsActivateModalOpen}
+  title="Activate Payment"
+  message={paymentsActivatingOrder ? `Are you sure you want to activate this payment? This will also restore its related order <strong>${paymentsActivatingOrder.id}</strong> and order items.` : ""}
+  error={paymentsActivateError}
+  confirmText="Activate Payment"
+  loading={paymentsActivateLoading}
+  onConfirm={confirmPaymentsActivate}
+  onClose={closePaymentsActivateModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isStockArchiveModalOpen}
+  title="Archive Stock Movement"
+  message={stockArchivingMovement ? `Are you sure you want to archive this stock movement?` : ""}
+  error={stockArchiveError}
+  confirmText="Archive Movement"
+  loading={stockArchiveLoading}
+  onConfirm={confirmStockArchive}
+  onClose={closeStockArchiveModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isStockActivateModalOpen}
+  title="Activate Stock Movement"
+  message={stockActivatingMovement ? `Are you sure you want to activate <strong>${stockActivatingMovement.stock?.product?.name || stockActivatingMovement.reference_type || stockActivatingMovement.id}</strong>?` : ""}
+  error={stockActivateError}
+  confirmText="Activate Movement"
+  loading={stockActivateLoading}
+  onConfirm={confirmStockActivate}
+  onClose={closeStockActivateModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isLowStockArchiveModalOpen}
+  title="Archive Product"
+  message={lowStockArchivingProduct ? `Are you sure you want to archive <strong>${lowStockArchivingProduct.name}</strong>? This will also archive its related stocks, orders and transfers.` : ""}
+  error={lowStockArchiveError}
+  confirmText="Archive Product"
+  loading={lowStockArchiveLoading}
+  onConfirm={confirmLowStockArchive}
+  onClose={closeLowStockArchiveModal}
+/>
+
+<ConfirmModal
+  bind:isOpen={isLowStockActivateModalOpen}
+  title="Activate Product"
+  message={lowStockActivatingProduct ? `Are you sure you want to activate <strong>${lowStockActivatingProduct.name}</strong>? This will also restore its related stocks, orders and transfers.` : ""}
+  error={lowStockActivateError}
+  confirmText="Activate Product"
+  loading={lowStockActivateLoading}
+  onConfirm={confirmLowStockActivate}
+  onClose={closeLowStockActivateModal}
+/>
 
 <style>
   :global(.loading-slide) {

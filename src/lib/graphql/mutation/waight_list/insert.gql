@@ -1,0 +1,5 @@
+mutation insertWaightLists($object: customer_waight_lists_insert_input!) {
+  insert_customer_waight_lists_one(object: $object) {
+    id
+  }
+}
