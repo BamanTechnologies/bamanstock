@@ -9,6 +9,7 @@ query fetchInvestorStocks(
     type
     quantity
     created_at
+    is_deleted
     batch_number
     expiry_date
     unit

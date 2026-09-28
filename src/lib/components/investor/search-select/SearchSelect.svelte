@@ -20,6 +20,8 @@
     valueKey = "id",
     placeholder = $_('searchAndSelect'),
     initialValue = "",
+    mode = "filter",
+    excludeDeleted = false,
     role = "investor",
     client: clientProp,
     onSelect = (item: SelectItem | null) => {},
@@ -31,6 +33,8 @@
     valueKey?: string;
     placeholder?: string;
     initialValue?: string;
+    mode?: "filter" | "form";
+    excludeDeleted?: boolean;
     role?: string;
     client?: ApolloClient;
     onSelect?: (item: SelectItem | null) => void;
@@ -61,12 +65,17 @@
     return () => document.removeEventListener("click", handleClickOutside);
   });
 
+  function effectiveFilter(filter: Record<string, unknown>): Record<string, unknown> {
+    if (mode !== "form" || !excludeDeleted) return filter;
+    return { _and: [filter, { is_deleted: { _eq: false } }] };
+  }
+
   async function loadItems(filter: Record<string, unknown>) {
     loading = true;
     try {
       const result = await client.query({
         query,
-        variables: { limit: 10, offset: 0, filter },
+        variables: { limit: 10, offset: 0, filter: effectiveFilter(filter) },
       });
       items = ((result.data as Record<string, any>)?.[dataKey] as SelectItem[]) ?? [];
     } catch {
@@ -85,7 +94,11 @@
     try {
       const result = await client.query({
         query,
-        variables: { limit: 1, offset: 0, filter: { [valueKey]: { _eq: initialValue } } },
+        variables: {
+          limit: 1,
+          offset: 0,
+          filter: effectiveFilter({ [valueKey]: { _eq: initialValue } }),
+        },
       });
       const found = ((result.data as Record<string, any>)?.[dataKey] as SelectItem[]) ?? [];
       if (found.length > 0) {
@@ -204,7 +217,17 @@
             onclick={() => selectItem(item)}
             class="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer flex items-center gap-2"
           >
-            <span class="flex-1">{displayLabel(item)}</span>
+            <span class="flex-1">
+              {displayLabel(item)}
+              {#if mode === "filter" && item.is_deleted === true}
+                <span
+                  class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                >
+                  <Icon iconName="icon/archive" size={10} />
+                  {$_('archived')}
+                </span>
+              {/if}
+            </span>
             {#if selectedItem && selectedItem[valueKey] === item[valueKey]}
               <Icon iconName="icon/check" size={14} class="text-info shrink-0" />
             {/if}

@@ -1,4 +1,9 @@
-query topCustomers($limit: Int, $offset: Int, $filter: customers_bool_exp) {
+query topCustomers(
+  $limit: Int
+  $offset: Int
+  $filter: customers_bool_exp = {}
+  $ordersFilter: orders_bool_exp = {}
+) {
   customers(
     limit: $limit
     offset: $offset
@@ -9,12 +14,12 @@ query topCustomers($limit: Int, $offset: Int, $filter: customers_bool_exp) {
     first_name
     last_name
     address
-    orders_aggregate {
+    orders_aggregate(where: $ordersFilter) {
       aggregate {
         count
       }
     }
-    revenue: orders_aggregate {
+    revenue: orders_aggregate(where: $ordersFilter) {
       aggregate {
         sum {
           total_amount

@@ -2,8 +2,9 @@ query getDashboardSalesTrend(
   $investorId: uuid!
   $year: Int
   $lastTwelveMonth: timestamptz!
+  $ordersFilter: orders_bool_exp = {}
 ) {
-  overall_orders: orders_aggregate {
+  overall_orders: orders_aggregate(where: $ordersFilter) {
     aggregate {
       sum {
         total_amount
@@ -11,7 +12,9 @@ query getDashboardSalesTrend(
     }
   }
   last_twelve_month: orders_aggregate(
-    where: { created_at: { _gte: $lastTwelveMonth } }
+    where: {
+      _and: [{ created_at: { _gte: $lastTwelveMonth } }, $ordersFilter]
+    }
   ) {
     aggregate {
       sum {

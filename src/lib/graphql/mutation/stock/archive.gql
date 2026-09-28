@@ -1,0 +1,24 @@
+mutation archiveStock($id: uuid!, $isDeleted: Boolean!) {
+  update_stock(where: { id: { _eq: $id } }, _set: { is_deleted: $isDeleted }) {
+    affected_rows
+  }
+  update_stock_movements(where: { stock_id: { _eq: $id } }, _set: { is_deleted: $isDeleted }) {
+    affected_rows
+  }
+  update_orders(where: { stock_id: { _eq: $id } }, _set: { is_deleted: $isDeleted }) {
+    affected_rows
+  }
+  update_stock_transfers(
+    where: {
+      stock_transfer_batches: {
+        _or: [
+          { stock_id: { _eq: $id } },
+          { destination_stock: { _eq: $id } }
+        ]
+      }
+    }
+    _set: { is_deleted: $isDeleted }
+  ) {
+    affected_rows
+  }
+}

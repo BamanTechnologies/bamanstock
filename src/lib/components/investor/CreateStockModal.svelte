@@ -14,7 +14,7 @@
   interface CreateStockModalProps {
     isOpen?: boolean;
     onClose?: () => void;
-    onSuccess?: () => void;
+    onSuccess?: (productId: string) => void;
   }
 
   let {
@@ -182,7 +182,7 @@
         variables: { object },
       });
 
-      onSuccess?.();
+      onSuccess?.(productId);
       handleClose();
     } catch (err: any) {
       error = err.message ?? "An unexpected error occurred";
@@ -277,6 +277,8 @@
               filterBuilder={(s) => ({ name: { _ilike: `%${s}%` } })}
               displayLabel={(item) => item.name}
               placeholder="Search and select product"
+              mode="form"
+              excludeDeleted={true}
               onSelect={handleProductSelect}
             />
           </div>
