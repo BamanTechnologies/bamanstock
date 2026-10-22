@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
@@ -10,6 +13,8 @@
   import INVESTOR_BRANCHES_QUERY from "$graphql/queries/locations/branches.gql";
   import DELETE_BRANCH from "$graphql/mutation/locations/delete.gql";
   import { _ } from "svelte-i18n";
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let isAddLocationModalOpen = $state(false);
   let locationToEdit = $state<{
@@ -129,7 +134,7 @@
         totalCount = result.data?.total?.aggregate?.count ?? 0;
         syncUrl();
       } catch (err) {
-        fetchError = (err as Error).message;
+        fetchError = formatErrorForToast(err);
         locations = [];
         totalCount = 0;
       } finally {
@@ -164,11 +169,19 @@
   }
 
   function handleAddLocation() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     locationToEdit = null;
     isAddLocationModalOpen = true;
   }
 
   function handleEdit(loc: any) {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     locationToEdit = {
       id: loc.id,
       name: loc.name,
@@ -190,6 +203,10 @@
   }
 
   async function handleDeleteConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!deletingLocation) return;
     deleteLoading = true;
     try {

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
@@ -11,6 +14,8 @@
   import INVESTOR_MERCHANTS_QUERY from "$graphql/queries/merchants/investor_merchants.gql";
   import DELETE_MERCHANT from "$graphql/mutation/merchant/delete.gql";
   import { _ } from "svelte-i18n";
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let isCreateModalOpen = $state(false);
   let isEditModalOpen = $state(false);
@@ -157,7 +162,7 @@
         locationCount = result.data?.merchants_location?.aggregate?.count ?? 0;
         syncUrl();
       } catch (err) {
-        fetchError = (err as Error).message;
+        fetchError = formatErrorForToast(err);
         merchants = [];
         totalCount = 0;
       } finally {
@@ -202,6 +207,10 @@
   }
 
   async function handleDeleteConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!deletingMerchant) return;
     deleteLoading = true;
     try {
@@ -215,7 +224,7 @@
       fetchError = null;
       refetchTrigger++;
     } catch (err: any) {
-      fetchError = (err as Error).message;
+      fetchError = formatErrorForToast(err);
     } finally {
       deleteLoading = false;
     }
@@ -272,7 +281,12 @@
       size={20}
       class="text-red-500 cursor-pointer"
     />
-    <Button class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]" onclick={() => (isCreateModalOpen = true)}>
+    <Button
+      class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
+      disabled={subscriptionLocked}
+      title={subscriptionLocked ? SUBSCRIPTION_BLOCKED_MESSAGE : undefined}
+      onclick={() => (isCreateModalOpen = true)}
+    >
       <Icon iconName="icon/plus" size={16} class="mr-2" />
       {$_('inviteMerchant')}
     </Button>

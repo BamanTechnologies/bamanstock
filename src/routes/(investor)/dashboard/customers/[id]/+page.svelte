@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
@@ -15,6 +18,8 @@
   import { _ } from "svelte-i18n";
 
   const customerId = $derived($page.params.id ?? "");
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let activeTab = $state("Orders");
   const tabs = ["Orders", "Payments", "Waight Lists"];
@@ -120,6 +125,10 @@
   }
 
   async function confirmOrderArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderArchivingItem) return;
     orderArchiveLoading = true;
     orderArchiveError = null;
@@ -133,7 +142,7 @@
       orderArchivingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      orderArchiveError = err.message ?? "An unexpected error occurred";
+      orderArchiveError = formatErrorForToast(err);
     } finally {
       orderArchiveLoading = false;
     }
@@ -152,6 +161,10 @@
   }
 
   async function confirmOrderActivate() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderActivatingItem) return;
     orderActivateLoading = true;
     orderActivateError = null;
@@ -165,7 +178,7 @@
       orderActivatingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      orderActivateError = err.message ?? "An unexpected error occurred";
+      orderActivateError = formatErrorForToast(err);
     } finally {
       orderActivateLoading = false;
     }

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import CreateProductModal from "$lib/components/investor/CreateProductModal.svelte";
@@ -22,6 +25,8 @@
   } from "$lib/inventory/product-labels";
 
   const productId = $derived($page.params.id);
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let activeTab = $state($page.url.searchParams.get("tab") ?? "Overview");
   const tabs = ["Overview", "Stock", "Orders", "Stock Movement", "Waight Lists"];
@@ -274,6 +279,10 @@
   }
 
   async function confirmStockArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stockArchivingItem) return;
     stockArchiveLoading = true;
     try {
@@ -282,13 +291,17 @@
       stockArchivingItem = null;
       stockRefetch++;
     } catch (err: any) {
-      stockArchiveError = err.message ?? "An unexpected error occurred";
+      stockArchiveError = formatErrorForToast(err);
     } finally {
       stockArchiveLoading = false;
     }
   }
 
   async function confirmStockRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stockRestoringItem) return;
     stockRestoreLoading = true;
     try {
@@ -297,7 +310,7 @@
       stockRestoringItem = null;
       stockRefetch++;
     } catch (err: any) {
-      stockRestoreError = err.message ?? "An unexpected error occurred";
+      stockRestoreError = formatErrorForToast(err);
     } finally {
       stockRestoreLoading = false;
     }
@@ -451,6 +464,10 @@
   }
 
   async function confirmOrderArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderArchivingItem) return;
     orderArchiveLoading = true;
     try {
@@ -459,13 +476,17 @@
       orderArchivingItem = null;
       ordersRefetch++;
     } catch (err: any) {
-      orderArchiveError = err.message ?? "An unexpected error occurred";
+      orderArchiveError = formatErrorForToast(err);
     } finally {
       orderArchiveLoading = false;
     }
   }
 
   async function confirmOrderRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderRestoringItem) return;
     orderRestoreLoading = true;
     try {
@@ -474,7 +495,7 @@
       orderRestoringItem = null;
       ordersRefetch++;
     } catch (err: any) {
-      orderRestoreError = err.message ?? "An unexpected error occurred";
+      orderRestoreError = formatErrorForToast(err);
     } finally {
       orderRestoreLoading = false;
     }
@@ -655,6 +676,10 @@
   }
 
   async function confirmSmArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!smArchivingItem) return;
     smArchiveLoading = true;
     try {
@@ -663,13 +688,17 @@
       smArchivingItem = null;
       smRefetch++;
     } catch (err: any) {
-      smArchiveError = err.message ?? "An unexpected error occurred";
+      smArchiveError = formatErrorForToast(err);
     } finally {
       smArchiveLoading = false;
     }
   }
 
   async function confirmSmRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!smRestoringItem) return;
     smRestoreLoading = true;
     try {
@@ -678,7 +707,7 @@
       smRestoringItem = null;
       smRefetch++;
     } catch (err: any) {
-      smRestoreError = err.message ?? "An unexpected error occurred";
+      smRestoreError = formatErrorForToast(err);
     } finally {
       smRestoreLoading = false;
     }
@@ -695,6 +724,10 @@
   }
 
   async function confirmProductRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     productRestoreLoading = true;
     productRestoreError = null;
     try {
@@ -702,7 +735,7 @@
       isProductRestoreModalOpen = false;
       detailRefetchTrigger++;
     } catch (err: any) {
-      productRestoreError = err.message ?? "An unexpected error occurred";
+      productRestoreError = formatErrorForToast(err);
     } finally {
       productRestoreLoading = false;
     }

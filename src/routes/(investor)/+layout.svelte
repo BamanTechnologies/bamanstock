@@ -18,6 +18,9 @@
   import { useProfile } from "$lib/stores/profile.svelte.js";
   import { ensurePushNotifications } from "$lib/notification/push-notification.js";
   import NotificationBell from "$lib/components/notification/NotificationBell.svelte";
+  import SubscriptionWarningBar from "$lib/components/SubscriptionWarningBar.svelte";
+  import { subscriptionStore } from "$lib/subscription/client";
+  import { fetchCompanySubscriptionForCompany } from "$lib/subscription/service";
 
   const profile = useProfile();
 
@@ -27,6 +30,7 @@
 
   let showProfileDropdown = $state(false);
   let showLanguageDropdown = $state(false);
+  let selectedCompanyId = $state<string | null>(null);
 
   const langOptions = [
     { value: "en", label: "English",      abbr: "ENG" },
@@ -35,6 +39,17 @@
   ];
 
   $effect(() => { themeStore.init(); });
+
+  $effect(() => {
+    const companies = profile.data?.investors?.[0]?.company_investors?.map((ci: any) => ci?.company).filter(Boolean) ?? [];
+    const nextCompanyId = companies[0]?.id ?? null;
+    if (nextCompanyId !== selectedCompanyId) {
+      selectedCompanyId = nextCompanyId;
+      void fetchCompanySubscriptionForCompany(nextCompanyId).then((result) => {
+        subscriptionStore.setFromServer(result);
+      });
+    }
+  });
 
   function toggleTheme() {
     themeStore.set(themeStore.current === 'Dark' ? 'Light' : 'Dark');
@@ -229,6 +244,10 @@
             </div>
           </div>
         </header>
+      {/if}
+
+      {#if !isInvestorPage}
+        <SubscriptionWarningBar class="sticky top-16 z-[9]" />
       {/if}
 
       <main class="flex flex-1 flex-col {isInvestorPage ? 'w-full h-screen overflow-auto p-0' : 'overflow-auto'}">

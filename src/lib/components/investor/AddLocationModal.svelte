@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
@@ -7,6 +8,8 @@
   import INSERT_BRANCH from "$graphql/mutation/locations/insert.gql";
   import UPDATE_BRANCH from "$graphql/mutation/locations/update.gql";
   import COMPANY_QUERY from "$graphql/queries/selector/company.gql";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
 
   interface LocationData {
     id?: string;
@@ -39,6 +42,7 @@
   let companyId = $state("");
   let loading = $state(false);
   let error = $state<string | null>(null);
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   $effect(() => {
     if (isOpen) {
@@ -85,6 +89,11 @@
   }
 
   async function handleSubmit() {
+    if (subscriptionLocked) {
+      error = SUBSCRIPTION_BLOCKED_MESSAGE;
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!locationName || !address || !companyId) {
       error = "All fields are required";
       return;
@@ -129,7 +138,7 @@
       onSubmit?.({ name: locationName, address, company: companyId });
       handleClose();
     } catch (err: any) {
-      error = err.message ?? "An unexpected error occurred";
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

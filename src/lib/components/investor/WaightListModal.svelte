@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
@@ -147,7 +148,7 @@
       onSuccess?.();
       handleClose();
     } catch (err: any) {
-      error = err.message ?? "An unexpected error occurred";
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

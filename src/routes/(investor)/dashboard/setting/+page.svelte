@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getAuthClient } from "$lib/graphql/client";
   import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
@@ -95,7 +96,7 @@
         toast.success($_("passwordChangedSuccessfully"));
       }
     } catch (err: any) {
-      passwordError = err?.message ?? "An unexpected error occurred";
+      passwordError = formatErrorForToast(err);
     } finally {
       changingPassword = false;
     }
@@ -177,7 +178,7 @@
         telegramModalError = response?.message || $_("somethingWentWrong");
       }
     } catch (err: any) {
-      telegramModalError = err?.message ?? "An unexpected error occurred";
+      telegramModalError = formatErrorForToast(err);
     } finally {
       telegramModalLoading = false;
     }
@@ -226,7 +227,7 @@
       isDisconnectModalOpen = false;
       await profile.refetch();
     } catch (err: any) {
-      disconnectModalError = err?.message ?? "An unexpected error occurred";
+      disconnectModalError = formatErrorForToast(err);
     } finally {
       disconnectModalLoading = false;
     }
@@ -241,7 +242,7 @@
       await profile.refetch();
       toast.success($_("profileReloaded"));
     } catch (err: any) {
-      toast.error(err?.message ?? "An unexpected error occurred");
+      toast.error(formatErrorForToast(err));
     }
   };
 </script>
