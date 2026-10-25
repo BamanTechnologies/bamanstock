@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import CreateProductModal from "$lib/components/investor/CreateProductModal.svelte";
@@ -20,8 +23,11 @@
     formatProductTypeLabel,
     buildProductLabel,
   } from "$lib/inventory/product-labels";
+  import OrderDetailsModal from "$lib/components/merchant/OrderDetailsModal.svelte";
 
   const productId = $derived($page.params.id);
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let activeTab = $state($page.url.searchParams.get("tab") ?? "Overview");
   const tabs = ["Overview", "Stock", "Orders", "Stock Movement", "Waight Lists"];
@@ -31,6 +37,28 @@
     const params = new URLSearchParams($page.url.searchParams);
     params.set("tab", tab);
     goto(`?${params.toString()}`, { replaceState: true, keepFocus: true, noScroll: true });
+  }
+
+  function openOrderDetails(order: any) {
+    selectedOrder = {
+      id: order.id,
+      customer: order.customer
+        ? `${order.customer.first_name ?? ""} ${order.customer.last_name ?? ""}`.trim()
+        : "Customer",
+      items: Number(order.stock?.order_item_batches?.reduce(
+        (total: number, batch: any) => total + Number(batch.quantity ?? 0),
+        0
+      ) ?? 0),
+      amount: fmtCurrency(order.total_amount),
+      paymentStatus: order.status ?? "unpaid",
+      date: order.created_at ? fmtDate(order.created_at) : "-",
+      orderStatus: order.status ?? "unpaid",
+      seller: order.merchant
+        ? `${order.merchant.first_name ?? ""} ${order.merchant.last_name ?? ""}`.trim()
+        : undefined,
+    };
+    if (!selectedOrder.items) selectedOrder.items = 1;
+    isOrderDetailsOpen = true;
   }
 
   function handleBack() {
@@ -274,6 +302,10 @@
   }
 
   async function confirmStockArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stockArchivingItem) return;
     stockArchiveLoading = true;
     try {
@@ -282,13 +314,17 @@
       stockArchivingItem = null;
       stockRefetch++;
     } catch (err: any) {
-      stockArchiveError = err.message ?? "An unexpected error occurred";
+      stockArchiveError = formatErrorForToast(err);
     } finally {
       stockArchiveLoading = false;
     }
   }
 
   async function confirmStockRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stockRestoringItem) return;
     stockRestoreLoading = true;
     try {
@@ -297,7 +333,7 @@
       stockRestoringItem = null;
       stockRefetch++;
     } catch (err: any) {
-      stockRestoreError = err.message ?? "An unexpected error occurred";
+      stockRestoreError = formatErrorForToast(err);
     } finally {
       stockRestoreLoading = false;
     }
@@ -314,6 +350,8 @@
   let orderRestoringItem = $state<any>(null);
   let orderRestoreLoading = $state(false);
   let orderRestoreError = $state<string | null>(null);
+  let selectedOrder = $state<any>(null);
+  let isOrderDetailsOpen = $state(false);
 
   function ordersSyncUrl() {
     const params = new URLSearchParams($page.url.searchParams.toString());
@@ -451,6 +489,10 @@
   }
 
   async function confirmOrderArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderArchivingItem) return;
     orderArchiveLoading = true;
     try {
@@ -459,13 +501,17 @@
       orderArchivingItem = null;
       ordersRefetch++;
     } catch (err: any) {
-      orderArchiveError = err.message ?? "An unexpected error occurred";
+      orderArchiveError = formatErrorForToast(err);
     } finally {
       orderArchiveLoading = false;
     }
   }
 
   async function confirmOrderRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderRestoringItem) return;
     orderRestoreLoading = true;
     try {
@@ -474,7 +520,7 @@
       orderRestoringItem = null;
       ordersRefetch++;
     } catch (err: any) {
-      orderRestoreError = err.message ?? "An unexpected error occurred";
+      orderRestoreError = formatErrorForToast(err);
     } finally {
       orderRestoreLoading = false;
     }
@@ -655,6 +701,10 @@
   }
 
   async function confirmSmArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!smArchivingItem) return;
     smArchiveLoading = true;
     try {
@@ -663,13 +713,17 @@
       smArchivingItem = null;
       smRefetch++;
     } catch (err: any) {
-      smArchiveError = err.message ?? "An unexpected error occurred";
+      smArchiveError = formatErrorForToast(err);
     } finally {
       smArchiveLoading = false;
     }
   }
 
   async function confirmSmRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!smRestoringItem) return;
     smRestoreLoading = true;
     try {
@@ -678,7 +732,7 @@
       smRestoringItem = null;
       smRefetch++;
     } catch (err: any) {
-      smRestoreError = err.message ?? "An unexpected error occurred";
+      smRestoreError = formatErrorForToast(err);
     } finally {
       smRestoreLoading = false;
     }
@@ -695,6 +749,10 @@
   }
 
   async function confirmProductRestore() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     productRestoreLoading = true;
     productRestoreError = null;
     try {
@@ -702,7 +760,7 @@
       isProductRestoreModalOpen = false;
       detailRefetchTrigger++;
     } catch (err: any) {
-      productRestoreError = err.message ?? "An unexpected error occurred";
+      productRestoreError = formatErrorForToast(err);
     } finally {
       productRestoreLoading = false;
     }
@@ -728,6 +786,14 @@
     const num = Number(val);
     if (isNaN(num)) return String(val);
     return `ETB ${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function fmtDate(value: string | null | undefined): string {
+    if (!value) return "-";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? value
+      : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   }
 
   function getVisiblePages(current: number, total: number): (number | string)[] {
@@ -1275,6 +1341,7 @@
                     <td class="px-4 py-3 text-foreground">{fmtCurrency(order.outstanding_amount)}</td>
                     {#if !productIsArchived}
                       <td class="px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
+                        <button onclick={() => openOrderDetails(order)} class="p-1.5 mr-1 rounded hover:bg-[#4DA0E6]/10 transition-colors" aria-label="View order details"><Icon iconName="icon/eye" size={16} class="text-[#4DA0E6]" /></button>
                         {#if order.is_deleted}
                           <button onclick={() => openOrderRestoreModal(order)} class="p-1.5 rounded hover:bg-muted transition-colors" aria-label="Restore order"><Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" /></button>
                         {:else}
@@ -1569,6 +1636,15 @@
   productId={productId}
   onSuccess={() => {
     detailRefetchTrigger++;
+  }}
+/>
+
+<OrderDetailsModal
+  isOpen={isOrderDetailsOpen}
+  order={selectedOrder}
+  onClose={() => {
+    isOrderDetailsOpen = false;
+    selectedOrder = null;
   }}
 />
 

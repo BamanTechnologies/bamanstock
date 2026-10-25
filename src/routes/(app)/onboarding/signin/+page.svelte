@@ -5,6 +5,7 @@
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
   import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { getAnonymousClient } from "$graphql/client.ts";
   import { authStore } from "$lib/stores/auth.svelte.js";
   import LOGIN from "$graphql/queries/auth/login.gql";
@@ -63,32 +64,32 @@
         const payload = jwtDecode<JwtPayload>(data.token);
         const allowedRoles = payload.metadata['x-hasura-allowed-roles'] ?? [];
         if (!allowedRoles.includes('investor')) {
-          toast.error("You do not have investor permissions");
+          toast.error(formatErrorForToast("You do not have investor permissions"));
           return;
         }
         toast.success("Login successful");
         authStore.loginWithToken(data.token);
         goto("/");
       } else if (data?.message) {
-        toast.error(data.message);
+        toast.error(formatErrorForToast(data.message));
       } else {
-        toast.error("Something went wrong");
+        toast.error(formatErrorForToast("Something went wrong"));
       }
     } catch (err: unknown) {
       const apolloErr = err as ApolloError;
       if (apolloErr.graphQLErrors?.length) {
-        toast.error(apolloErr.graphQLErrors[0]?.message ?? "Something went wrong");
+        toast.error(formatErrorForToast(apolloErr.graphQLErrors[0]?.message ?? apolloErr));
       } else if (apolloErr.networkError) {
         const netErr = apolloErr.networkError as { statusCode?: number; message?: string };
         if (netErr.statusCode === 401 || netErr.statusCode === 403) {
-          toast.error("Invalid credentials");
+          toast.error(formatErrorForToast("Invalid credentials"));
         } else if (netErr.message) {
-          toast.error(netErr.message);
+          toast.error(formatErrorForToast(netErr.message));
         } else {
-          toast.error("Something went wrong");
+          toast.error(formatErrorForToast("Something went wrong"));
         }
       } else {
-        toast.error("Something went wrong");
+        toast.error(formatErrorForToast("Something went wrong"));
       }
     } finally {
       loading = false;

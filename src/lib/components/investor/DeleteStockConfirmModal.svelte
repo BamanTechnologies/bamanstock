@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { getAuthClient } from "$graphql/client.ts";
@@ -10,6 +13,8 @@
     onClose?: () => void;
     onSuccess?: () => void;
   }
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let {
     isOpen = $bindable(false),
@@ -35,6 +40,11 @@
   }
 
   async function handleConfirm() {
+    if (subscriptionLocked) {
+      error = SUBSCRIPTION_BLOCKED_MESSAGE;
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stock) return;
     loading = true;
     error = null;
@@ -47,7 +57,7 @@
       onSuccess?.();
       handleClose();
     } catch (err: any) {
-      error = err.message ?? "Failed to delete stock";
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

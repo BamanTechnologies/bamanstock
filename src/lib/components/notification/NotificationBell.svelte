@@ -2,6 +2,7 @@
   import { browser } from "$app/environment";
   import { get } from "svelte/store";
   import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { _ } from "svelte-i18n";
   import { getAuthClient } from "$lib/graphql/client.js";
   import { authStore } from "$lib/stores/auth.svelte.js";
@@ -142,7 +143,7 @@
       refetchCurrent();
     } catch (err) {
       console.error("[Notifications] failed to mark as seen", err);
-      toast.error("Failed to update notification");
+      toast.error(formatErrorForToast("Failed to update notification"));
     }
   }
 
@@ -161,7 +162,7 @@
       refetchCurrent();
     } catch (err) {
       console.error("[Notifications] failed to mark as unseen", err);
-      toast.error("Failed to update notification");
+      toast.error(formatErrorForToast("Failed to update notification"));
     }
   }
 
@@ -174,7 +175,7 @@
       refetchCurrent();
     } catch (err) {
       console.error("[Notifications] failed to mark all as seen", err);
-      toast.error("Failed to mark all notifications as seen");
+      toast.error(formatErrorForToast("Failed to mark all notifications as seen"));
     }
   }
 

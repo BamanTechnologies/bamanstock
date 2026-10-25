@@ -1,32 +1,13 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { downloadOrderPdf, type OrderPdfData } from "$lib/utils/order-pdf";
+
   export let isOpen = false;
-  export let order: any = null;
-  export let onClose: () => void; 
+  export let order: OrderPdfData | null = null;
+  export let onClose: () => void;
 
-  // Placeholder data to match the screenshot exactly if order data is missing
-  const items = [
-    { name: "Lenovo IdeaPad 3", qty: 1, price: 3506, icon: "laptop" },
-    { name: "Beats Pro", qty: 1, price: 7981, icon: "headphones" },
-    { name: "Nike Jordan", qty: 1, price: 450, icon: "shoe" },
-    { name: "Apple Series 5 Watch", qty: 1, price: 902, icon: "watch" }
-  ];
-
-  // Map item.icon to a valid iconName string literal
-  function getIconName(icon: string | undefined): 
-    "icon/laptop" | "icon/headphones" | "icon/shoe" | "icon/watch" | "icon/package" {
-    switch (icon) {
-      case "laptop":
-        return "icon/laptop";
-      case "headphones":
-        return "icon/headphones";
-      case "shoe":
-        return "icon/shoe";
-      case "watch":
-        return "icon/watch";
-      default:
-        return "icon/package";
-    }
+  function downloadPdf() {
+    if (order) downloadOrderPdf(order);
   }
 </script>
 
@@ -40,12 +21,22 @@
         <div class="flex items-center gap-2 mt-1">
           <span class="text-sm text-slate-400">#{order.id || '1930'}</span>
           <span class="text-[10px] text-slate-300">•</span>
-          <span class="text-sm text-[#12B76A] font-medium">Completed</span>
+          <span class="text-sm text-[#12B76A] font-medium">{order.orderStatus}</span>
         </div>
       </div>
-      <button on:click={onClose} class="text-slate-900 hover:bg-slate-50 p-1 rounded-lg transition-colors">
-        <Icon iconName="icon/x" size={24} />
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          on:click={downloadPdf}
+          class="inline-flex items-center gap-2 rounded-md bg-[var(--primary-blue)] px-3 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          <Icon iconName="icon/download" size={16} />
+          
+        </button>
+        <button type="button" on:click={onClose} class="text-slate-900 hover:bg-slate-50 p-1 rounded-lg transition-colors" aria-label="Close order details">
+          <Icon iconName="icon/x" size={24} />
+        </button>
+      </div>
     </div>
 
     <div class="flex-1 overflow-y-auto p-8 space-y-10">
@@ -59,15 +50,15 @@
           </div>
           <div>
             <p class="text-sm text-slate-400 mb-1">Customer</p>
-            <p class="text-base font-medium text-slate-700">Olivia Rhye</p>
+            <p class="text-base font-medium text-slate-700">{order.customer}</p>
           </div>
           <div>
-            <p class="text-sm text-slate-400 mb-1">Order ID</p>
-            <p class="text-base font-medium text-slate-700">#{order.id || '1930'}</p>
+            <p class="text-sm text-slate-400 mb-1">Order date</p>
+            <p class="text-base font-medium text-slate-700">{order.date}</p>
           </div>
           <div>
-            <p class="text-sm text-slate-400 mb-1">Location</p>
-            <p class="text-base font-medium text-slate-700">Branch 123</p>
+            <p class="text-sm text-slate-400 mb-1">Order status</p>
+            <p class="text-base font-medium text-slate-700">{order.orderStatus}</p>
           </div>
         </div>
       </section>
@@ -83,19 +74,33 @@
         </div>
 
         <div class="divide-y divide-slate-100">
-          {#each items as item}
+          {#if order.lineItems?.length}
+            {#each order.lineItems as item}
+              <div class="grid grid-cols-12 items-center py-4 px-3 text-sm">
+                <div class="col-span-6 flex items-center gap-3">
+                  <div class="w-10 h-10 bg-slate-50 border border-slate-100 rounded flex items-center justify-center text-slate-400">
+                    <Icon iconName="icon/package" size={20} />
+                  </div>
+                  <span class="font-medium text-slate-600">{item.name}</span>
+                </div>
+                <div class="col-span-1 text-center text-slate-400">{item.quantity}</div>
+                <div class="col-span-2 text-right text-slate-400">${item.unitPrice.toLocaleString()}</div>
+                <div class="col-span-3 text-right text-slate-600">${(item.quantity * item.unitPrice).toLocaleString()}</div>
+              </div>
+            {/each}
+          {:else}
             <div class="grid grid-cols-12 items-center py-4 px-3 text-sm">
               <div class="col-span-6 flex items-center gap-3">
                 <div class="w-10 h-10 bg-slate-50 border border-slate-100 rounded flex items-center justify-center text-slate-400">
-                  <Icon iconName={getIconName(item.icon)} size={20} />
+                  <Icon iconName="icon/package" size={20} />
                 </div>
-                <span class="font-medium text-slate-600">{item.name}</span>
+                <span class="font-medium text-slate-600">Order items</span>
               </div>
-              <div class="col-span-1 text-center text-slate-400">{item.qty}</div>
-              <div class="col-span-2 text-right text-slate-400">${item.price.toLocaleString()}</div>
-              <div class="col-span-3 text-right text-slate-600">${(item.qty * item.price).toLocaleString()}</div>
+              <div class="col-span-1 text-center text-slate-400">{order.items}</div>
+              <div class="col-span-2 text-right text-slate-400">-</div>
+              <div class="col-span-3 text-right text-slate-600">{order.amount}</div>
             </div>
-          {/each}
+          {/if}
         </div>
       </section>
 
@@ -106,7 +111,7 @@
         <div class="grid grid-cols-3 gap-4">
           <div>
             <p class="text-sm text-slate-400 mb-1">Paid</p>
-            <p class="text-base font-medium text-slate-700">$3000</p>
+            <p class="text-base font-medium text-slate-700">{order.paymentStatus}</p>
           </div>
           <div>
             <p class="text-sm text-slate-400 mb-1">Unpaid</p>
@@ -114,7 +119,7 @@
           </div>
           <div>
             <p class="text-sm text-slate-400 mb-1">Total</p>
-            <p class="text-base font-medium text-slate-700">$3000</p>
+            <p class="text-base font-medium text-slate-700">{order.amount}</p>
           </div>
         </div>
       </section>

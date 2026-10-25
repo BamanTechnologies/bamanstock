@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { getAuthClient } from "$graphql/client.js";
@@ -46,7 +47,7 @@
       onSuccess?.();
       handleClose();
     } catch (err: any) {
-      error = err.message ?? "Failed to delete waight list";
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

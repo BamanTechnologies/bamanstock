@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { goto } from "$app/navigation";
@@ -136,7 +137,7 @@
         totalCount = result.data?.total?.aggregate?.count ?? 0;
         syncUrl();
       } catch (err) {
-        fetchError = (err as Error).message;
+        fetchError = formatErrorForToast(err);
         customers = [];
         totalCount = 0;
       } finally {
