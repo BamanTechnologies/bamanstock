@@ -23,6 +23,7 @@
     formatProductTypeLabel,
     buildProductLabel,
   } from "$lib/inventory/product-labels";
+  import OrderDetailsModal from "$lib/components/merchant/OrderDetailsModal.svelte";
 
   const productId = $derived($page.params.id);
 
@@ -36,6 +37,28 @@
     const params = new URLSearchParams($page.url.searchParams);
     params.set("tab", tab);
     goto(`?${params.toString()}`, { replaceState: true, keepFocus: true, noScroll: true });
+  }
+
+  function openOrderDetails(order: any) {
+    selectedOrder = {
+      id: order.id,
+      customer: order.customer
+        ? `${order.customer.first_name ?? ""} ${order.customer.last_name ?? ""}`.trim()
+        : "Customer",
+      items: Number(order.stock?.order_item_batches?.reduce(
+        (total: number, batch: any) => total + Number(batch.quantity ?? 0),
+        0
+      ) ?? 0),
+      amount: fmtCurrency(order.total_amount),
+      paymentStatus: order.status ?? "unpaid",
+      date: order.created_at ? fmtDate(order.created_at) : "-",
+      orderStatus: order.status ?? "unpaid",
+      seller: order.merchant
+        ? `${order.merchant.first_name ?? ""} ${order.merchant.last_name ?? ""}`.trim()
+        : undefined,
+    };
+    if (!selectedOrder.items) selectedOrder.items = 1;
+    isOrderDetailsOpen = true;
   }
 
   function handleBack() {
@@ -327,6 +350,8 @@
   let orderRestoringItem = $state<any>(null);
   let orderRestoreLoading = $state(false);
   let orderRestoreError = $state<string | null>(null);
+  let selectedOrder = $state<any>(null);
+  let isOrderDetailsOpen = $state(false);
 
   function ordersSyncUrl() {
     const params = new URLSearchParams($page.url.searchParams.toString());
@@ -761,6 +786,14 @@
     const num = Number(val);
     if (isNaN(num)) return String(val);
     return `ETB ${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function fmtDate(value: string | null | undefined): string {
+    if (!value) return "-";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? value
+      : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   }
 
   function getVisiblePages(current: number, total: number): (number | string)[] {
@@ -1308,6 +1341,7 @@
                     <td class="px-4 py-3 text-foreground">{fmtCurrency(order.outstanding_amount)}</td>
                     {#if !productIsArchived}
                       <td class="px-4 py-3 text-right" onclick={(e) => e.stopPropagation()}>
+                        <button onclick={() => openOrderDetails(order)} class="p-1.5 mr-1 rounded hover:bg-[#4DA0E6]/10 transition-colors" aria-label="View order details"><Icon iconName="icon/eye" size={16} class="text-[#4DA0E6]" /></button>
                         {#if order.is_deleted}
                           <button onclick={() => openOrderRestoreModal(order)} class="p-1.5 rounded hover:bg-muted transition-colors" aria-label="Restore order"><Icon iconName="icon/rotate-ccw" size={16} class="text-muted-foreground hover:text-foreground" /></button>
                         {:else}
@@ -1602,6 +1636,15 @@
   productId={productId}
   onSuccess={() => {
     detailRefetchTrigger++;
+  }}
+/>
+
+<OrderDetailsModal
+  isOpen={isOrderDetailsOpen}
+  order={selectedOrder}
+  onClose={() => {
+    isOrderDetailsOpen = false;
+    selectedOrder = null;
   }}
 />
 
