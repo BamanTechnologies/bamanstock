@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { getAuthClient } from "$graphql/client.ts";
@@ -59,7 +60,7 @@
       });
       result = (res.data as any)?.send_customer_sms ?? null;
     } catch (err) {
-      error = (err as Error).message;
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
@@ -41,6 +44,8 @@
       return "";
     }
   }
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let investorId = $state(getInvestorIdFromToken());
 
@@ -429,6 +434,10 @@
   }
 
   async function confirmStockArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stockArchivingItem) return;
     stockArchiveLoading = true;
     stockArchiveError = null;
@@ -442,7 +451,7 @@
       stockArchivingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      stockArchiveError = err.message ?? "An unexpected error occurred";
+      stockArchiveError = formatErrorForToast(err);
     } finally {
       stockArchiveLoading = false;
     }
@@ -461,6 +470,10 @@
   }
 
   async function confirmStockActivate() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!stockActivatingItem) return;
     stockActivateLoading = true;
     stockActivateError = null;
@@ -474,7 +487,7 @@
       stockActivatingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      stockActivateError = err.message ?? "An unexpected error occurred";
+      stockActivateError = formatErrorForToast(err);
     } finally {
       stockActivateLoading = false;
     }
@@ -748,6 +761,10 @@
   }
 
   async function confirmSmArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!smArchivingItem) return;
     smArchiveLoading = true;
     smArchiveError = null;
@@ -761,7 +778,7 @@
       smArchivingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      smArchiveError = err.message ?? "An unexpected error occurred";
+      smArchiveError = formatErrorForToast(err);
     } finally {
       smArchiveLoading = false;
     }
@@ -780,6 +797,10 @@
   }
 
   async function confirmSmActivate() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!smActivatingItem) return;
     smActivateLoading = true;
     smActivateError = null;
@@ -793,7 +814,7 @@
       smActivatingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      smActivateError = err.message ?? "An unexpected error occurred";
+      smActivateError = formatErrorForToast(err);
     } finally {
       smActivateLoading = false;
     }

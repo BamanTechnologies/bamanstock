@@ -1,0 +1,31 @@
+query GetCompanySubscription($companyId: uuid!) {
+  companies_by_pk(id: $companyId) {
+    id
+    name
+    has_active_subscription
+  }
+  billing_subscriptions(
+    where: { company_id: { _eq: $companyId } }
+    order_by: { created_at: desc }
+    limit: 1
+  ) {
+    id
+    company_id
+    start_date
+    end_date
+    status
+    is_active
+    created_at
+    updated_at
+    pricing_plan_frequency_id
+    plan_pricing: pricing_plan_frequency_price {
+      id
+      price
+      billing_cycle: frequency
+      plan: pricing_plan {
+        id
+        name
+      }
+    }
+  }
+}

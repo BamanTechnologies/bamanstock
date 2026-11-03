@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import TagInput from "./TagInput.svelte";
+  import { toast } from "svelte-sonner";
 
   interface AddProductModalProps {
     isOpen?: boolean;
@@ -23,6 +25,8 @@
     onClose,
     onCreate,
   }: AddProductModalProps = $props();
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let productName = $state("");
   let category = $state("");
@@ -112,6 +116,10 @@
   }
 
   function handleCreate() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (
       !productName ||
       !category ||

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
@@ -35,6 +37,8 @@
   }
 
   let investorId = $state(getInvestorIdFromToken());
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   // ===================== General State =====================
   let activeTab = $state("Overview");
@@ -339,6 +343,7 @@
   }
 
   function openStockArchiveModal(item: any) {
+    if (subscriptionLocked) return;
     stockArchivingItem = item;
     stockArchiveError = null;
     isStockArchiveModalOpen = true;
@@ -351,6 +356,10 @@
   }
 
   async function confirmStockArchive() {
+    if (subscriptionLocked) {
+      stockArchiveError = SUBSCRIPTION_BLOCKED_MESSAGE;
+      return;
+    }
     if (!stockArchivingItem) return;
     stockArchiveLoading = true;
     stockArchiveError = null;
@@ -364,7 +373,7 @@
       stockArchivingItem = null;
       stockRefetch++;
     } catch (err: any) {
-      stockArchiveError = err.message ?? "An unexpected error occurred";
+      stockArchiveError = formatErrorForToast(err);
     } finally {
       stockArchiveLoading = false;
     }
@@ -396,7 +405,7 @@
       stockActivatingItem = null;
       stockRefetch++;
     } catch (err: any) {
-      stockActivateError = err.message ?? "An unexpected error occurred";
+      stockActivateError = formatErrorForToast(err);
     } finally {
       stockActivateLoading = false;
     }
@@ -537,6 +546,7 @@
   }
 
   function openSmArchiveModal(movement: any) {
+    if (subscriptionLocked) return;
     smArchivingMovement = movement;
     smArchiveError = null;
     isSmArchiveModalOpen = true;
@@ -549,6 +559,10 @@
   }
 
   async function confirmSmArchive() {
+    if (subscriptionLocked) {
+      smArchiveError = SUBSCRIPTION_BLOCKED_MESSAGE;
+      return;
+    }
     if (!smArchivingMovement) return;
     smArchiveLoading = true;
     smArchiveError = null;
@@ -562,7 +576,7 @@
       smArchivingMovement = null;
       smRefetch++;
     } catch (err: any) {
-      smArchiveError = err.message ?? "An unexpected error occurred";
+      smArchiveError = formatErrorForToast(err);
     } finally {
       smArchiveLoading = false;
     }
@@ -594,7 +608,7 @@
       smActivatingMovement = null;
       smRefetch++;
     } catch (err: any) {
-      smActivateError = err.message ?? "An unexpected error occurred";
+      smActivateError = formatErrorForToast(err);
     } finally {
       smActivateLoading = false;
     }
@@ -823,6 +837,8 @@
         <Button
           class="bg-[var(--primary-blue)] text-white text-xs sm:text-base hover:opacity-90"
           onclick={() => (isAssignStockModalOpen = true)}
+          disabled={subscriptionLocked}
+          title={subscriptionLocked ? SUBSCRIPTION_BLOCKED_MESSAGE : undefined}
         >
           Assign Stock
         </Button>

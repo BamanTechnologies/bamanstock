@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
@@ -12,6 +15,8 @@
     onClose?: () => void;
     onSuccess?: () => void;
   }
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let {
     isOpen = $bindable(false),
@@ -61,6 +66,11 @@
   }
 
   async function handleSubmit() {
+    if (subscriptionLocked) {
+      error = SUBSCRIPTION_BLOCKED_MESSAGE;
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!firstName || !lastName || !phone || !address || !password || !branchId) {
       error = "All fields are required";
       return;
@@ -91,7 +101,7 @@
         error = res?.message ?? "Failed to register merchant";
       }
     } catch (err: any) {
-      error = err.message ?? "An unexpected error occurred";
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatErrorForToast } from "$lib/utils/error";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { DataTable } from "$lib/components/ui/data-table/index.js";
   import { Dropdown } from "$lib/components/ui/dropdown/index.js";
@@ -390,7 +391,7 @@
       paymentsRefetch++;
       paymentsStatsRefetch++;
     } catch (err: any) {
-      paymentsArchiveError = err.message ?? "An unexpected error occurred";
+      paymentsArchiveError = formatErrorForToast(err);
     } finally {
       paymentsArchiveLoading = false;
     }
@@ -423,7 +424,7 @@
       paymentsRefetch++;
       paymentsStatsRefetch++;
     } catch (err: any) {
-      paymentsActivateError = err.message ?? "An unexpected error occurred";
+      paymentsActivateError = formatErrorForToast(err);
     } finally {
       paymentsActivateLoading = false;
     }
@@ -689,7 +690,7 @@
       stockRefetch++;
       stockStatsRefetch++;
     } catch (err: any) {
-      stockArchiveError = err.message ?? "An unexpected error occurred";
+      stockArchiveError = formatErrorForToast(err);
     } finally {
       stockArchiveLoading = false;
     }
@@ -722,7 +723,7 @@
       stockRefetch++;
       stockStatsRefetch++;
     } catch (err: any) {
-      stockActivateError = err.message ?? "An unexpected error occurred";
+      stockActivateError = formatErrorForToast(err);
     } finally {
       stockActivateLoading = false;
     }
@@ -996,7 +997,7 @@
       lowStockRefetch++;
       lowStockStatsRefetch++;
     } catch (err: any) {
-      lowStockArchiveError = err.message ?? "An unexpected error occurred";
+      lowStockArchiveError = formatErrorForToast(err);
     } finally {
       lowStockArchiveLoading = false;
     }
@@ -1029,7 +1030,7 @@
       lowStockRefetch++;
       lowStockStatsRefetch++;
     } catch (err: any) {
-      lowStockActivateError = err.message ?? "An unexpected error occurred";
+      lowStockActivateError = formatErrorForToast(err);
     } finally {
       lowStockActivateLoading = false;
     }
@@ -1447,7 +1448,7 @@
       salesRefetch++;
       salesStatsRefetch++;
     } catch (err: any) {
-      salesArchiveError = err.message ?? "An unexpected error occurred";
+      salesArchiveError = formatErrorForToast(err);
     } finally {
       salesArchiveLoading = false;
     }
@@ -1480,7 +1481,7 @@
       salesRefetch++;
       salesStatsRefetch++;
     } catch (err: any) {
-      salesActivateError = err.message ?? "An unexpected error occurred";
+      salesActivateError = formatErrorForToast(err);
     } finally {
       salesActivateLoading = false;
     }
