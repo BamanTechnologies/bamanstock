@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { getAuthClient } from "$graphql/client.js";
@@ -108,7 +109,7 @@
       isReminderConfirmOpen = false;
       refreshTrigger++;
     } catch (err: any) {
-      reminderError = err.message ?? "Failed to send reminder SMS";
+      reminderError = formatErrorForToast(err);
     } finally {
       reminderSending = false;
     }

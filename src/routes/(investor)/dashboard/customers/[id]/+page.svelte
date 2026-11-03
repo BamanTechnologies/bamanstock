@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
@@ -13,8 +16,11 @@
   import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import ARCHIVE_ORDER from "$graphql/mutation/order/archive.gql";
   import { _ } from "svelte-i18n";
+  import OrderDetailsModal from "$lib/components/merchant/OrderDetailsModal.svelte";
 
   const customerId = $derived($page.params.id ?? "");
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let activeTab = $state("Orders");
   const tabs = ["Orders", "Payments", "Waight Lists"];
@@ -65,6 +71,8 @@
   let orderActivatingItem = $state<any>(null);
   let orderActivateLoading = $state(false);
   let orderActivateError = $state<string | null>(null);
+  let selectedOrder = $state<any>(null);
+  let isOrderDetailsOpen = $state(false);
 
   const ordersTotalPages = $derived(Math.max(1, Math.ceil(ordersTotalCount / ordersRowsPerPage)));
 
@@ -120,6 +128,10 @@
   }
 
   async function confirmOrderArchive() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderArchivingItem) return;
     orderArchiveLoading = true;
     orderArchiveError = null;
@@ -133,7 +145,7 @@
       orderArchivingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      orderArchiveError = err.message ?? "An unexpected error occurred";
+      orderArchiveError = formatErrorForToast(err);
     } finally {
       orderArchiveLoading = false;
     }
@@ -145,6 +157,26 @@
     isOrderActivateModalOpen = true;
   }
 
+  function openOrderDetails(order: any) {
+    selectedOrder = {
+      id: order.id,
+      customer: customerDetail
+        ? `${customerDetail.first_name ?? ""} ${customerDetail.last_name ?? ""}`.trim()
+        : order.customer_name ?? "Customer",
+      items: Number(order.order_quantity ?? 0),
+      amount: fmtCurrency(order.total_amount),
+      paymentStatus: order.status ?? "unpaid",
+      date: fmtDate(order.created_at),
+      orderStatus: order.status ?? "unpaid",
+      lineItems: (order.order_items ?? []).map((item: any) => ({
+        name: item.stock?.product_type ?? item.stock?.type ?? "Order item",
+        quantity: 1,
+        unitPrice: Number(order.total_amount ?? 0) / Math.max(1, Number(order.order_quantity ?? 1)),
+      })),
+    };
+    isOrderDetailsOpen = true;
+  }
+
   function closeOrderActivateModal() {
     isOrderActivateModalOpen = false;
     orderActivatingItem = null;
@@ -152,6 +184,10 @@
   }
 
   async function confirmOrderActivate() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!orderActivatingItem) return;
     orderActivateLoading = true;
     orderActivateError = null;
@@ -165,7 +201,7 @@
       orderActivatingItem = null;
       detailRefetchTrigger++;
     } catch (err: any) {
-      orderActivateError = err.message ?? "An unexpected error occurred";
+      orderActivateError = formatErrorForToast(err);
     } finally {
       orderActivateLoading = false;
     }
@@ -487,6 +523,14 @@
                     <td class="px-4 py-3 text-foreground font-medium">{fmtCurrency(order.total_amount)}</td>
                     <td class="px-4 py-3 text-foreground">{fmtCurrency(order.outstanding_amount)}</td>
                     <td class="px-4 py-3 text-right">
+                      <button
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 mr-2 rounded-md text-xs font-medium border border-[#4DA0E6] text-[#4DA0E6] hover:bg-[#4DA0E6]/10 transition-colors"
+                        onclick={() => openOrderDetails(order)}
+                        title="View order details"
+                      >
+                        <Icon iconName="icon/eye" size={14} />
+                        Details
+                      </button>
                       {#if order.is_deleted}
                         <button
                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border border-border text-foreground hover:bg-muted transition-colors"
@@ -562,6 +606,15 @@
             </button>
           </div>
         </div>
+
+        <OrderDetailsModal
+          isOpen={isOrderDetailsOpen}
+          order={selectedOrder}
+          onClose={() => {
+            isOrderDetailsOpen = false;
+            selectedOrder = null;
+          }}
+        />
       </div>
     </div>
 

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
@@ -12,6 +15,8 @@
   import DELETE_PRODUCT from "$graphql/mutation/product/delete.gql";
   import ARCHIVE_PRODUCT from "$graphql/mutation/product/archive.gql";
   import { _ } from "svelte-i18n";
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let activeTab = $state<"active" | "archived">(
     ($page.url.searchParams.get("tab") as "active" | "archived") || "active"
@@ -141,7 +146,7 @@
         totalCount = result.data?.total?.aggregate?.count ?? 0;
         syncUrl();
       } catch (err) {
-        fetchError = (err as Error).message;
+        fetchError = formatErrorForToast(err);
         products = [];
         totalCount = 0;
       } finally {
@@ -190,6 +195,10 @@
   }
 
   async function handleDeleteConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!deletingProduct) return;
     deleteLoading = true;
     deleteError = null;
@@ -203,7 +212,7 @@
       deletingProduct = null;
       refetchTrigger++;
     } catch (err: any) {
-      deleteError = err.message ?? "An unexpected error occurred";
+      deleteError = formatErrorForToast(err);
     } finally {
       deleteLoading = false;
     }
@@ -222,6 +231,10 @@
   }
 
   async function handleArchiveConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!archivingProduct) return;
     archiveLoading = true;
     archiveError = null;
@@ -235,7 +248,7 @@
       archivingProduct = null;
       refetchTrigger++;
     } catch (err: any) {
-      archiveError = err.message ?? "An unexpected error occurred";
+      archiveError = formatErrorForToast(err);
     } finally {
       archiveLoading = false;
     }
@@ -254,6 +267,10 @@
   }
 
   async function handleActivateConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!activatingProduct) return;
     activateLoading = true;
     activateError = null;
@@ -267,7 +284,7 @@
       activatingProduct = null;
       refetchTrigger++;
     } catch (err: any) {
-      activateError = err.message ?? "An unexpected error occurred";
+      activateError = formatErrorForToast(err);
     } finally {
       activateLoading = false;
     }
@@ -284,11 +301,19 @@
   }
 
   function handleEdit(product: any) {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     editingProductId = product.id;
     isCreateModalOpen = true;
   }
 
   function handleDelete(product: any) {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     console.log("Delete product:", product);
   }
 
@@ -319,7 +344,8 @@
   <div class="flex items-center justify-end">
     <Button
       class="bg-[#4DA0E6] text-white hover:bg-[#3d8fd4]"
-      disabled={activeTab === "archived"}
+      disabled={activeTab === "archived" || subscriptionLocked}
+      title={subscriptionLocked ? SUBSCRIPTION_BLOCKED_MESSAGE : undefined}
       onclick={() => {
         editingProductId = "";
         isCreateModalOpen = true;

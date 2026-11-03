@@ -10,6 +10,9 @@
   import LOCATION_QUERY from "$graphql/queries/selector/location.gql";
   import COMPANY_QUERY from "$graphql/queries/selector/company.gql";
   import MERCHANT_QUERY from "$graphql/queries/selector/merchant.gql";
+  import { toast } from "svelte-sonner";
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { formatErrorForToast } from "$lib/utils/error";
 
   interface CreateStockModalProps {
     isOpen?: boolean;
@@ -43,6 +46,7 @@
   let note = $state("");
   let loading = $state(false);
   let error = $state<string | null>(null);
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   function regenerateBatchNumber() {
     batchNumber = generateBatchNumber();
@@ -118,6 +122,11 @@
   }
 
   async function handleSubmit() {
+    if (subscriptionLocked) {
+      error = SUBSCRIPTION_BLOCKED_MESSAGE;
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!companyId || !branchId || !productId || !batchNumber || !quantity || !merchantId) {
       error = "Company, Branch, Product, Batch Number, Quantity, and Merchant are required";
       return;
@@ -185,7 +194,7 @@
       onSuccess?.(productId);
       handleClose();
     } catch (err: any) {
-      error = err.message ?? "An unexpected error occurred";
+      error = formatErrorForToast(err);
     } finally {
       loading = false;
     }

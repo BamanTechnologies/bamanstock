@@ -3,6 +3,7 @@
   import { jwtDecode } from 'jwt-decode';
   import { getAuthClient } from '$lib/graphql/client';
   import { toast } from 'svelte-sonner';
+  import { formatErrorForToast } from '$lib/utils/error';
   import Icon from "$lib/components/ui/Icon/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
@@ -83,7 +84,7 @@
       profileName = `${firstName} ${lastName}`.trim() || 'User';
       toast.success('Profile updated successfully');
     } catch (err: any) {
-      toast.error(err?.message ?? 'Failed to update profile');
+      toast.error(formatErrorForToast(err));
     } finally {
       saving = false;
     }

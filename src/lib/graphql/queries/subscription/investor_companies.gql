@@ -1,0 +1,9 @@
+query GetInvestorCompanies($investorId: uuid!) {
+  company_investors(where: { investor_id: { _eq: $investorId } }) {
+    company {
+      id
+      name
+      has_active_subscription
+    }
+  }
+}

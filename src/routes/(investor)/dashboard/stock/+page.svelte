@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SUBSCRIPTION_BLOCKED_MESSAGE, subscriptionBlocksMutations } from "$lib/subscription/client";
+  import { toast } from "svelte-sonner";
+  import { formatErrorForToast } from "$lib/utils/error";
   import { Button } from "$lib/components/ui/button/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import EmptyState from "$lib/components/investor/EmptyState.svelte";
@@ -17,6 +20,8 @@
   import PRODUCT_QUERY from "$graphql/queries/selector/products.gql";
   import COMPANY_QUERY from "$graphql/queries/selector/company.gql";
   import LOCATION_QUERY from "$graphql/queries/selector/location.gql";
+
+  const subscriptionLocked = $derived($subscriptionBlocksMutations);
 
   let isCreateStockModalOpen = $state(false);
   let isReminderModalOpen = $state(false);
@@ -164,7 +169,7 @@
         totalCount = result.data?.stock_aggregate?.aggregate?.count ?? 0;
         syncUrl();
       } catch (err) {
-        fetchError = (err as Error).message;
+        fetchError = formatErrorForToast(err);
         stockItems = [];
         totalCount = 0;
       } finally {
@@ -204,11 +209,19 @@
   }
 
   function handleEdit(item: any) {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     stockItemToEdit = item;
     isUpdateStockModalOpen = true;
   }
 
   function handleDelete(item: any) {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     stockItemToDelete = item;
     isDeleteStockModalOpen = true;
   }
@@ -220,6 +233,10 @@
   }
 
   async function handleArchiveConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!archivingStock) return;
     archiveLoading = true;
     archiveError = null;
@@ -233,7 +250,7 @@
       archivingStock = null;
       refetchTrigger++;
     } catch (err: any) {
-      archiveError = err.message ?? "An unexpected error occurred";
+      archiveError = formatErrorForToast(err);
     } finally {
       archiveLoading = false;
     }
@@ -252,6 +269,10 @@
   }
 
   async function handleActivateConfirm() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     if (!activatingStock) return;
     activateLoading = true;
     activateError = null;
@@ -265,7 +286,7 @@
       activatingStock = null;
       refetchTrigger++;
     } catch (err: any) {
-      activateError = err.message ?? "An unexpected error occurred";
+      activateError = formatErrorForToast(err);
     } finally {
       activateLoading = false;
     }
@@ -278,6 +299,10 @@
   }
 
   function handleAddStock() {
+    if (subscriptionLocked) {
+      toast.error(SUBSCRIPTION_BLOCKED_MESSAGE);
+      return;
+    }
     isCreateStockModalOpen = true;
   }
 
